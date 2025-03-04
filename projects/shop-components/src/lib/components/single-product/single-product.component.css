@@ -1,0 +1,194 @@
+/* Single Product Page */
+.single-product-page {
+    margin: auto;
+    padding: 40px 20px;
+    border-radius: 10px;
+  }
+  
+  /* Back Button */
+  .back-button {
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    color: #2F4F2F;
+    font-weight: bold;
+  }
+  
+  /* Layout */
+  .product-container {
+    display: flex;
+    gap: 40px;
+    margin-top: 20px;
+  }
+  
+  /* Product Image */
+  .product-image-wrapper {
+    flex: 1;
+  }
+  
+  .product-image {
+    width: 100%;
+    max-width: 400px;
+    border-radius: 8px;
+  }
+  
+  /* Product Info */
+  .product-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  
+  /* Badges */
+  .product-badges {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  
+  .badge {
+    padding: 5px 10px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: bold;
+  }
+  
+  .category-badge {
+    background: #E8F5E9;
+    color: #2F4F2F;
+  }
+  
+  .strain-badge {
+    background: #FFEBEE;
+    color: #D32F2F;
+  }
+  
+  /* Product Title */
+  .product-title {
+    font-size: 1.8rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+  
+  /* Price */
+  .product-price {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #2F4F2F;
+    margin-bottom: 15px;
+  }
+  
+  /* Weight Selection */
+  #weight-select {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+    margin-bottom: 15px;
+  }
+  
+  /* Quantity Selector */
+  .quantity-selector {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 15px 0;
+  }
+  
+  .quantity-button {
+    background: #2F4F2F;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    font-size: 18px;
+    cursor: pointer;
+  }
+  
+  .quantity {
+    font-size: 18px;
+    font-weight: bold;
+  }
+  
+  /* Stock Status */
+  .stock-status {
+    font-size: 14px;
+    color: red;
+    font-weight: bold;
+  }
+  
+  .stock-count {
+    font-size: 16px;
+    font-weight: bold;
+  }
+  
+  /* Add to Cart Button */
+  .add-to-cart-button {
+    background: #2F4F2F;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 20px;
+  }
+  
+  .add-to-cart-button:hover {
+    background: #1e351e;
+  }
+  
+/* Product Details Section */
+.product-details {
+    margin-top: 20px;
+    font-size: 1rem;
+    color: #333;
+  }
+  
+  /* Read More Button */
+  .toggle-description {
+    background: none;
+    border: none;
+    color: #2F4F2F;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 5px;
+    transition: color 0.3s ease-in-out;
+  }
+  
+  .toggle-description:hover {
+    color: #1e351e;
+  }
+  
+  .product-details h3 {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+  
+  /* Weight Selection */
+#weight-select {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 16px;
+  margin-bottom: 15px;
+  background: white;
+  cursor: pointer;
+  width: 100%;
+  max-width: 200px;
+}
+
+/* Single Weight Display */
+.single-weight {
+  font-size: 16px;
+  font-weight: bold;
+  color: #2F4F2F;
+  margin-top: 10px;
+}

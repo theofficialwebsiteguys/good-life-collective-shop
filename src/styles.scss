@@ -1,0 +1,36 @@
+
+body {
+    h1, h2, h3, h4, li, label{
+      font-family: "Roboto", serif;
+      font-weight: 400;
+      font-style: normal;
+    }
+  
+    p, span, button{
+      font-weight: bold;
+      font-family: "Roboto", serif;
+    }
+    margin: 0;
+  }
+
+  button {
+    background-color: #25463D; /* Green */
+    color: white; /* White Text */
+    border: none;
+    padding: 10px 15px;
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 8px; /* Rounded */
+    cursor: pointer;
+    transition: background 0.2s ease-in-out;
+  }
+  
+  button:hover {
+    background-color: #1e3b32; /* Darker Green on Hover */
+  }
+  
+  button:disabled {
+    background-color: #A8B5A3; /* Muted Green for Disabled */
+    cursor: not-allowed;
+  }
+  

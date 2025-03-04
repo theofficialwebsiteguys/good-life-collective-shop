@@ -1,0 +1,42 @@
+.carousel-container {
+    display: flex;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    max-width: 100%;
+    padding: 10px;
+  }
+  
+  .product-carousel {
+    display: flex;
+    gap: 15px;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    white-space: nowrap;
+    max-width: 100%;
+  }
+  
+  .product-carousel::-webkit-scrollbar {
+    display: none; /* Hide scrollbar */
+  }
+  
+  .carousel-btn {
+    background: #333;
+    color: white;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    font-size: 18px;
+    z-index: 10;
+  }
+  
+  .carousel-btn.left {
+    position: absolute;
+    left: 0;
+  }
+  
+  .carousel-btn.right {
+    position: absolute;
+    right: 0;
+  }
+  

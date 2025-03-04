@@ -1,0 +1,27 @@
+<!-- Auth Icon (Clickable) -->
+<div class="auth-container" (click)="toggleAuthTooltip()" #authIcon>
+    <i class="fa-solid fa-user"></i>
+  
+    <!-- Tooltip Modal -->
+    <div class="auth-tooltip" *ngIf="authTooltipOpen" #authTooltip>
+      <ng-container *ngIf="isLoggedIn; else notLoggedIn">
+        <div class="user-info">
+          <p><i class="fa-solid fa-user"></i> <strong>{{ userData.fname }} {{ userData.lname }}</strong></p>
+          <p><i class="fa-solid fa-envelope"></i> {{ userData.email }}</p>
+          <p><i class="fa-solid fa-phone"></i> {{ userData.phone }}</p>
+          <p><i class="fa-solid fa-star"></i> Points: {{ userData.points }}</p>
+          <!-- <p><i class="fa-solid fa-user-tag"></i> Role: {{ userData.role }}</p> -->
+          <button class="logout-button" (click)="logout()">Logout</button>
+        </div>
+      </ng-container>
+  
+      <!-- Not Logged In State -->
+      <ng-template #notLoggedIn>
+        <div class="auth-buttons">
+          <button class="auth-button" (click)="navigateToLogin()">Login</button>
+          <button class="auth-button" (click)="navigateToSignup()">Sign Up</button>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+  

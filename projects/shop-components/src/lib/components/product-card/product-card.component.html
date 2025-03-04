@@ -1,0 +1,28 @@
+<div class="product-card">
+    <!-- Product Image -->
+    <div class="product-image-wrapper">
+      <img [src]="product.image" [alt]="product.title" class="product-image">
+      <button class="add-to-cart-button" (click)="addToCart($event)">+</button>
+    </div>
+  
+    <!-- Product Info -->
+    <div class="product-info">
+      <!-- Brand -->
+      <p class="product-brand">{{ product.brand }}</p>
+  
+      <!-- Title -->
+      <h3 class="product-title">{{ product.title }}</h3>
+
+      
+  
+      <!-- Strain Type with Icon -->
+      <div class="product-strain">
+        <!-- <img *ngIf="product.strainType" [src]="getStrainIcon(product.strainType)" class="strain-icon"> -->
+        <span>{{ product.strainType }}</span>
+      </div>
+  
+      <!-- Weight & Price -->
+      <p class="product-weight-price">{{ product.weight }} · {{ product.price | currency}}</p>
+    </div>
+  </div>
+  

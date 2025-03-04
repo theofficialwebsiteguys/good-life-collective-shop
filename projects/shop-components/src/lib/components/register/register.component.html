@@ -1,0 +1,72 @@
+<div class="auth-container">
+    <img src="/assets/logo.png" alt="Flower Power Logo" class="logo" />
+  
+    <h2>Register for Flower Power Rewards</h2>
+  
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+      <div class="name-row">
+        <div class="form-group">
+          <label for="firstName" class="required">First Name</label>
+          <input type="text" id="firstName" formControlName="firstName" placeholder="Enter your first name" required />
+        </div>
+  
+        <div class="form-group">
+          <label for="lastName" class="required">Last Name</label>
+          <input type="text" id="lastName" formControlName="lastName" placeholder="Enter your last name" required />
+        </div>
+      </div>
+  
+      <div class="form-group">
+        <label for="email" class="required">Email</label>
+        <input type="email" id="email" formControlName="email" placeholder="Enter your email" required />
+      </div>
+  
+      <div class="form-group phone-group">
+        <label for="phone" class="required">Phone</label>
+        <div class="phone-inputs">
+          <select id="countryCode" formControlName="countryCode" required>
+            <option *ngFor="let country of countries" [value]="country.code">
+              {{ country.name }} ({{ country.dialCode }})
+            </option>
+          </select>
+          <input type="tel" id="phone" formControlName="phone" placeholder="Enter your phone number" required />
+        </div>
+      </div>
+  
+      <div class="form-group">
+        <label for="dob" class="required">Date of Birth</label>
+        <div class="dob-container">
+          <input type="tel" formControlName="month" placeholder="MM" maxlength="2" required />
+          <input type="tel" formControlName="day" placeholder="DD" maxlength="2" required />
+          <input type="tel" formControlName="year" placeholder="YYYY" maxlength="4" required />
+        </div>
+      </div>
+  
+      <div class="form-group">
+        <label for="password" class="required">Password</label>
+        <input type="password" id="password" formControlName="password" placeholder="Enter your password" required />
+      </div>
+  
+      <div class="form-group">
+        <label for="confirmPassword" class="required">Confirm Password</label>
+        <input type="password" id="confirmPassword" formControlName="confirmPassword" placeholder="Confirm your password" required />
+      </div>
+  
+      <div class="form-group terms-group">
+        <input type="checkbox" id="termsAccepted" formControlName="termsAccepted" required />
+        <label for="termsAccepted">
+          I acknowledge that my personal data may be used for personalization. My data will not be sold.
+        </label>
+      </div>
+  
+      <button class="auth-button" type="submit">REGISTER</button>
+    </form>
+  
+    <p class="login-link">
+      Already have an account?
+      <a routerLink="/login">Login</a>
+    </p>
+  
+    <p class="error-message" *ngIf="errorMessage">{{ errorMessage }}</p>
+  </div>
+  

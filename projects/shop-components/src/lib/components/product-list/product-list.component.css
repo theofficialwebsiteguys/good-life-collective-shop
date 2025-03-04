@@ -1,0 +1,26 @@
+
+  .section-title {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #2F4F2F;
+  }
+  
+  .product-section {
+    text-align: center;
+    padding: 40px 20px;
+    background: #F8F5E4;
+  }
+  
+  /* Set up a grid layout for uniform cards */
+  .product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); /* ✅ Ensures proper wrapping */
+    gap: 20px;
+    /* max-width: 1200px; */
+    margin: auto;
+    padding: 20px;
+    justify-content: center;
+    align-items: stretch; /* ✅ Makes all cards the same height */
+  }
+  

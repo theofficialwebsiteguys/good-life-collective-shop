@@ -1,0 +1,46 @@
+<div class="cart-container">
+  
+    <!-- Empty Cart Message -->
+    <div *ngIf="cartItems.length === 0" class="empty-cart">
+      <p>Your cart is empty.</p>
+      <button class="continue-shopping" [routerLink]="'/shop'">Continue Shopping</button>
+    </div>
+  
+    <!-- Cart Items -->
+    <div *ngFor="let item of cartItems" class="cart-item">
+      <img [src]="item.image" alt="{{ item.title }}" class="product-image" />
+  
+      <div class="cart-details">
+        <p class="brand">{{ item.brand }}</p>
+        <h3 class="title">{{ item.title }}</h3>
+        <p class="variant">{{ item.weight }} - {{ item.strainType }}</p>
+        <p class="price">{{ item.price | currency }}</p>
+  
+        <div class="quantity-controls">
+          <button (click)="updateQuantity(item, item.quantity - 1)">−</button>
+          <span>{{ item.quantity }}</span>
+          <button (click)="updateQuantity(item, item.quantity + 1)">+</button>
+        </div>
+      </div>
+  
+      <button class="remove-item" (click)="removeItem(item)">
+        <i class="fa-solid fa-trash"></i>
+      </button>
+    </div>
+  
+    <!-- Add More Items Button -->
+    <button class="add-more-items" [routerLink]="'/shop'">+ Add more items</button>
+  
+    <!-- Subtotal Section -->
+    <div class="subtotal-section">
+      <h3>Subtotal</h3>
+      <p class="subtotal-price">{{ subtotal | currency }}</p>
+    </div>
+  
+    <!-- Checkout Button -->
+     <div class="checkout-container">
+        <button class="checkout-button" [routerLink]="'/checkout'">Proceed to Checkout</button>
+     </div>
+    
+  </div>
+  

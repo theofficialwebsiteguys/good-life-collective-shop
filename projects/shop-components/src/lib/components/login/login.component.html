@@ -1,0 +1,22 @@
+<div class="auth-container">
+    <img src="assets/logo.png" alt="Flower Power Logo" class="logo" />
+    
+    <h2>Log In</h2>
+    
+    <label>Email <span class="required">*</span></label>
+    <input type="email" [(ngModel)]="email" placeholder="Enter your email" />
+  
+    <label>Password <span class="required">*</span></label>
+    <input type="password" [(ngModel)]="password" placeholder="Enter your password" />
+  
+    <a href="#" class="forgot-password">Forgot your password?</a>
+  
+    <button class="auth-button" (click)="login()">LOGIN</button>
+  
+    <p class="signup-link">
+      Don’t have an account? <a [routerLink]="'/register'">Sign Up</a>
+    </p>
+  
+    <p class="error-message" *ngIf="errorMessage">{{ errorMessage }}</p>
+  </div>
+  

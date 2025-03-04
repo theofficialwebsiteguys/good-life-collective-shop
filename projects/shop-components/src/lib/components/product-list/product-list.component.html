@@ -1,0 +1,7 @@
+<div class="product-grid">
+  <lib-product-card 
+    *ngFor="let product of products$ | async"
+    [product]="product"
+    (click)="navigateToProduct(product)">
+  </lib-product-card>
+</div>

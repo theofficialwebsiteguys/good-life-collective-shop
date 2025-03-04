@@ -1,0 +1,19 @@
+.cart-icon {
+    position: relative;
+    font-size: 24px;
+    text-decoration: none;
+    color: black;
+    cursor: pointer;
+  }
+  
+  .cart-count {
+    position: absolute;
+    top: -5px;
+    right: -10px;
+    background: red;
+    color: white;
+    font-size: 12px;
+    padding: 3px 6px;
+    border-radius: 50%;
+  }
+  
