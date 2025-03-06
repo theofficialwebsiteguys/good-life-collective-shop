@@ -40,9 +40,12 @@
         <p *ngIf="product && product.quantity < 5" class="stock-status">Only <span class="stock-count">{{product.quantity}} left</span></p>
   
         <!-- Add to Cart Button -->
-        <button class="add-to-cart-button" (click)="addToCart()">
-          Add to Cart
+        <button class="add-to-cart-button" 
+                (click)="addToCart()" 
+                [disabled]="isAddingToCart">
+          {{ isAddingToCart ? 'Adding...' : 'Add to Cart' }}
         </button>
+
   
         <!-- Product Details -->
         <div class="product-details">

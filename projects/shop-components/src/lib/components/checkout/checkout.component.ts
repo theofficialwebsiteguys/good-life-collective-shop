@@ -6,7 +6,8 @@ import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
 import { AeropayService } from '../../services/aeropay.service';
 import { openWidget } from 'aerosync-web-sdk';
-import { ToastController } from '@ionic/angular';
+import { LoadingController, ToastController } from '@ionic/angular';
+import { CapacitorHttp } from '@capacitor/core';
 
 @Component({
   selector: 'lib-checkout',
@@ -20,23 +21,66 @@ export class CheckoutComponent {
   orderType = 'pickup';
   paymentMethod = 'cash';
   cartItems: CartItem[] = [];
-  deliveryAddress = { street: '', apt: '', city: '', zip: '' };
+  deliveryAddress = {
+    street: '',
+    apt: '',
+    city: '',
+    zip: '',
+    state: 'NY' // Default to New York and cannot be changed
+  };
+  
   finalSubtotal = 0;
   finalTax = 0;
   finalTotal = 0;
   selectedPaymentMethod: string = 'cash';
 
   selectedOrderType: string = 'pickup';
-
+  pointValue: number = 0.05;
 
   enableDelivery: boolean = false;
 
-  constructor(private toastController: ToastController,private aeropayService: AeropayService,private authService: AuthService, private cartService: CartService, private router: Router) {}
+  isGuest: boolean = true;
+
+  constructor(private loadingController: LoadingController,private toastController: ToastController,private aeropayService: AeropayService,private authService: AuthService, private cartService: CartService, private router: Router) {}
 
   ngOnInit() {
     this.cartItems = this.cartService.getCart();
     this.userInfo = this.authService.getCurrentUser();
+    if(!this.userInfo){
+      this.isGuest = true;
+      this.userInfo = {
+        fname: '',
+        lname: '',
+        email: '',
+        phone: '',
+        dob: ''
+      }
+
+    }else{
+      this.isGuest = false;
+    }
+    this.authService.validateSession();
     this.calculateDefaultTotals();
+  }
+
+  updateTotals() {
+    const pointsValue = this.pointsToRedeem * this.pointValue;
+    const originalSubtotal = this.cartItems.reduce(
+      (total: number, item: any) => total + (item.price * item.quantity),
+      0
+    );
+    this.finalSubtotal = originalSubtotal - pointsValue;
+    if (this.finalSubtotal < 0) this.finalSubtotal = 0;
+    this.finalTax = this.finalSubtotal * 0.13;
+    this.finalTotal = this.finalSubtotal + this.finalTax;
+    // if(this.finalTotal >= 90 ){
+    //   this.enableDelivery = true;
+    // }
+
+    // this.accessibilityService.announce(
+    //   `Subtotal updated to ${this.finalSubtotal.toFixed(2)} dollars.`,
+    //   'polite'
+    // );
   }
 
   checkDeliveryEligibility() {
@@ -58,18 +102,113 @@ export class CheckoutComponent {
     this.finalTotal = this.finalSubtotal + this.finalTax;
   }
 
-  placeOrder() {
-    alert('Order placed successfully!');
-    this.cartService.clearCart();
-    this.router.navigate(['/shop']);
+
+
+
+  isLoading: boolean = false;
+  pointsToRedeem: number = 0;
+  
+
+  async placeOrder() {
+
+    this.isLoading = true;
+    // const loading = await this.loadingController.create({
+    //   spinner: 'crescent',
+    //   message: 'Please wait while we process your order...',
+    //   cssClass: 'custom-loading',
+    // });
+    // await loading.present();
+  
+    try {
+      const newUserData = {
+        fname: this.userInfo.fname,
+        lname: this.userInfo.lname,
+        phone: this.userInfo.phone,
+        email: this.userInfo.email,
+        dob: '1990-01-01'
+      };
+
+      const alleavesResponse = await this.cartService.createAlleavesCustomer(newUserData);
+      let newAllLeavesId = '';
+      if (alleavesResponse?.id_customer) {
+        console.log('Alleaves Customer Created:', alleavesResponse.id_customer);
+        newAllLeavesId = alleavesResponse.id_customer; // Save the ID
+      } else {
+        console.warn('Failed to create Alleaves Customer');
+      }
+
+      const user_id = this.userInfo.id;
+      const points_redeem = this.pointsToRedeem;
+      let pos_order_id = 0;
+      let points_add = 0;
+
+      const deliveryAddress =
+        this.selectedOrderType === 'delivery'
+          ? {
+              address1: this.deliveryAddress.street.trim(),
+              address2: this.deliveryAddress.apt ? this.deliveryAddress.apt.trim() : null,
+              city: this.deliveryAddress.city.trim(),
+              state: this.deliveryAddress.state.trim(),
+              zip: this.deliveryAddress.zip.trim(),
+              delivery_date: new Date().toISOString().split('T')[0],
+            }
+          : null;
+
+          if (this.selectedPaymentMethod === 'aeropay' && this.selectedBankId) {
+            this.aeropayService.fetchUsedForMerchantToken(this.aeropayUserId).subscribe({
+              next: async (response: any) => {
+                const transactionResponse = await this.aeropayService.createTransaction(
+                  this.finalTotal.toFixed(2), // Convert total to string
+                  this.selectedBankId
+                ).toPromise();
+          
+                if (!transactionResponse.data || !transactionResponse.data.success) {
+                  console.error('AeroPay Transaction Failed:', transactionResponse.data);
+                  this.presentToast('Payment failed. Please try again.', 'danger');
+                  //this.isLoading = false;
+                  // await loading.dismiss();
+                  this.isLoading = false;
+                  return;
+                }
+          
+                this.presentToast('Payment successful!', 'success');
+              },
+              error: (error: any) => {
+                console.log('Error:', error);
+                this.presentToast('Error', 'danger');
+              }
+            });
+           
+          }
+  
+      const response = await this.cartService.checkout(points_redeem, this.selectedOrderType, deliveryAddress, this.isGuest ? newAllLeavesId : this.userInfo.alleaves_customer_id);
+  
+      pos_order_id = response.id_order;
+      points_add = response.subtotal;
+
+      await this.cartService.placeOrder(user_id, pos_order_id, points_redeem ? 0 : points_add, points_redeem, this.finalSubtotal, this.cartItems);
+  
+      //this.orderPlaced.emit();
+      this.cartService.clearCart();
+      this.router.navigate(['/confirmation']);
+
+      // const userOrders = await this.authService.getUserOrders(); // ✅ Ensure this is awaited
+      
+      //this.accessibilityService.announce('Your order has been placed successfully.', 'polite');
+    } catch (error:any) {
+      console.error('Error placing order:', error);
+      await this.presentToast('Error placing order: ' + JSON.stringify(error.message));
+      //this.accessibilityService.announce('There was an error placing your order. Please try again.', 'polite');
+    } finally {
+      //this.isLoading = false;
+      console.log('Cleanup complete: Destroying subscription');
+      this.isLoading = false;
+    }
   }
 
   goBack() {
     this.router.navigate(['/cart']);
   }
-
-
-
 
 
   isFetchingAeroPay: boolean = false; 
@@ -312,4 +451,5 @@ export class CheckoutComponent {
     }
   }
 
+  
 }

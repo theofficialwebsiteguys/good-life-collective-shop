@@ -4,6 +4,7 @@ import { BehaviorSubject, catchError, forkJoin, from, map, Observable, of, switc
 import { environment } from '../../environments/environment';
 import { AuthService } from './auth.service';
 import { CapacitorHttp } from '@capacitor/core';
+import { ConfigService } from './config.service';
 
 export interface CartItem {
   id: string;
@@ -36,7 +37,7 @@ export class CartService {
 
   private inactivityTimer: any;
 
-  constructor(private http: HttpClient, private authService: AuthService) {
+  constructor(private http: HttpClient, private authService: AuthService, private configService: ConfigService) {
     if (!sessionStorage.getItem(this.cartKey)) {
       sessionStorage.setItem(this.cartKey, JSON.stringify([]));
     }
@@ -165,7 +166,7 @@ export class CartService {
     this.saveCart([]);
   }
 
-  checkout(points_redeem: number, orderType: string, deliveryAddress: any) {
+  checkout(points_redeem: number, orderType: string, deliveryAddress: any, allLeavesId: number) {
     const cartItems = this.getCart();
     // const unmatchedItems = [...cartItems];
     // const matchedCart: any[] = [];
@@ -204,7 +205,7 @@ export class CartService {
   
     const createOrder = async () => {
       const orderDetails = {
-        id_customer: user_info.alleaves_customer_id,
+        id_customer: allLeavesId,
         id_external: null,
         id_location: 1000,
         id_status: 1,
@@ -606,27 +607,17 @@ export class CartService {
       return addedItems;
     }
 
-  async placeOrder(user_id: number, pos_order_id: number, points_add: number, points_redeem: number, amount: number, cart: any) {
-    const payload = { user_id, pos_order_id, points_add, points_redeem, amount, cart };
+  async placeOrder(user_id: number = 562, pos_order_id: number, points_add: number, points_redeem: number, amount: number, cart: any) {
+    const payload: any = { user_id, pos_order_id, points_add, points_redeem, amount, cart };
   
-  
+    payload.employee_id = 562;
     const sessionData = localStorage.getItem('sessionData');
-    const token = sessionData ? JSON.parse(sessionData).token : null;
-  
-    if (!token) {
-      throw new Error("No user logged in");
-    }
-  
-    const headers = {
-      Authorization: token,
-      'Content-Type': 'application/json', // Ensure it's set
-      Accept: 'application/json',
-    };
+    const headers = this.getHeaders();
     
     const options = {
       url: `${environment.apiUrl}/orders/create`,
       method: 'POST',
-      headers: headers,
+      headers,
       data: payload,
     };
   
@@ -685,10 +676,50 @@ export class CartService {
     const headers: { [key: string]: string } = {
       'Content-Type': 'application/json', // Ensure JSON data format
     };
+
+    const apiKey = this.configService.getApiKey() || '';
   
-    headers['x-auth-api-key'] = environment.db_api_key; // Set API key header for guests
+    headers['x-auth-api-key'] = apiKey; // Set API key header for guests
   
     return headers;
   }
+
+  async createAlleavesCustomer(userData: {
+    fname: string;
+    lname: string;
+    phone: string;
+    email: string;
+    dob: string;
+  }): Promise<any> {
+    try {
+      console.log(JSON.parse(sessionStorage.getItem('authTokensAlleaves') || '{}'))
+      const request = {
+        method: 'POST',
+        url: 'https://app.alleaves.com/api/customer',
+        headers: {
+          Authorization: `Bearer ${JSON.parse(sessionStorage.getItem('authTokensAlleaves') || '{}')}`,
+          'Content-Type': 'application/json; charset=utf-8',
+          Accept: 'application/json; charset=utf-8'
+        },
+        data: {
+          name_first: userData.fname,
+          name_last: userData.lname,
+          phone: userData.phone,
+          email: userData.email,
+          date_of_birth: userData.dob
+        }
+      };
+
+      const response = await CapacitorHttp.request(request);
+
+      console.log('External API Response:', response);
+      return response.data; // Return response for further processing
+
+    } catch (error) {
+      console.error('Error calling Alleaves API:', error);
+      throw new Error('Failed to create Alleaves customer');
+    }
+  }
+  
 
 }

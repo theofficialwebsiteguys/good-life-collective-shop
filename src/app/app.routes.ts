@@ -5,6 +5,8 @@ import { CartComponent } from '../../projects/shop-components/src/lib/components
 import { CheckoutComponent } from '../../projects/shop-components/src/lib/components/checkout/checkout.component';
 import { LoginComponent } from '../../projects/shop-components/src/lib/components/login/login.component';
 import { RegisterComponent } from '../../projects/shop-components/src/lib/components/register/register.component';
+import { ConfirmationComponent } from '../../projects/shop-components/src/lib/components/confirmation/confirmation.component';
+import { BudtenderSalesComponent, DashboardComponent, OrdersComponent, UsersComponent } from 'admin-dashboard';
 
 export const routes: Routes = [
     { path: '', redirectTo: '', pathMatch: 'full' },
@@ -14,4 +16,16 @@ export const routes: Routes = [
     { path: 'checkout', component: CheckoutComponent },
     { path: 'login', component: LoginComponent },
     { path: 'register', component: RegisterComponent },
+    { path: 'confirmation', component: ConfirmationComponent },
+    {
+        path: 'dashboard',
+        component: DashboardComponent,
+        children: [
+          { path: 'orders', component: OrdersComponent },
+          { path: 'users', component: UsersComponent },
+          { path: 'budtender-sales', component: BudtenderSalesComponent },
+          // add more child routes here as needed
+          { path: '', redirectTo: 'orders', pathMatch: 'full' }
+        ]
+      },
 ];

@@ -1,4 +1,4 @@
-import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
+import { Component, OnInit, ElementRef, ViewChild, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -19,19 +19,36 @@ export class RecentProductsCarouselComponent implements OnInit {
   
   @ViewChild('productCarousel', { static: false }) productCarousel!: ElementRef;
 
+  @Input() brands: string[] = [];
+
   constructor(private productService: ProductsService, private navigationService: NavigationService) {}
 
   ngOnInit(): void {
     this.products$ = this.productService.fetchProducts().pipe(
-      map(products => 
-        products.sort((a: any, b: any) => b.posProductId - a.posProductId).slice(0, 8)
-      )
+      map(products => {
+        let filteredProducts = products;
+
+        // Apply filtering based on category and brand
+        if (this.brands && this.brands.length > 0) {
+          filteredProducts = filteredProducts.filter(product => 
+            this.brands.includes(product.brand) // Checks if the product's brand is in the allowed brands list
+          );
+        }
+
+        // Sort and limit the number of products displayed
+        return filteredProducts.sort((a: any, b: any) => b.posProductId - a.posProductId).slice(0, 12);
+      })
     );
   }
 
   scrollProducts(direction: number): void {
-    this.productCarousel.nativeElement.scrollBy({ left: direction * 300, behavior: 'smooth' });
+    if (this.productCarousel?.nativeElement) {
+      this.productCarousel.nativeElement.scrollBy({ left: direction * 300, behavior: 'smooth' });
+    } else {
+      console.warn('productCarousel is not initialized yet.');
+    }
   }
+  
 
   navigateToProduct(product: Product): void {
     this.navigationService.navigateToProduct(product);

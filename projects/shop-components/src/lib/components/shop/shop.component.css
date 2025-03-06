@@ -41,12 +41,13 @@
   /* Toggle Button for Sidebar on Mobile */
   .sidebar-toggle {
     display: none;
-    background: #007bff;
+    background: #25463d;
     color: white;
     padding: 10px;
     border-radius: 5px;
     border: none;
     cursor: pointer;
+    font-size: 16px;
   }
   
   @media (max-width: 768px) {

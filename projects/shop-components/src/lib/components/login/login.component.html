@@ -1,5 +1,5 @@
 <div class="auth-container">
-    <img src="assets/logo.png" alt="Flower Power Logo" class="logo" />
+
     
     <h2>Log In</h2>
     
@@ -7,7 +7,7 @@
     <input type="email" [(ngModel)]="email" placeholder="Enter your email" />
   
     <label>Password <span class="required">*</span></label>
-    <input type="password" [(ngModel)]="password" placeholder="Enter your password" />
+    <input type="password" (keydown.enter)="login()" [(ngModel)]="password" placeholder="Enter your password" />
   
     <a href="#" class="forgot-password">Forgot your password?</a>
   

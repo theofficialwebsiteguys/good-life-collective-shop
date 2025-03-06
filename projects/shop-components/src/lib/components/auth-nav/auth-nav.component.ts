@@ -3,6 +3,7 @@ import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'lib-auth-nav',
@@ -18,6 +19,7 @@ export class AuthNavComponent {
   authTooltipOpen = false;
   isLoggedIn = false; // Set to `true` if user is logged in
   userData: any = null;
+  private authSubscription!: Subscription;
 
   constructor(private authService: AuthService){}
   ngOnInit() {
@@ -25,11 +27,9 @@ export class AuthNavComponent {
   }
 
   checkLoginStatus() {
-    this.authService.isLoggedIn().subscribe(success => {
-      if(success){
-        this.isLoggedIn = true;
-        this.userData = this.authService.getCurrentUser();
-      }
+    this.authSubscription = this.authService.isLoggedIn().subscribe(status => {
+      this.isLoggedIn = status;
+      this.userData = status ? this.authService.getCurrentUser() : null;
     });
   }
 
@@ -38,9 +38,12 @@ export class AuthNavComponent {
   }
 
   logout() {
-    localStorage.removeItem('userData');
-    this.isLoggedIn = false;
+    this.authService.logout();
     this.authTooltipOpen = false;
+  }
+
+  isAdmin(): boolean {
+    return this.userData?.role === 'admin';
   }
 
   navigateToLogin() {

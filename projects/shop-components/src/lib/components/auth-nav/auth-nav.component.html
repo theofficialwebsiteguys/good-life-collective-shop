@@ -1,6 +1,6 @@
 <!-- Auth Icon (Clickable) -->
 <div class="auth-container" (click)="toggleAuthTooltip()" #authIcon>
-    <i class="fa-solid fa-user"></i>
+    <i class="fa-solid fa-user user-icon"></i>
   
     <!-- Tooltip Modal -->
     <div class="auth-tooltip" *ngIf="authTooltipOpen" #authTooltip>
@@ -10,6 +10,8 @@
           <p><i class="fa-solid fa-envelope"></i> {{ userData.email }}</p>
           <p><i class="fa-solid fa-phone"></i> {{ userData.phone }}</p>
           <p><i class="fa-solid fa-star"></i> Points: {{ userData.points }}</p>
+
+          <button *ngIf="isAdmin()" class="admin-button" [routerLink]="'/dashboard'">Admin Dashboard</button>
           <!-- <p><i class="fa-solid fa-user-tag"></i> Role: {{ userData.role }}</p> -->
           <button class="logout-button" (click)="logout()">Logout</button>
         </div>
@@ -18,8 +20,8 @@
       <!-- Not Logged In State -->
       <ng-template #notLoggedIn>
         <div class="auth-buttons">
-          <button class="auth-button" (click)="navigateToLogin()">Login</button>
-          <button class="auth-button" (click)="navigateToSignup()">Sign Up</button>
+          <button class="auth-button" [routerLink]="'/login'">Login</button>
+          <button class="auth-button" [routerLink]="'/register'">Sign Up</button>
         </div>
       </ng-template>
     </div>

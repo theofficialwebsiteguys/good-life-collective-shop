@@ -10,6 +10,7 @@ import { environment } from '../../environments/environment';
 import { ProductsService } from './products.service';
 import { Product } from '../models/product.model';
 import { CapacitorHttp } from '@capacitor/core';
+import { ConfigService } from './config.service';
 
 @Injectable({
   providedIn: 'root',
@@ -23,7 +24,7 @@ export class AuthService {
 
   private apiUrl = `${environment.apiUrl}/users`;
 
-  constructor(private http: HttpClient, private router: Router, private productsService: ProductsService) {
+  constructor(private http: HttpClient, private router: Router, private productsService: ProductsService, private configService: ConfigService) {
     const user = localStorage.getItem('user_info');
     if (user) {
       this.userSubject.next(JSON.parse(user));
@@ -32,6 +33,20 @@ export class AuthService {
 
 
   private getHeaders(): { [key: string]: string } {
+    const sessionData = localStorage.getItem('sessionData');
+    const token = sessionData ? JSON.parse(sessionData).token : null;
+    const headers: { [key: string]: string } = {
+      'Content-Type': 'application/json', // Ensure JSON data format
+    };
+
+    const apiKey = this.configService.getApiKey() || '';
+  
+    headers['x-auth-api-key'] = apiKey; // Set API key header for guests
+  
+    return headers;
+  }
+
+  private getSessionHeaders(): { [key: string]: string } {
     const sessionData = localStorage.getItem('sessionData');
     const token = sessionData ? JSON.parse(sessionData).token : null;
   
@@ -101,7 +116,7 @@ export class AuthService {
             this.authStatus.next(true);
             this.userSubject.next(user);
             this.storeUserInfo(user);
-            this.router.navigateByUrl('/rewards');
+            // this.router.navigateByUrl('/rewards');
             this.validateSession();
             observer.next(response.data);
             observer.complete();
@@ -115,7 +130,7 @@ export class AuthService {
 
 
   logout(): void {
-    const headers = this.getHeaders();
+    const headers = this.getSessionHeaders();
 
     CapacitorHttp.post({
       url: `${this.apiUrl}/logout`,
@@ -126,7 +141,7 @@ export class AuthService {
         this.removeToken();
         this.authStatus.next(false);
         this.userSubject.next(null);
-        this.router.navigate(['/rewards']);
+        this.router.navigate(['/shop']);
         this.removeUser();
       })
       .catch((error) => console.error('Logout failed:', error));
@@ -201,21 +216,27 @@ export class AuthService {
   validateSession(): void {
     const sessionData = this.getSessionData();
 
-    if (!sessionData || this.isTokenExpired(sessionData.expiry)) {
-      this.authStatus.next(false);
-      this.removeToken();
-      this.removeUser();
-      return;
-    }
+    // if (!sessionData || this.isTokenExpired(sessionData.expiry)) {
+    //   this.authStatus.next(false);
+    //   this.removeToken();
+    //   this.removeUser();
+    //   return;
+    // }
 
-    const headers = this.getHeaders();
+    const headers = this.getCurrentUser() ? this.getSessionHeaders() : this.getHeaders();
+
+    const url = !this.getCurrentUser()
+    ? `${this.apiUrl}/validate-session?bypassUserCheck=true`
+    : `${this.apiUrl}/validate-session`;
 
     CapacitorHttp.get({
-      url: `${this.apiUrl}/validate-session`,
+      url,
       headers,
     })
       .then((response) => {
-        if (response.status === 200) {
+        console.log(response)
+        if (response) {
+          console.log(response)
           this.authStatus.next(true);
           this.updateUserData();
           this.handleRecentOrders(response.data.orders);
@@ -236,7 +257,7 @@ export class AuthService {
     const token = sessionData ? JSON.parse(sessionData).token : null;
 
     if (!token) {
-      this.logout();
+      return;
     }
     const headers = this.getHeaders();
 
@@ -319,45 +340,68 @@ export class AuthService {
   setAuthTokensAlleaves(alleaves: any): void {
     sessionStorage.removeItem('authTokensAlleaves');
     if (alleaves) {
+      console.log("setting alleaves")
       sessionStorage.setItem('authTokensAlleaves', JSON.stringify(alleaves));
     }
   }
 
-  async getUserOrders(): Promise<any> {
+  // async getUserOrders(): Promise<any> {
+  //   try {
+  //     const response = await CapacitorHttp.get({
+  //       url: `${environment.apiUrl}/orders/user`,
+  //       headers: this.getHeaders(),
+  //       params: { user_id: String(this.getCurrentUser().id) }, // Ensure it's a string
+  //     });
+  
+  //     console.log("API Response:", response);
+  //     console.log("Response Data Type:", typeof response.data);
+  
+  //     // Handle cases where the response is not an object
+  //     if (typeof response.data === "number") {
+  //       response.data = String(response.data); // Convert to string
+  //     }
+  
+  //     // Ensure JSON parsing if needed
+  //     try {
+  //       if (typeof response.data === "string") {
+  //         response.data = JSON.parse(response.data);
+  //       }
+  //     } catch (e) {
+  //       console.warn("Failed to parse response:", e);
+  //     }
+  
+  //     this.handleRecentOrders(response.data);
+  //     this.updateUserData();
+  
+  //     return response.data;
+  //   } catch (error) {
+  //     console.error("Error fetching user orders:", error);
+  //     throw error;
+  //   }
+  // }
+  
+
+  async sendMessage(name: string, email: string, message: string) {
+    const emailData = {
+      subject: `New Message from ${name}`,  // ✅ Use backticks for template literals
+      message: `Name: ${name}\nEmail: ${email}\nMessage: ${message}`  // ✅ Properly format string
+    };
+
+    const options = {
+      url: `${environment.apiUrl}/businesses/send-email`,  // ✅ Fix missing backticks
+      method: 'POST',
+      headers: this.getHeaders(),
+      data: emailData  // ✅ Ensure proper structure
+    };
+
     try {
-      const response = await CapacitorHttp.get({
-        url: `${environment.apiUrl}/orders/user`,
-        headers: this.getHeaders(),
-        params: { user_id: String(this.getCurrentUser().id) }, // Ensure it's a string
-      });
-  
-      console.log("API Response:", response);
-      console.log("Response Data Type:", typeof response.data);
-  
-      // Handle cases where the response is not an object
-      if (typeof response.data === "number") {
-        response.data = String(response.data); // Convert to string
-      }
-  
-      // Ensure JSON parsing if needed
-      try {
-        if (typeof response.data === "string") {
-          response.data = JSON.parse(response.data);
-        }
-      } catch (e) {
-        console.warn("Failed to parse response:", e);
-      }
-  
-      this.handleRecentOrders(response.data);
-      this.updateUserData();
-  
-      return response.data;
+      const response = await CapacitorHttp.request(options);
+      console.log('Email sent!', response);
+      return response;
     } catch (error) {
-      console.error("Error fetching user orders:", error);
+      console.error('Error sending email', error);
       throw error;
     }
   }
-  
-
 
 }

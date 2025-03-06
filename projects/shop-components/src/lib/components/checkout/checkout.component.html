@@ -125,14 +125,36 @@
                     <span>Subtotal:</span>
                     <span>{{ finalSubtotal | currency }}</span>
                 </div>
-                <!-- <div class="summary-item">
+                <div class="summary-item" *ngIf="userInfo.points">
                     <span>Available Points:</span>
-                    <span>{{ checkoutInfo.user_info.points }}</span>
-                </div> -->
-                <!-- <div class="summary-item">
+                    <span>{{ userInfo.points }}</span>
+                </div> 
+                <div class="summary-item" *ngIf="userInfo.points">
                     <span>Potential Savings:</span>
-                    <span>{{ (checkoutInfo.user_info.points * pointValue) | currency }}</span>
-                </div> -->
+                    <span>{{ (userInfo.points * pointValue) | currency }}</span>
+                </div>
+
+                <div class="points-slider" *ngIf="userInfo.points">
+                    <label for="pointsRange">Adjust points to redeem for discount:</label>
+                    <input 
+                        type="range" 
+                        id="pointsRange"
+                        [(ngModel)]="pointsToRedeem" 
+                        [min]="0" 
+                        [max]="userInfo.points" 
+                        [step]="1"
+                        (change)="updateTotals()"
+                        aria-label="Adjust points to redeem for discount"
+                    />
+                </div>
+                <div class="summary-item" *ngIf="userInfo.points">
+                    <span>Points to Redeem:</span>
+                    <span>{{ pointsToRedeem }}</span>
+                </div>
+                <div class="summary-item" *ngIf="userInfo.points">
+                    <span> Discount Applied:</span>
+                    <span>{{ pointsToRedeem * pointValue | currency }}</span>
+                </div>            
                 <div class="summary-item">
                     <span>Tax:</span>
                     <span>{{ finalTax | currency }}</span>
@@ -141,7 +163,15 @@
                     <span>Total:</span>
                     <span>{{ finalTotal | currency }}</span>
                 </div>
-                <button class="checkout-button" (click)="placeOrder()">Submit Order</button>
+                <button 
+                class="checkout-button" 
+                (click)="placeOrder()" 
+                [disabled]="isLoading"
+            >
+                <span *ngIf="isLoading" class="spinner"></span>
+                <span *ngIf="!isLoading">Submit Order</span>
+            </button>
+            
             </div>
 
             <div class="cart-preview">

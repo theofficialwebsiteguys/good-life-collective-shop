@@ -3,16 +3,14 @@
     display: inline-block;
     cursor: pointer;
   }
-  
-  .auth-icon {
-    width: 35px;
-    height: 35px;
+
+  .user-icon{
+    font-size: 20px;
   }
-  
+
   /* Tooltip Style */
   .auth-tooltip {
     position: absolute;
-    bottom: 110%; /* Moves the tooltip above the icon */
     left: -100px;
     transform: translateX(-50%);
     background: white;
@@ -29,7 +27,7 @@
   
   /* Add Arrow on Tooltip */
   .auth-tooltip::after {
-    content: "";
+    content: none;
     position: absolute;
     bottom: -10px; /* Positions arrow */
     left: -100px;
@@ -59,18 +57,14 @@
   .auth-button {
     width: 100%;
     padding: 8px;
-    background-color: #7a8f85;
+    background-color: #25463D;
     color: white;
     border: none;
     border-radius: 5px;
     font-size: 14px;
     cursor: pointer;
   }
-  
-  .auth-button:hover {
-    background-color: #5f756c;
-  }
-  
+
   .user-info {
     display: flex;
     flex-direction: column;
@@ -95,7 +89,7 @@
   }
   
   .user-info p i {
-    color: #7a8f85; /* Icon color to match buttons */
+    color: #25463D; /* Icon color to match buttons */
     font-size: 16px;
   }
   
@@ -124,5 +118,23 @@
   
   .logout-button:hover {
     background-color: #c0392b;
+  }
+  
+  .admin-button {
+    background-color: #2c3e50;
+    color: white;
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-bottom: 10px;
+    transition: background 0.3s ease-in-out;
+  }
+  
+  .admin-button:hover {
+    background-color: #1a252f;
   }
   

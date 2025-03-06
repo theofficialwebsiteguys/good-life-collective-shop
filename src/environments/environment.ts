@@ -4,8 +4,7 @@
 
 export const environment = {
   production: false,
-  // apiUrl: 'http://localhost:3333/api',
-  apiUrl: 'https://dispensary-api-ac9613fa4c11.herokuapp.com/api',
+  apiUrl: 'http://localhost:3333/api',
   venueId: '836944c298d40676',
   flower_power_api_key: '564ee591-42df-46d9-91c0-ff3507e316ec',
   aeropay_api_key: '016c0534-ff89-4626-b8a4-fdbe7fbe1f08',

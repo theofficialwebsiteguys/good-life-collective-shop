@@ -21,6 +21,7 @@ export class SingleProductComponent {
   selectedWeight: string = '';
   availableWeights: string[] = [];
   showFullDescription = false;
+  isAddingToCart: boolean = false;
 
   private productSubscription: Subscription | null = null;
   private routeSubscription: Subscription | null = null;
@@ -63,14 +64,20 @@ export class SingleProductComponent {
   }
 
   async addToCart() {
+    if (this.isAddingToCart) return;
+    this.isAddingToCart = true;
+
     const cartItem = {
       ...this.product,
       quantity: this.quantity,
     };
   
     this.cartService.addToCart(cartItem); 
+    setTimeout(() => {
+      this.isAddingToCart = false; // Enable button after 3 seconds
+    }, 2000);
     //this.accessibilityService.announce(`${this.product?.title} added to cart. Quantity: ${this.quantity}.`, 'assertive');
-    alert('Item added to cart!');
+    // alert('Item added to cart!');
   }
 
   toggleDescription() {

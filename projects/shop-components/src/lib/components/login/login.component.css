@@ -1,10 +1,7 @@
 .auth-container {
     width: 90%;
     max-width: 400px;
-    background: white;
     padding: 50px;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     text-align: center;
     margin: auto;
   }
@@ -46,7 +43,7 @@
   .auth-button {
     width: 100%;
     padding: 10px;
-    background-color: #7a8f85;
+    background-color: #25463D;
     color: white;
     border: none;
     border-radius: 5px;

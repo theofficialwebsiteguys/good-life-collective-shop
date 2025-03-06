@@ -41,7 +41,7 @@
   right: 8px;
   background: white;
   border: 1px solid #ddd;
-  color: #2F4F2F;
+  color: #25463d;
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -54,8 +54,22 @@
   transition: all 0.3s ease-in-out;
 }
 
+/* ✅ Green Checkmark State */
+.add-to-cart-button:disabled {
+  background: #25463d; /* Green */
+  color: white;
+  border-color: #25463d;
+  cursor: not-allowed;
+}
+
+/* ✅ Smooth Animation */
+.add-to-cart-button span {
+  transition: opacity 0.3s ease-in-out;
+}
+
+
 .add-to-cart-button:hover {
-  background: #2F4F2F;
+  background: #25463d;
   color: white;
 } 
 

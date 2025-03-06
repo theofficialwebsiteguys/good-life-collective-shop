@@ -3,6 +3,7 @@
     <button class="sidebar-toggle" (click)="toggleSidebar()">☰ Filters</button>
   
     <div class="sidebar" [class.open]="isSidebarOpen">
+      <button class="close-btn" *ngIf="isSidebarOpen" (click)="toggleSidebar()">Close</button>
       <button class="close-btn" (click)="clearFilters()">Clear Filters</button>
   
       <!-- Strains -->
@@ -80,9 +81,9 @@
                   <option value="NAME">Alphabetical</option>
                 </select>
 
-                <lib-cart-icon></lib-cart-icon>
+                <!-- <lib-cart-icon></lib-cart-icon>
 
-                <lib-auth-nav></lib-auth-nav>
+                <lib-auth-nav></lib-auth-nav> -->
 
               </div>
 

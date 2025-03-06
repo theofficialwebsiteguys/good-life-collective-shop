@@ -2,12 +2,15 @@
   "name": "shop-components",
   "version": "0.0.1",
   "peerDependencies": {
-    "@angular/common": "^18.2.0",
-    "@angular/core": "^18.2.0"
+    "@angular/common": "^19.1.7",
+    "@angular/core": "^19.1.7",
+    "@capacitor/core": "^7.0.1",
+    "@ionic/angular": "^8.4.3",
+    "aerosync-web-sdk": "^1.1.0",
+    "admin-dashboard": "^0.0.1"
   },
   "dependencies": {
-    "tslib": "^2.3.0",
-    "aerosync-web-sdk": "^1.1.0"
+    "tslib": "^2.3.0"
   },
   "sideEffects": false
 }

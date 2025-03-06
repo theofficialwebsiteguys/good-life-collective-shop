@@ -1,8 +1,14 @@
 <!-- Categories at the top -->
 <lib-categories [iconSet]="'playful'"></lib-categories>
 
+<lib-contact></lib-contact>
+
 <!-- Recent Products -->
 <!-- <lib-recent-products-carousel></lib-recent-products-carousel> -->
+ <lib-recent-products-carousel 
+ [brands]="['LeadFarmer', 'Hurley']">
+</lib-recent-products-carousel>
+
 
 <!-- The main shop system -->
 <router-outlet></router-outlet>

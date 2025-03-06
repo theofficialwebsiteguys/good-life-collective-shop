@@ -21,7 +21,7 @@ import { AuthNavComponent } from '../auth-nav/auth-nav.component';
   styleUrl: './shop.component.css'
 })
 export class ShopComponent implements OnInit {
-  category: string | null = null;
+  category: string | null = 'Flower';
   selectedBrands: string[] = []; // ✅ Support multiple brands
   selectedWeights: string[] = []; // ✅ Support multiple brands
   selectedTypes: string[] = []; // ✅ Support multiple types
