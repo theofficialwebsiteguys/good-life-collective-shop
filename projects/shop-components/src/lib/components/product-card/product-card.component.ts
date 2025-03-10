@@ -2,6 +2,7 @@ import { Component, Input } from '@angular/core';
 import { Product } from '../../models/product.model';
 import { CommonModule } from '@angular/common';
 import { CartService } from '../../services/cart.service';
+import { AccessibilityService } from '../../services/accessibility.service';
 
 @Component({
   selector: 'lib-product-card',
@@ -15,7 +16,7 @@ export class ProductCardComponent {
   isAdded: boolean = false;
   isDisabled: boolean = false;
 
-  constructor(private cartService: CartService){}
+  constructor(private cartService: CartService, private accessibilityService: AccessibilityService){}
 
   async addToCart(event: Event) {
     event.stopPropagation();
@@ -36,7 +37,7 @@ export class ProductCardComponent {
       this.isDisabled = false;
     }, 2000);
     
-    //this.accessibilityService.announce(`${this.product?.title} added to cart. Quantity: ${this.quantity}.`, 'assertive');
+    this.accessibilityService.announce(`${this.product?.title} added to cart. Quantity: 1.`, 'assertive');
     // alert('Item added to cart!');
   }
 }

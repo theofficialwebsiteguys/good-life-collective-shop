@@ -54,19 +54,16 @@
   transition: all 0.3s ease-in-out;
 }
 
-/* ✅ Green Checkmark State */
 .add-to-cart-button:disabled {
-  background: #25463d; /* Green */
+  background: #25463d;
   color: white;
   border-color: #25463d;
   cursor: not-allowed;
 }
 
-/* ✅ Smooth Animation */
 .add-to-cart-button span {
   transition: opacity 0.3s ease-in-out;
 }
-
 
 .add-to-cart-button:hover {
   background: #25463d;
@@ -82,7 +79,6 @@
   padding-top: 10px;
 }
 
-/* Brand Styling */
 .product-brand {
   font-size: 0.8rem;
   text-transform: uppercase;
@@ -92,24 +88,21 @@
   margin-bottom: 4px;
 }
 
-/* Product Title - Fixed Height & Two Lines */
 .product-title {
-    font-size: 1.1rem;
-    font-weight: bold;
-    color: #2F4F2F;
-    margin-bottom: 8px;
-    height: 2.7em; /* ✅ Ensures space for exactly two lines */
-    line-height: 1.3em; /* ✅ Controls spacing for two lines */
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 2; /* ✅ Restricts text to 2 lines */
-    -webkit-box-orient: vertical;
-    word-break: break-word; /* ✅ Ensures words wrap correctly */
-  }
-  
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #2F4F2F;
+  margin-bottom: 8px;
+  height: 2.7em;
+  line-height: 1.3em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  word-break: break-word;
+}
 
-/* Strain Type */
 .product-strain {
   display: flex;
   align-items: center;
@@ -124,7 +117,6 @@
   margin-right: 6px;
 }
 
-/* Weight & Price */
 .product-weight-price {
   font-size: 0.95rem;
   color: #333;

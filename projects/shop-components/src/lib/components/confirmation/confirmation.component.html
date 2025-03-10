@@ -1,7 +1,8 @@
-<div class="confirmation-container">
+<div class="confirmation-container" aria-live="assertive">
     <div class="confirmation-card">
-        <h1>Thank You for Your Order!</h1>
-        <p>Your order has been successfully placed. We appreciate your business and look forward to serving you again.</p>
-        <button class="shop-button" [routerLink]="'/shop'">Return to Shop</button>
+      <h1 #confirmationHeading tabindex="-1">Thank You for Your Order!</h1>
+      <p>Your order has been successfully placed. We appreciate your business and look forward to serving you again.</p>
+      <button class="shop-button" [routerLink]="'/shop'">Return to Shop</button>
     </div>
-</div>
+  </div>
+  

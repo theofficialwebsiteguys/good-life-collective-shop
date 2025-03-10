@@ -1,7 +1,10 @@
-<div class="product-grid">
-  <lib-product-card 
-    *ngFor="let product of products$ | async"
-    [product]="product"
-    (click)="navigateToProduct(product)">
-  </lib-product-card>
-</div>
+<section class="product-section" aria-labelledby="productListHeading">
+  <div class="product-grid" role="list">
+    <lib-product-card 
+      *ngFor="let product of products$ | async"
+      [product]="product"
+      (click)="navigateToProduct(product)"
+      role="listitem">
+    </lib-product-card>
+  </div>
+</section>

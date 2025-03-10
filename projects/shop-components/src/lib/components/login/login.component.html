@@ -1,22 +1,32 @@
 <div class="auth-container">
+  <h2>Log In</h2>
 
-    
-    <h2>Log In</h2>
-    
-    <label>Email <span class="required">*</span></label>
-    <input type="email" [(ngModel)]="email" placeholder="Enter your email" />
-  
-    <label>Password <span class="required">*</span></label>
-    <input type="password" (keydown.enter)="login()" [(ngModel)]="password" placeholder="Enter your password" />
-  
-    <a href="#" class="forgot-password">Forgot your password?</a>
-  
-    <button class="auth-button" (click)="login()">LOGIN</button>
-  
-    <p class="signup-link">
-      Don’t have an account? <a [routerLink]="'/register'">Sign Up</a>
-    </p>
-  
-    <p class="error-message" *ngIf="errorMessage">{{ errorMessage }}</p>
-  </div>
-  
+  <label for="email">Email <span class="required">*</span></label>
+  <input
+    id="email"
+    type="email"
+    [(ngModel)]="email"
+    placeholder="Enter your email"
+    aria-required="true"
+    autocomplete="email" />
+
+  <label for="password">Password <span class="required">*</span></label>
+  <input
+    id="password"
+    type="password"
+    (keydown.enter)="login()"
+    [(ngModel)]="password"
+    placeholder="Enter your password"
+    aria-required="true"
+    autocomplete="current-password" />
+
+  <a href="#" class="forgot-password">Forgot your password?</a>
+
+  <button class="auth-button" (click)="login()">LOGIN</button>
+
+  <p class="signup-link">
+    Don’t have an account? <a [routerLink]="'/register'">Sign Up</a>
+  </p>
+
+  <p class="error-message" *ngIf="errorMessage" role="alert">{{ errorMessage }}</p>
+</div>

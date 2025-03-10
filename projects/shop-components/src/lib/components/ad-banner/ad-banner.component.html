@@ -1,0 +1,11 @@
+<div class="ad-banner"
+     role="button"
+     tabindex="0"
+     (click)="onBannerClick(ads[currentAdIndex])"
+     (keydown.enter)="onBannerClick(ads[currentAdIndex])"
+     (keydown.space)="onBannerClick(ads[currentAdIndex])"
+     [attr.aria-label]="'Advertisement for ' + ads[currentAdIndex].brand + ', ' + ads[currentAdIndex].ctaText">
+  <img class="ad-image" 
+       [src]="ads[currentAdIndex].image" 
+       [alt]="'Advertisement for ' + ads[currentAdIndex].brand + ', ' + ads[currentAdIndex].ctaText" />
+</div>

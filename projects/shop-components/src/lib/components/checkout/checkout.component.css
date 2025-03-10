@@ -1,317 +1,332 @@
 .checkout-container {
-    max-width: 1200px;
-    margin: auto;
-    padding: 20px;
+  max-width: 1200px;
+  margin: auto;
+  padding: 20px;
 }
 
 .checkout-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
 }
 
 .back-button {
-    background: none;
-    border: none;
-    font-size: 16px;
-    cursor: pointer;
-    color: #25463d;
-    font-weight: bold;
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  color: #25463d;
+  font-weight: bold;
 }
 
 .checkout-content {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
 }
 
 .checkout-left {
-    flex: 1;
-    min-width: 300px;
+  flex: 1;
+  min-width: 300px;
 }
 
 .checkout-right {
-    width: 350px;
-    min-width: 300px;
+  width: 350px;
+  min-width: 300px;
 }
 
 .section {
-    margin-bottom: 20px;
+  margin-bottom: 20px;
+}
+
+/* Visually hidden text for screen readers */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  clip: rect(0, 0, 0, 0);
+  overflow: hidden;
 }
 
 .input-group {
-    display: flex;
-    gap: 10px;
+  display: flex;
+  gap: 10px;
 }
 
 input {
-    width: 90%;
-    padding: 12px;
-    margin-bottom: 10px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    font-size: 16px;
+  width: 90%;
+  padding: 12px;
+  margin-bottom: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
 }
 
 .radio-group {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 100%;
+}
 
-    label {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 10px;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        cursor: pointer;
-        background: white;
+.radio-group label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  cursor: pointer;
+  background: white;
+}
 
-        input {
-            margin: 0;
-            width: auto;
-            margin-left: auto;
-        }
+.radio-group label input {
+  margin: 0;
+  width: auto;
+  margin-left: auto;
+}
 
-        .radio-text {
-            font-size: 16px;
-            font-weight: bold;
-            width: 100%;
-        }
-    }
+.radio-text {
+  font-size: 16px;
+  font-weight: bold;
+  width: 100%;
+}
 
-    .warning {
-        width: 150px;
-        font-size: 12px;
-        color: red;
-    }
+.warning {
+  width: 150px;
+  font-size: 12px;
+  color: red;
+}
 
-    .aeropay {
-        display: flex;
-        align-items: start;
+.section fieldset {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
 
-        img {
-            height: 20px;
-            margin-left: 10px;
-        }
-    }
+.section fieldset legend {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 10px;
 }
 
 .summary-box {
-    padding: 20px;
-    background: #f8f8f8;
-    border-radius: 8px;
+  padding: 20px;
+  background: #f8f8f8;
+  border-radius: 8px;
 }
 
 .summary-item {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 10px;
-    font-size: 16px;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-size: 16px;
 }
 
 .total {
-    font-weight: bold;
-    font-size: 18px;
+  font-weight: bold;
+  font-size: 18px;
 }
 
 .checkout-button {
-    background: #25463d;
-    color: white;
-    border: none;
-    padding: 14px;
-    font-size: 16px;
-    border-radius: 8px;
-    cursor: pointer;
-    width: 100%;
-    margin-top: 15px;
+  background: #25463d;
+  color: white;
+  border: none;
+  padding: 14px;
+  font-size: 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 15px;
 }
 
 .cart-preview {
-    margin-top: 20px;
+  margin-top: 20px;
 }
 
 .cart-item {
-    display: flex;
-    align-items: center;
-    margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
 
-    img {
-        width: 50px;
-        height: 50px;
-        border-radius: 8px;
-        margin-right: 10px;
-    }
+.cart-item img {
+  width: 50px;
+  height: 50px;
+  border-radius: 8px;
+  margin-right: 10px;
+}
 
-    .item-details {
-        display: flex;
-        flex-direction: column;
-        font-size: 14px;
-    }
+.item-details {
+  display: flex;
+  flex-direction: column;
+  font-size: 14px;
 }
 
 @media (max-width: 768px) {
-    .checkout-content {
-        flex-direction: column;
-    }
-
-    .checkout-right {
-        width: 100%;
-    }
-}
-.aeropay {
-    display: flex;
+  .checkout-content {
     flex-direction: column;
-    gap: 8px;
-    padding: 10px;
-    border-radius: 8px;
   }
-
-  .payment-method{
+  .checkout-right {
     width: 100%;
   }
-  
-  /* Aeropay Label */
-  .aeropay-label {
-    display: flex;
-    gap: 10px;
-    cursor: pointer;
-  }
-  
-  .aeropay-image {
-    height: 30px;
-  }
-  
-  .aeropay-container{
-    display: flex;
-  }
-  
-  /* Box Styling */
-  .aeropay-box {
-    background: #f9f9f9;
-    padding: 10px;
-    border-radius: 6px;
-  }
-  
-  /* AeroPay Content */
-  .aeropay-content {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-  
-  /* Loading Spinner */
-  .loading-container {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 14px;
-  }
-  
-  .spinner {
-    display: inline-block;
-    width: 16px;
-    height: 16px;
-    border: 2px solid #fff;
-    border-top: 2px solid transparent;
-    border-radius: 50%;
-    animation: spin 0.6s linear infinite;
-    margin-right: 8px;
-  }
-  
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-  
-  
-  /* Verification Section */
-  .verification-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 5px;
-  }
-  
-  .verification-input {
-    display: flex;
-    gap: 5px;
-    align-items: center;
-  }
-  
-  .verification-container input {
-    width: 60px;
-    text-align: center;
-    padding: 6px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-  }
-  
-  .verification-container button {
-    padding: 6px 8px;
-    font-size: 14px;
-    background: #3498db;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-  
-  /* Bank Card */
-  .bank-card {
-    display: flex;
-    align-items: center;
-    background: white;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    padding: 6px;
-    margin-top: 4px;
-    cursor: pointer;
-  }
-  
-  .bank-card.selected-bank {
-    border: 2px solid #27ae60;
-    background: #eaf8ea;
-  }
-  
-  .bank-icon {
-    font-size: 18px;
-    margin-right: 8px;
-  }
-  
-  .bank-details h3 {
-    font-size: 14px;
-    margin: 0;
-  }
-  
-  .bank-details p {
-    font-size: 12px;
-    margin: 0;
-    color: #666;
-  }
-  
-  .checkmark {
-    font-size: 16px;
-    color: #27ae60;
-    margin-left: auto;
-  }
-  
-  /* Connect Another Bank Button */
-  .connect-bank-button {
-    margin-top: 5px;
-    padding: 8px;
-    font-size: 14px;
-    background: #21412a;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-  
-  .connect-bank-button:hover {
-    background: #1b3421;
-  }
-  
+}
+
+/* Aeropay-specific Styles */
+.aeropay {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  border-radius: 8px;
+    img {
+        height: 20px;
+        margin-left: 10px;
+    }
+}
+
+.payment-method {
+  width: 100%;
+}
+
+/* Aeropay Label */
+.aeropay-label {
+  display: flex;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.aeropay-image {
+  height: 30px;
+}
+
+.aeropay-container {
+  display: flex;
+}
+
+.aeropay-box {
+  background: #f9f9f9;
+  padding: 10px;
+  border-radius: 6px;
+}
+
+.aeropay-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Loading Spinner */
+.loading-container {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 14px;
+}
+
+.spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid #fff;
+  border-top: 2px solid transparent;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  margin-right: 8px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Verification Section */
+.verification-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.verification-input {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+
+.verification-container input {
+  width: 60px;
+  text-align: center;
+  padding: 6px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.verification-container button {
+  padding: 6px 8px;
+  font-size: 14px;
+  background: #3498db;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+/* Bank Card */
+.bank-card {
+  display: flex;
+  align-items: center;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 6px;
+  margin-top: 4px;
+  cursor: pointer;
+}
+
+.bank-card.selected-bank {
+  border: 2px solid #27ae60;
+  background: #eaf8ea;
+}
+
+.bank-icon {
+  font-size: 18px;
+  margin-right: 8px;
+}
+
+.bank-details h3 {
+  font-size: 14px;
+  margin: 0;
+}
+
+.bank-details p {
+  font-size: 12px;
+  margin: 0;
+  color: #666;
+}
+
+.checkmark {
+  font-size: 16px;
+  color: #27ae60;
+  margin-left: auto;
+}
+
+/* Connect Another Bank Button */
+.connect-bank-button {
+  margin-top: 5px;
+  padding: 8px;
+  font-size: 14px;
+  background: #21412a;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.connect-bank-button:hover {
+  background: #1b3421;
+}

@@ -44,7 +44,4 @@ export class ContactComponent {
     return this.contactForm.controls;
   }
 
-  async sendMessage() {
-   
-  }
 }

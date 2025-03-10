@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 @Component({
@@ -10,5 +10,11 @@ import { RouterModule } from '@angular/router';
   styleUrl: './confirmation.component.css'
 })
 export class ConfirmationComponent {
+  @ViewChild('confirmationHeading') confirmationHeading!: ElementRef;
 
+  ngAfterViewInit(): void {
+    if (this.confirmationHeading) {
+      this.confirmationHeading.nativeElement.focus();
+    }
+  }
 }

@@ -5,7 +5,6 @@ import { AuthNavComponent } from './components/auth-nav/auth-nav.component';
 import { ConfirmationComponent } from './components/confirmation/confirmation.component';
 
 // Grouped components under their respective files
-import { AccountComponent } from './components/account/account.component';
 import { CartComponent } from './components/cart/cart.component';
 import { CartIconComponent } from './components/cart-icon/cart-icon.component';
 import { CategoriesComponent } from './components/categories/categories.component';
@@ -18,6 +17,7 @@ import { RegisterComponent } from './components/register/register.component';
 import { ShopComponent } from './components/shop/shop.component';
 import { SingleProductComponent } from './components/single-product/single-product.component';
 import { ConfigService } from './services/config.service';
+import { AdBannerComponent } from './components/ad-banner/ad-banner.component';
 
 @NgModule({
   providers: [ConfigService],
@@ -27,7 +27,6 @@ import { ConfigService } from './services/config.service';
   imports: [CommonModule,
     AuthNavComponent,
     ConfirmationComponent,
-    AccountComponent,
     CartComponent,
     CartIconComponent,
     CategoriesComponent,
@@ -38,12 +37,12 @@ import { ConfigService } from './services/config.service';
     RecentProductsCarouselComponent,
     RegisterComponent,
     ShopComponent,
-    SingleProductComponent
+    SingleProductComponent,
+    AdBannerComponent
   ],
   exports: [
     AuthNavComponent,
     ConfirmationComponent,
-    AccountComponent,
     CartComponent,
     CartIconComponent,
     CategoriesComponent,
@@ -54,7 +53,8 @@ import { ConfigService } from './services/config.service';
     RecentProductsCarouselComponent,
     RegisterComponent,
     ShopComponent,
-    SingleProductComponent
+    SingleProductComponent,
+    AdBannerComponent
   ]
 })
 export class ShopComponentsModule {}

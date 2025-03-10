@@ -15,12 +15,6 @@
     font-weight: bold;
   }
   
-/* Product Page Layout */
-.product-container {
-  display: flex;
-  gap: 40px;
-  margin-top: 20px;
-}
 
 /* Responsive Layout for Smaller Screens */
 @media (max-width: 768px) {
@@ -52,22 +46,44 @@
   }
 }
 
-  /* Product Image */
-  .product-image-wrapper {
-    flex: 1;
-  }
-  
-  .product-image {
-    width: 100%;
-    border-radius: 8px;
-  }
-  
-  /* Product Info */
-  .product-info {
-    flex: 1;
-    flex-direction: column;
-    justify-content: space-between;
-  }
+/* Product Container - Ensures Equal Spacing */
+.product-container {
+  display: flex;
+  align-items: center; /* Centers content vertically */
+  justify-content: space-between; /* Keeps space balanced */
+  gap: 40px;
+}
+
+/* Product Image Wrapper - Ensures it takes up its space */
+.product-image-wrapper {
+  flex: 1; /* Allows it to scale naturally */
+  flex-basis: 50%; /* Ensures it takes up equal space */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 400px; /* Fixed height for uniformity */
+  max-width: 400px; /* Keeps the size predictable */
+  overflow: hidden;
+  border-radius: 8px;
+  background: #f7f7f7; /* Light background for contrast */
+}
+
+/* Product Image - Stays Centered */
+.product-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain; /* Ensures entire image is visible */
+}
+
+/* Product Info - Ensures it takes up its space */
+.product-info {
+  flex: 1;
+  flex-basis: 50%; /* Ensures it takes up equal space */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
   
   /* Badges */
   .product-badges {
@@ -154,7 +170,7 @@
   
   /* Add to Cart Button */
   .add-to-cart-button {
-    background: #2F4F2F;
+    background: #25463d;
     color: white;
     border: none;
     padding: 12px 20px;

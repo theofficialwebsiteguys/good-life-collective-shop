@@ -1,96 +1,95 @@
 .auth-container {
-    width: 90%;
-    max-width: 400px;
-    padding: 50px;
-    text-align: center;
-    margin: auto;
-  }
-  
-  .logo {
-    max-width: 180px;
-    margin-bottom: 20px;
-  }
-  
-  label {
-    display: block;
-    font-weight: bold;
-    margin-top: 10px;
-    text-align: left;
-  }
-  
-  .required::after {
-    content: " *";
-    color: red;
-  }
-  
-  .terms-group{
-    display: flex;
+  width: 90%;
+  max-width: 400px;
+  padding: 50px;
+  text-align: center;
+  margin: auto;
+}
 
-    input{
-        width: 5%;
-        margin: 10px;
-    }
-  }
-  
-  input {
-    width: 100%;
-    padding: 10px;
-    margin: 5px 0;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 16px;
-  }
-  
-  .phone-group {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .phone-inputs {
-    display: flex;
-    gap: 10px;
-  }
-  
-  .dob-container {
-    display: flex;
-    gap: 10px;
-  }
-  
-  .dob-container input {
-    flex: 1;
-  }
-  
-  .auth-button {
-    width: 100%;
-    padding: 10px;
-    background-color: #25463D;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    font-size: 16px;
-    font-weight: bold;
-    margin-top: 15px;
-    cursor: pointer;
-  }
-  
-  .auth-button:hover {
-    background-color: #5f756c;
-  }
-  
-  .login-link {
-    margin-top: 10px;
-    font-size: 14px;
-  }
-  
-  .login-link a {
-    color: #1d4033;
-    font-weight: bold;
-    text-decoration: none;
-  }
-  
-  .error-message {
-    color: red;
-    font-size: 14px;
-    margin-top: 10px;
-  }
-  
+.logo {
+  max-width: 180px;
+  margin-bottom: 20px;
+}
+
+label {
+  display: block;
+  font-weight: bold;
+  margin-top: 10px;
+  text-align: left;
+}
+
+.required::after {
+  content: " *";
+  color: red;
+}
+
+.terms-group {
+  display: flex;
+}
+
+.terms-group input {
+  width: 5%;
+  margin: 10px;
+}
+
+input {
+  width: 100%;
+  padding: 10px;
+  margin: 5px 0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+.phone-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.phone-inputs {
+  display: flex;
+  gap: 10px;
+}
+
+.dob-container {
+  display: flex;
+  gap: 10px;
+}
+
+.dob-container input {
+  flex: 1;
+}
+
+.auth-button {
+  width: 100%;
+  padding: 10px;
+  background-color: #25463D;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  font-weight: bold;
+  margin-top: 15px;
+  cursor: pointer;
+}
+
+.auth-button:hover {
+  background-color: #5f756c;
+}
+
+.login-link {
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+.login-link a {
+  color: #1d4033;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.error-message {
+  color: red;
+  font-size: 14px;
+  margin-top: 10px;
+}

@@ -1,71 +1,71 @@
 <div *ngIf="product" class="single-product-page">
-    <!-- Back Button -->
-    <button class="back-button" (click)="goBack()">← Back</button>
+  <!-- Back Button -->
+  <button class="back-button" (click)="goBack()" aria-label="Go back to product list">← Back</button>
   
-    <div class="product-container">
-      <!-- Left Side: Product Image -->
+  <div class="product-container">
+    <div></div>
+    <!-- Left Side: Product Image -->
+    <div class="image-container">
       <div class="product-image-wrapper">
         <img [src]="product.image" [alt]="product.title" class="product-image">
       </div>
+    </div>
+
+    <!-- Right Side: Product Information -->
+    <div class="product-info">
+      <!-- Category & Strain Badges -->
+      <div class="product-badges" role="group" aria-label="Product categories">
+        <span class="badge category-badge">{{ product.category | titlecase }}</span>
+        <span class="badge strain-badge">{{ product.strainType }}</span>
+      </div>
   
-      <!-- Right Side: Product Information -->
-      <div class="product-info">
-        <!-- Category & Strain Badges -->
-        <div class="product-badges">
-          <span class="badge category-badge">{{ product.category }}</span>
-          <span class="badge strain-badge">{{ product.strainType }}</span>
-        </div>
+      <!-- Title & Price -->
+      <h1 class="product-title">{{ product.title }}</h1>
+      <p class="product-price">{{ product.price | currency }}</p>
   
-        <!-- Title & Price -->
-        <h1 class="product-title">{{ product.title }}</h1>
-        <p class="product-price">{{ product.price | currency}}</p>
-  
-        <!-- Weight Selection -->
-        <label for="weight-select">Select Weight:</label>
-        <select id="weight-select" [(ngModel)]="selectedWeight" *ngIf="availableWeights.length > 0">
+      <!-- Weight Selection -->
+      <label for="weight-select">Select Weight:</label>
+      <select id="weight-select" [(ngModel)]="selectedWeight" *ngIf="availableWeights.length > 0">
         <option *ngFor="let weight of availableWeights" [value]="weight">
-            {{ weight }}
+          {{ weight }}
         </option>
-        </select>
-
-
-        <!-- Quantity Selector -->
-        <div class="quantity-selector">
-          <button class="quantity-button" (click)="decreaseQuantity()">-</button>
-          <span class="quantity">{{ quantity }}</span>
-          <button class="quantity-button" (click)="increaseQuantity()">+</button>
-        </div>
+      </select>
   
-        <!-- Stock Status -->
-        <p *ngIf="product && product.quantity < 5" class="stock-status">Only <span class="stock-count">{{product.quantity}} left</span></p>
+      <!-- Quantity Selector -->
+      <div class="quantity-selector">
+        <button class="quantity-button" (click)="decreaseQuantity()" [disabled]="quantity <= 1" aria-label="Decrease quantity">-</button>
+        <span class="quantity">{{ quantity }}</span>
+        <button class="quantity-button" (click)="increaseQuantity()" [disabled]="quantity >= product.quantity" aria-label="Increase quantity">+</button>
+      </div>
+        
+      <!-- Stock Status -->
+      <p *ngIf="product && product.quantity < 5" class="stock-status">
+        Only <span class="stock-count">{{ product.quantity }}</span> left
+      </p>
   
-        <!-- Add to Cart Button -->
-        <button class="add-to-cart-button" 
-                (click)="addToCart()" 
-                [disabled]="isAddingToCart">
-          {{ isAddingToCart ? 'Adding...' : 'Add to Cart' }}
-        </button>
-
+      <!-- Add to Cart Button -->
+      <button class="add-to-cart-button" 
+              (click)="addToCart()" 
+              [disabled]="isAddingToCart"
+              [attr.aria-label]="isAddingToCart ? 'Adding to cart' : 'Add to Cart'">
+        {{ isAddingToCart ? 'Adding...' : 'Add to Cart' }}
+      </button>
   
-        <!-- Product Details -->
-        <div class="product-details">
-            <h3>Details</h3>
-            <p>{{ truncatedDescription }}
-
-                <!-- Show "Read More" if description exceeds 300 characters -->
-                <button *ngIf="product?.desc && product.desc.length > 300" 
-                    (click)="toggleDescription()" 
-                    class="toggle-description">
+      <!-- Product Details -->
+      <div class="product-details" role="region" aria-labelledby="details-heading">
+        <h3 id="details-heading">Details</h3>
+        <p>
+          {{ truncatedDescription }}
+          <!-- Toggle Button for Full Description -->
+          <button *ngIf="product?.desc && product.desc.length > 300" 
+                  (click)="toggleDescription()" 
+                  class="toggle-description" 
+                  [attr.aria-expanded]="showFullDescription">
             {{ showFullDescription ? 'Show Less' : 'Read More' }}
-            </button>
-            </p>
-            
-
-          
-            <p><strong>THC:</strong> {{ product.thc }}</p>
-          </div>
-          
+          </button>
+        </p>
+        <p><strong>THC:</strong> {{ product.thc }}</p>
       </div>
     </div>
   </div>
-  
+</div>

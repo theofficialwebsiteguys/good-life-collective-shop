@@ -16,7 +16,7 @@ import { AuthNavComponent } from '../auth-nav/auth-nav.component';
 @Component({
   selector: 'lib-shop',
   standalone: true,
-  imports: [CommonModule, ProductListComponent, CartIconComponent, CategoriesComponent, FormsModule, AuthNavComponent],
+  imports: [CommonModule, ProductListComponent, CartIconComponent, FormsModule, AuthNavComponent],
   templateUrl: './shop.component.html',
   styleUrl: './shop.component.css'
 })
@@ -61,6 +61,10 @@ export class ShopComponent implements OnInit {
     // Listen for category changes
     this.route.queryParams.subscribe(params => {
       this.category = params['category'] || null;
+
+      if (params['brand']) {
+        this.selectedBrands = [params['brand']];
+      }
       this.fetchDynamicFilters(); // Refresh filters when category changes
     });
   
@@ -68,7 +72,14 @@ export class ShopComponent implements OnInit {
     this.productService.products$.subscribe(() => {
       this.fetchDynamicFilters(); // Re-fetch filters when products update
     });
+
+    this.sortOption = localStorage.getItem('sortOption') || 'RECENT';
   }
+
+  updateSortOption() {
+    localStorage.setItem('sortOption', this.sortOption);
+  }
+  
 
   toggleSidebar(): void {
     this.isSidebarOpen = !this.isSidebarOpen;

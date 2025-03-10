@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { Subscription } from 'rxjs';
+import { AccessibilityService } from '../../services/accessibility.service';
 
 @Component({
   selector: 'lib-auth-nav',
@@ -21,7 +22,7 @@ export class AuthNavComponent {
   userData: any = null;
   private authSubscription!: Subscription;
 
-  constructor(private authService: AuthService){}
+  constructor(private authService: AuthService, private accessibilityService: AccessibilityService){}
   ngOnInit() {
     this.checkLoginStatus();
   }
@@ -35,6 +36,8 @@ export class AuthNavComponent {
 
   toggleAuthTooltip() {
     this.authTooltipOpen = !this.authTooltipOpen;
+    const message = this.authTooltipOpen ? 'User menu opened' : 'User menu closed';
+    this.accessibilityService.announce(message, 'polite');
   }
 
   logout() {

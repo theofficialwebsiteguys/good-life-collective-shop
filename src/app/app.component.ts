@@ -9,17 +9,18 @@ import { CategoriesComponent } from '../../projects/shop-components/src/lib/comp
 import { ShopComponent } from '../../projects/shop-components/src/lib/components/shop/shop.component';
 import { ContactComponent } from '../../projects/shop-components/src/lib/components/contact/contact.component';
 import { DashboardComponent, ConfigService } from 'admin-dashboard'
+import { AdBannerComponent } from '../../projects/shop-components/src/lib/components/ad-banner/ad-banner.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, ProductListComponent, SingleProductComponent, RecentProductsCarouselComponent, CategoriesComponent, ShopComponent, ContactComponent, DashboardComponent],
+  imports: [CommonModule, RouterOutlet, RecentProductsCarouselComponent, CategoriesComponent,  ContactComponent, AdBannerComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
 export class AppComponent {
   constructor(private navigationService: NavigationService, private configService: ConfigService) {
-    // this.configService.setApiKey('c69203dbdeaf88d28f3bfa28afeaff32965744f3d3ae6321b9eff6d198b1edfb');
+    this.configService.setApiKey('c69203dbdeaf88d28f3bfa28afeaff32965744f3d3ae6321b9eff6d198b1edfb');
   }
 
   isViewingProduct(): boolean {

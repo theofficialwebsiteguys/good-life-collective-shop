@@ -1,33 +1,32 @@
 <div class="product-card">
-    <!-- Product Image -->
-    <div class="product-image-wrapper">
-      <img [src]="product.image" [alt]="product.title" class="product-image">
-      <button class="add-to-cart-button" 
+  <!-- Product Image -->
+  <div class="product-image-wrapper">
+    <img [src]="product.image" [alt]="product.title" class="product-image">
+    <button type="button"
+            class="add-to-cart-button" 
             (click)="addToCart($event)" 
-            [disabled]="isDisabled">
-        <span *ngIf="isAdded">✔</span> <!-- ✅ Show checkmark -->
-        <span *ngIf="!isAdded">+</span> <!-- 🔄 Show plus when not added -->
-      </button>
-    </div>
-  
-    <!-- Product Info -->
-    <div class="product-info">
-      <!-- Brand -->
-      <p class="product-brand">{{ product.brand }}</p>
-  
-      <!-- Title -->
-      <h3 class="product-title">{{ product.title }}</h3>
-
-      
-  
-      <!-- Strain Type with Icon -->
-      <div class="product-strain">
-        <!-- <img *ngIf="product.strainType" [src]="getStrainIcon(product.strainType)" class="strain-icon"> -->
-        <span>{{ product.strainType }}</span>
-      </div>
-  
-      <!-- Weight & Price -->
-      <p class="product-weight-price">{{ product.weight }} · {{ product.price | currency}}</p>
-    </div>
+            [disabled]="isDisabled"
+            [attr.aria-label]="isAdded ? (product.title + ' added to cart') : ('Add ' + product.title + ' to cart')">
+      <span *ngIf="isAdded">✔</span> <!-- Checkmark when added -->
+      <span *ngIf="!isAdded">+</span> <!-- Plus sign when not added -->
+    </button>
   </div>
-  
+
+  <!-- Product Info -->
+  <div class="product-info">
+    <!-- Brand -->
+    <p class="product-brand">{{ product.brand }}</p>
+
+    <!-- Title -->
+    <h3 class="product-title">{{ product.title }}</h3>
+
+    <!-- Strain Type with Icon -->
+    <div class="product-strain">
+      <!-- Optional: Add icon for strain type if desired -->
+      <span>{{ product.strainType }}</span>
+    </div>
+
+    <!-- Weight & Price -->
+    <p class="product-weight-price">{{ product.weight }} · {{ product.price | currency }}</p>
+  </div>
+</div>

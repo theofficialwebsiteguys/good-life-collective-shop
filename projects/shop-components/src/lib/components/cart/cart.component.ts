@@ -2,7 +2,6 @@ import { Component } from '@angular/core';
 import { CartItem, CartService } from '../../services/cart.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Observable } from 'rxjs';
 import { RouterModule } from '@angular/router';
 
 @Component({

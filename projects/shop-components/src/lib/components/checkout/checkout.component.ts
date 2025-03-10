@@ -61,6 +61,7 @@ export class CheckoutComponent {
     }
     this.authService.validateSession();
     this.calculateDefaultTotals();
+    this.checkDeliveryEligibility();
   }
 
   updateTotals() {

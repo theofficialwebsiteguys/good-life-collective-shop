@@ -6,7 +6,6 @@ export * from './lib/shop-components.service';
 export * from './lib/shop-components.component';
 export * from './lib/shop-components.module';
 
-export * from './lib/components/account/account.component'
 export * from './lib/components/auth-nav/auth-nav.component'
 export * from './lib/components/cart/cart.component'
 export * from './lib/components/cart-icon/cart-icon.component'
@@ -21,6 +20,7 @@ export * from './lib/components/register/register.component'
 export * from './lib/components/shop/shop.component'
 export * from './lib/components/single-product/single-product.component'
 export * from './lib/components/contact/contact.component'
+export * from './lib/components/ad-banner/ad-banner.component'
 
 export * from './lib/services/aeropay.service'
 export * from './lib/services/auth.service'

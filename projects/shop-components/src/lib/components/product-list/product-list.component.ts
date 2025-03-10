@@ -27,12 +27,10 @@ export class ProductListComponent implements OnInit {
   constructor(private productService: ProductsService, private navigationService: NavigationService) {}
 
   ngOnInit(): void {
-
     this.fetchFilteredProducts();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    console.log(this.selectedTypes)
     if (changes['category'] || changes['selectedBrands'] || changes['selectedWeights'] || changes['selectedTypes'] || changes['searchQuery'] || changes['sortOption']) {
       this.fetchFilteredProducts();
     }
