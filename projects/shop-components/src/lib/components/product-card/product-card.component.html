@@ -1,7 +1,7 @@
 <div class="product-card">
   <!-- Product Image -->
   <div class="product-image-wrapper">
-    <img [src]="product.image" [alt]="product.title" class="product-image">
+    <img [src]="product.image != '' ? product.image : 'assets/default.png'" [alt]="product.title" class="product-image">
     <button type="button"
             class="add-to-cart-button" 
             (click)="addToCart($event)" 

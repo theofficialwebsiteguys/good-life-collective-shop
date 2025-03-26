@@ -13,7 +13,7 @@ import {
   ProductFilters,
 } from '../models/product-filters.model';
 
-import { environment } from '../../environments/environment';
+import { environment } from '../../environments/environment.prod';
 import { NavigationService } from './navigation.service';
 
 @Injectable({

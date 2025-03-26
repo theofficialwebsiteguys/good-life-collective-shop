@@ -10,6 +10,8 @@ import { ShopComponent } from '../../projects/shop-components/src/lib/components
 import { ContactComponent } from '../../projects/shop-components/src/lib/components/contact/contact.component';
 import { DashboardComponent, ConfigService } from 'admin-dashboard'
 import { AdBannerComponent } from '../../projects/shop-components/src/lib/components/ad-banner/ad-banner.component';
+import { ConfigService as ShopConfig } from '../../projects/shop-components/src/lib/services/config.service'
+
 
 @Component({
   selector: 'app-root',
@@ -19,8 +21,10 @@ import { AdBannerComponent } from '../../projects/shop-components/src/lib/compon
   styleUrl: './app.component.scss'
 })
 export class AppComponent {
-  constructor(private navigationService: NavigationService, private configService: ConfigService) {
+  constructor(private navigationService: NavigationService, private configService: ConfigService, private shopConfig: ShopConfig) {
+    console.log("here")
     this.configService.setApiKey('c69203dbdeaf88d28f3bfa28afeaff32965744f3d3ae6321b9eff6d198b1edfb');
+    this.shopConfig.setApiKey('c69203dbdeaf88d28f3bfa28afeaff32965744f3d3ae6321b9eff6d198b1edfb');
   }
 
   isViewingProduct(): boolean {

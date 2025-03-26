@@ -15,7 +15,7 @@
       <button type="button" class="filter-toggle" (click)="toggleSection('types')"
               [attr.aria-expanded]="isExpanded['types']" aria-controls="filter-types">
         <h3>Strains</h3>
-        <span [class.expanded]="isExpanded['types']">−</span>
+        <span class="dash" [class.expanded]="isExpanded['types']">−</span>
       </button>
       <div id="filter-types" *ngIf="isExpanded['types']" class="filter-options">
         <label *ngFor="let type of types">
@@ -30,7 +30,7 @@
       <button type="button" class="filter-toggle" (click)="toggleSection('brands')"
               [attr.aria-expanded]="isExpanded['brands']" aria-controls="filter-brands">
         <h3>Brands</h3>
-        <span [class.expanded]="isExpanded['brands']">−</span>
+        <span class="dash" [class.expanded]="isExpanded['brands']">−</span>
       </button>
       <div id="filter-brands" *ngIf="isExpanded['brands']" class="filter-options">
         <ng-container *ngIf="dynamicFilterOptions$ | async as dynamicFilterOptions">
@@ -47,7 +47,7 @@
       <button type="button" class="filter-toggle" (click)="toggleSection('weights')"
               [attr.aria-expanded]="isExpanded['weights']" aria-controls="filter-weights">
         <h3>Weights</h3>
-        <span [class.expanded]="isExpanded['weights']">−</span>
+        <span class="dash" [class.expanded]="isExpanded['weights']">−</span>
       </button>
       <div id="filter-weights" *ngIf="isExpanded['weights']" class="filter-options">
         <ng-container *ngIf="dynamicFilterOptions$ | async as dynamicFilterOptions">
@@ -76,8 +76,8 @@
         <option value="THC_DESC">THC: High to Low</option>
         <option value="NAME">Alphabetical</option>
       </select>
-  
-      <!-- <lib-cart-icon></lib-cart-icon>
+<!--   
+      <lib-cart-icon></lib-cart-icon>
       <lib-auth-nav></lib-auth-nav> -->
     </div>
   

@@ -29,6 +29,7 @@ export class CheckoutComponent {
     state: 'NY' // Default to New York and cannot be changed
   };
   
+  originalSubtotal: number = 0;
   finalSubtotal = 0;
   finalTax = 0;
   finalTotal = 0;
@@ -64,13 +65,18 @@ export class CheckoutComponent {
     this.checkDeliveryEligibility();
   }
 
+  get maxRedeemablePoints(): number {
+    const maxPoints = Math.min(this.userInfo.points, this.originalSubtotal * 20);
+    return Math.ceil(maxPoints);
+  }
+
   updateTotals() {
     const pointsValue = this.pointsToRedeem * this.pointValue;
-    const originalSubtotal = this.cartItems.reduce(
+    this.originalSubtotal = this.cartItems.reduce(
       (total: number, item: any) => total + (item.price * item.quantity),
       0
     );
-    this.finalSubtotal = originalSubtotal - pointsValue;
+    this.finalSubtotal = this.originalSubtotal - pointsValue;
     if (this.finalSubtotal < 0) this.finalSubtotal = 0;
     this.finalTax = this.finalSubtotal * 0.13;
     this.finalTotal = this.finalSubtotal + this.finalTax;
@@ -78,10 +84,7 @@ export class CheckoutComponent {
     //   this.enableDelivery = true;
     // }
 
-    // this.accessibilityService.announce(
-    //   `Subtotal updated to ${this.finalSubtotal.toFixed(2)} dollars.`,
-    //   'polite'
-    // );
+
   }
 
   checkDeliveryEligibility() {
@@ -98,6 +101,10 @@ export class CheckoutComponent {
   }
 
   calculateDefaultTotals() {
+    this.originalSubtotal = this.cartItems.reduce(
+      (total, item) => total + (parseFloat(item.price) * item.quantity),
+      0
+    );
     this.finalSubtotal = this.cartItems.reduce((total, item) => total + (parseFloat(item.price) * item.quantity), 0);
     this.finalTax = this.finalSubtotal * 0.13;
     this.finalTotal = this.finalSubtotal + this.finalTax;

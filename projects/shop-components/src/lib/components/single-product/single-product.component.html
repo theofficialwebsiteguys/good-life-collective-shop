@@ -7,7 +7,7 @@
     <!-- Left Side: Product Image -->
     <div class="image-container">
       <div class="product-image-wrapper">
-        <img [src]="product.image" [alt]="product.title" class="product-image">
+        <img [src]="product.image != '' ? product.image : 'assets/default.png'" [alt]="product.title" class="product-image">
       </div>
     </div>
 

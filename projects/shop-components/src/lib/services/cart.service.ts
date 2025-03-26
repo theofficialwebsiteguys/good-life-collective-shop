@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, catchError, forkJoin, from, map, Observable, of, switchMap, tap, throwError } from 'rxjs';
-import { environment } from '../../environments/environment';
+import { environment } from '../../environments/environment.prod';
 import { AuthService } from './auth.service';
 import { CapacitorHttp } from '@capacitor/core';
 import { ConfigService } from './config.service';
@@ -677,6 +677,7 @@ export class CartService {
       'Content-Type': 'application/json', // Ensure JSON data format
     };
 
+    console.log(this.configService.getApiKey())
     const apiKey = this.configService.getApiKey() || '';
   
     headers['x-auth-api-key'] = apiKey; // Set API key header for guests

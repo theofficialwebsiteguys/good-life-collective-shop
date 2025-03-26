@@ -145,7 +145,7 @@
               id="pointsRange"
               [(ngModel)]="pointsToRedeem" 
               [min]="0" 
-              [max]="userInfo.points" 
+              [max]="maxRedeemablePoints" 
               [step]="1"
               (change)="updateTotals()"
               aria-label="Adjust points to redeem for discount"
@@ -180,7 +180,7 @@
         <div class="cart-preview" role="region" aria-labelledby="cart-preview-heading">
           <h2 id="cart-preview-heading">Your Items</h2>
           <div *ngFor="let item of cartItems" class="cart-item">
-            <img [src]="item.image" alt="{{ item.title }}" />
+            <img [src]="item.image != '' ? item.image : 'assets/default.png'" alt="{{ item.title }}" />
             <div class="item-details">
               <span class="item-quantity">{{ item.quantity }}x</span>
               <span class="item-title">{{ item.title }}</span>

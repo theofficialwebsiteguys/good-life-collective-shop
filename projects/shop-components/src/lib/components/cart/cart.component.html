@@ -9,7 +9,7 @@
   
   <!-- Cart Items -->
   <div *ngFor="let item of cartItems" class="cart-item">
-    <img [src]="item.image" alt="Image of {{ item.title }}" class="product-image" />
+    <img [src]="item.image != '' ? item.image : 'assets/default.png'" alt="Image of {{ item.title }}" class="product-image" />
   
     <div class="cart-details">
       <p class="brand">{{ item.brand }}</p>

@@ -39,3 +39,7 @@
   position: absolute;
   right: 0;
 }
+
+lib-product-card {
+  max-width: 275px; /* Prevent expansion */
+}

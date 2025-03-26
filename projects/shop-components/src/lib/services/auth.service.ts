@@ -6,7 +6,7 @@ import {
   filter,
   Observable
 } from 'rxjs';
-import { environment } from '../../environments/environment';
+import { environment } from '../../environments/environment.prod';
 import { ProductsService } from './products.service';
 import { Product } from '../models/product.model';
 import { CapacitorHttp } from '@capacitor/core';
@@ -237,9 +237,9 @@ export class AuthService {
         console.log(response)
         if (response) {
           console.log(response)
-          this.authStatus.next(true);
+          // this.authStatus.next(true);
           this.updateUserData();
-          this.handleRecentOrders(response.data.orders);
+          // this.handleRecentOrders(response.data.orders);
           this.setAuthTokensAlleaves(response.data.authTokens?.alleaves);
         } else {
           this.authStatus.next(false);

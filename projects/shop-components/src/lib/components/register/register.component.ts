@@ -84,14 +84,43 @@ export class RegisterComponent {
   }
 
   onSubmit() {
-    this.authService.register(this.firstName).subscribe(user => {
-      if (user) {
-        this.router.navigate(['/account']);
-      } else {
-        this.errorMessage = 'Signup failed. Please try again.';
+    if (this.registerForm.invalid) {
+      this.errorMessage = 'Please fill out all required fields correctly.';
+      this.registerForm.markAllAsTouched(); // This highlights all invalid fields
+      return;
+    }
+  
+    const formValues = this.registerForm.value;
+  
+    const newUser = {
+      firstName: formValues.firstName,
+      lastName: formValues.lastName,
+      email: formValues.email,
+      phone: `${this.getDialCode(formValues.countryCode)}${formValues.phone}`,
+      dob: `${formValues.year}-${formValues.month}-${formValues.day}`,
+      password: formValues.password
+    };
+  
+    this.authService.register(newUser).subscribe({
+      next: (user) => {
+        if (user) {
+          this.router.navigate(['/account']);
+        } else {
+          this.errorMessage = 'Signup failed. Please try again.';
+        }
+      },
+      error: (err) => {
+        console.error('Registration error:', err);
+        this.errorMessage = err?.error?.message || 'Signup failed. Please try again.';
       }
     });
   }
+  
+  getDialCode(code: string): string {
+    const country = this.countries.find(c => c.code === code);
+    return country ? country.dialCode : '';
+  }
+  
 
   passwordMatchValidator(group: FormGroup) {
     const password = group.get('password')?.value;

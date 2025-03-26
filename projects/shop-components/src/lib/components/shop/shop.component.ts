@@ -88,12 +88,20 @@ export class ShopComponent implements OnInit {
   
   // Function to re-fetch dynamic filter options
   fetchDynamicFilters(): void {
-    this.dynamicFilterOptions$ = this.productService.getProductFilterOptions();
+    this.dynamicFilterOptions$ = this.productService.getProductFilterOptions().pipe(
+      map((options) => {
+        return {
+          brands: options.brands.sort((a, b) => a.label.localeCompare(b.label)), // Sort alphabetically
+          weights: options.weights.sort((a, b) => parseFloat(a.label) - parseFloat(b.label)), // Sort numerically
+        };
+      })
+    );
   
     this.dynamicFilterOptions$.subscribe(response => {
       console.log('Updated Filter Options:', response);
     });
   }
+  
 
   toggleSection(section: keyof typeof this.isExpanded): void {
     this.isExpanded[section] = !this.isExpanded[section];

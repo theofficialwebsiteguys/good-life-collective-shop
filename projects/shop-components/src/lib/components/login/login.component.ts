@@ -22,13 +22,21 @@ export class LoginComponent {
     const credentials = {
       email: this.email,
       password: this.password
-    }
-    this.authService.login(credentials).subscribe(user => {
-      if (user) {
-        this.router.navigate(['/shop']);
-      } else {
-        this.errorMessage = 'Invalid credentials. Please try again.';
+    };
+  
+    this.authService.login(credentials).subscribe({
+      next: (user) => {
+        if (user) {
+          this.router.navigate(['/shop']);
+        } else {
+          this.errorMessage = 'Invalid credentials. Please try again.';
+        }
+      },
+      error: (err) => {
+        console.error('Login error:', err);
+        this.errorMessage = 'Invalid email or password. Please try again.';
       }
     });
   }
+  
 }

@@ -112,6 +112,10 @@
   margin-bottom: 20px;
 }
 
+h3, .dash{
+  color: black;
+}
+
 .search-input {
   flex: 1;
   padding: 8px;

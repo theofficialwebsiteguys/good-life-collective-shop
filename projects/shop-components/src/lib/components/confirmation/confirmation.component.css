@@ -29,7 +29,6 @@ p {
 }
 
 .shop-button {
-    background-color: #007bff;
     color: #fff;
     padding: 12px 24px;
     border: none;
@@ -41,9 +40,6 @@ p {
     display: inline-block;
 }
 
-.shop-button:hover {
-    background-color: #0056b3;
-}
 
 @keyframes fadeIn {
     from {

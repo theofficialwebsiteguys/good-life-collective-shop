@@ -2,7 +2,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { CapacitorHttp } from '@capacitor/core';
 import { from, Observable, tap } from 'rxjs';
-import { environment } from '../../environments/environment';
+import { environment } from '../../environments/environment.prod';
 import { v4 as uuidv4 } from 'uuid';
 
 @Injectable({
