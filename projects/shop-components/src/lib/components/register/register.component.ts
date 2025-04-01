@@ -86,15 +86,15 @@ export class RegisterComponent {
   onSubmit() {
     if (this.registerForm.invalid) {
       this.errorMessage = 'Please fill out all required fields correctly.';
-      this.registerForm.markAllAsTouched(); // This highlights all invalid fields
+      this.registerForm.markAllAsTouched(); // Highlights all invalid fields
       return;
     }
   
     const formValues = this.registerForm.value;
   
     const newUser = {
-      firstName: formValues.firstName,
-      lastName: formValues.lastName,
+      fname: formValues.firstName,
+      lname: formValues.lastName,
       email: formValues.email,
       phone: `${this.getDialCode(formValues.countryCode)}${formValues.phone}`,
       dob: `${formValues.year}-${formValues.month}-${formValues.day}`,
@@ -104,7 +104,8 @@ export class RegisterComponent {
     this.authService.register(newUser).subscribe({
       next: (user) => {
         if (user) {
-          this.router.navigate(['/account']);
+          this.registerForm.reset(); // ✅ Reset the form
+          this.router.navigate(['/shop']); // ✅ Navigate to /shop
         } else {
           this.errorMessage = 'Signup failed. Please try again.';
         }
@@ -115,6 +116,7 @@ export class RegisterComponent {
       }
     });
   }
+  
   
   getDialCode(code: string): string {
     const country = this.countries.find(c => c.code === code);

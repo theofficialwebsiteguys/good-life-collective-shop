@@ -30,9 +30,16 @@ export class AuthNavComponent {
   checkLoginStatus() {
     this.authSubscription = this.authService.isLoggedIn().subscribe(status => {
       this.isLoggedIn = status;
-      this.userData = status ? this.authService.getCurrentUser() : null;
+      if (status) {
+        this.authService.getUserInfo().subscribe((user:any) => {
+          this.userData = user;
+        });
+      } else {
+        this.userData = null;
+      }
     });
   }
+  
 
   toggleAuthTooltip() {
     this.authTooltipOpen = !this.authTooltipOpen;
