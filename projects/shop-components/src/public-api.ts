@@ -21,6 +21,8 @@ export * from './lib/components/shop/shop.component'
 export * from './lib/components/single-product/single-product.component'
 export * from './lib/components/contact/contact.component'
 export * from './lib/components/ad-banner/ad-banner.component'
+export * from './lib/components/forgot-password/forgot-password.component'
+export * from './lib/components/reset-password/reset-password.component'
 
 export * from './lib/services/aeropay.service'
 export * from './lib/services/auth.service'

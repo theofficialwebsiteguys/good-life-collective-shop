@@ -18,6 +18,8 @@ import { ShopComponent } from './components/shop/shop.component';
 import { SingleProductComponent } from './components/single-product/single-product.component';
 import { ConfigService } from './services/config.service';
 import { AdBannerComponent } from './components/ad-banner/ad-banner.component';
+import { ForgotPasswordComponent } from './components/forgot-password/forgot-password.component';
+import { ResetPasswordComponent } from './components/reset-password/reset-password.component';
 
 @NgModule({
   providers: [ConfigService],
@@ -38,7 +40,9 @@ import { AdBannerComponent } from './components/ad-banner/ad-banner.component';
     RegisterComponent,
     ShopComponent,
     SingleProductComponent,
-    AdBannerComponent
+    AdBannerComponent,
+    ForgotPasswordComponent,
+    ResetPasswordComponent
   ],
   exports: [
     AuthNavComponent,
@@ -54,7 +58,9 @@ import { AdBannerComponent } from './components/ad-banner/ad-banner.component';
     RegisterComponent,
     ShopComponent,
     SingleProductComponent,
-    AdBannerComponent
+    AdBannerComponent,
+    ForgotPasswordComponent,
+    ResetPasswordComponent
   ]
 })
 export class ShopComponentsModule {}

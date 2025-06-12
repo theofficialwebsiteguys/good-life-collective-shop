@@ -7,6 +7,8 @@ import { LoginComponent } from '../../projects/shop-components/src/lib/component
 import { RegisterComponent } from '../../projects/shop-components/src/lib/components/register/register.component';
 import { ConfirmationComponent } from '../../projects/shop-components/src/lib/components/confirmation/confirmation.component';
 import { BudtenderSalesComponent, DashboardComponent, OrdersComponent, OverviewComponent, ToolsComponent, UsersComponent } from 'admin-dashboard';
+import { ForgotPasswordComponent } from '../../projects/shop-components/src/lib/components/forgot-password/forgot-password.component';
+import { ResetPasswordComponent } from '../../projects/shop-components/src/lib/components/reset-password/reset-password.component';
 
 export const routes: Routes = [
     { path: '', redirectTo: '', pathMatch: 'full' },
@@ -17,6 +19,8 @@ export const routes: Routes = [
     { path: 'login', component: LoginComponent },
     { path: 'register', component: RegisterComponent },
     { path: 'confirmation', component: ConfirmationComponent },
+    { path: 'forgot-password', component: ForgotPasswordComponent },
+    { path: 'reset-password', component: ResetPasswordComponent },
     {
         path: 'dashboard',
         component: DashboardComponent,

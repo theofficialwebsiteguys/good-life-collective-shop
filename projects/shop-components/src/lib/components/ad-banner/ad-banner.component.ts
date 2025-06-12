@@ -19,14 +19,14 @@ export class AdBannerComponent {
     {
       image: 'https://storage.googleapis.com/the-website-guys/Flower-Power/carousel4.jpg',
       link: '/shop',     
-      brand: 'Bodega Boyz',         
-      ctaText: 'Shop Dank'
+      brand: 'Toke Folks',         
+      ctaText: 'Shop Tolk Folks'
     },
     {
       image: 'https://storage.googleapis.com/the-website-guys/Flower-Power/carousel5.jpg',
       link: '/shop',        
-      brand: 'Toke Folks',        
-      ctaText: 'Shop Dank'
+      brand: 'Hurley',        
+      ctaText: 'Shop Hurley'
     }
   ];
 

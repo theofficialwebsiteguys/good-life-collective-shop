@@ -29,6 +29,7 @@ export class CategoriesComponent {
       { name: 'Vape', iconPath: `assets/icons/${this.iconSet}/vaporizers.png` },
       { name: 'Beverage', iconPath: `assets/icons/${this.iconSet}/beverages.png` },
       { name: 'Tinctures', iconPath: `assets/icons/${this.iconSet}/tinctures.png` },
+      { name: 'Topical', iconPath: `assets/icons/${this.iconSet}/topicals.png` },
       { name: 'Accessories', iconPath: `assets/icons/${this.iconSet}/accessories.png` }
     ];
   }

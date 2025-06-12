@@ -6,6 +6,13 @@ import { AuthService } from './auth.service';
 import { CapacitorHttp } from '@capacitor/core';
 import { ConfigService } from './config.service';
 
+declare global {
+  interface Window {
+    dataLayer: any[];
+  }
+}
+
+
 export interface CartItem {
   id: string;
   posProductId: string;
@@ -141,6 +148,26 @@ export class CartService {
     }
 
     this.saveCart(cart);
+
+    if (typeof window !== 'undefined') {
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({
+        event: 'add_to_cart',
+        ecommerce: {
+          currency: 'USD',
+          value: Number(item.price),
+          items: [{
+            item_id: item.id,
+            item_name: item.title,
+            item_category: item.category,
+            item_variant: item.weight,
+            item_brand: item.brand,
+            quantity: item.quantity,
+            price: Number(item.price)
+          }]
+        }
+      });
+    }
   }
 
   updateQuantity(itemId: string, quantity: number) {
@@ -264,6 +291,28 @@ export class CartService {
         await createOrder();
         await addItemsToOrder();
         await updateOrderItemPrices();
+
+        if (typeof window !== 'undefined') {
+          window.dataLayer = window.dataLayer || [];
+          window.dataLayer.push({
+            event: 'purchase',
+            transaction_id: id_order.toString(),
+            value: subtotal,
+            ecommerce: {
+              items: checkoutItems.map(item => ({
+                item_id: item.id,
+                item_name: item.title,
+                item_category: item.category,
+                item_variant: item.weight,
+                item_brand: item.brand,
+                quantity: item.quantity,
+                price: Number(item.price)
+              }))
+            }
+          });
+        }
+
+        
         return { user_info, id_order, checkoutItems, subtotal };
       } catch (error) {
         console.error('Checkout process failed:', error);

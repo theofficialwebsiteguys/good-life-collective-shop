@@ -315,6 +315,7 @@ export class ProductsService {
       { category: 'VAPE', imageUrl: 'assets/icons/vaporizers.png' },
       { category: 'BEVERAGE', imageUrl: 'assets/icons/beverages.png' },
       { category: 'TINCTURES', imageUrl: 'assets/icons/tinctures.png' },
+      { category: 'TOPICAL', imageUrl: 'assets/icons/topicals.png' },
       { category: 'ACCESSORIES', imageUrl: 'assets/icons/accessories.png' },
     ];
   }
