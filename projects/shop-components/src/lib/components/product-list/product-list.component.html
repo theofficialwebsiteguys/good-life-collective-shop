@@ -4,7 +4,9 @@
       *ngFor="let product of products$ | async"
       [product]="product"
       (click)="navigateToProduct(product)"
-      role="listitem">
+      (keydown)="handleCardKey($event, product)"
+      tabindex="0"
+      role="button">
     </lib-product-card>
   </div>
 </section>

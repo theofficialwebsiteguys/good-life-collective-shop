@@ -50,4 +50,12 @@ export class ProductListComponent implements OnInit {
   navigateToProduct(product: Product) {
     this.navigationService.navigateToProduct(product);
   }
+
+  handleCardKey(event: KeyboardEvent, product: Product) {
+  if (event.key === 'Enter' || event.key === ' ') {
+    this.navigateToProduct(product);
+    event.preventDefault();
+  }
+}
+
 }

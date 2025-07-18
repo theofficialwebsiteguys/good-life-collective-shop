@@ -32,19 +32,19 @@
             <legend>Order Type</legend>
             <label>
               <span class="radio-text">Pickup</span>
-              <input type="radio" name="orderType" value="pickup" [(ngModel)]="orderType" />
+              <input type="radio" name="orderType" value="pickup" [(ngModel)]="selectedOrderType" (change)="onOrderTypeChange($event)"/>
             </label>
             <label>
               <span class="radio-text">Delivery</span>
               <span *ngIf="enableDelivery && finalTotal < 90" class="warning">(Min $90 required)</span>
               <span *ngIf="!enableDelivery" class="warning">Delivery is currently turned off.</span>
-              <input type="radio" name="orderType" value="delivery" [(ngModel)]="orderType" [disabled]="!enableDelivery || finalTotal < 90" />
+              <input type="radio" name="orderType" value="delivery" [(ngModel)]="selectedOrderType" [disabled]="!enableDelivery || finalTotal < 90" (change)="onOrderTypeChange($event)"/>
             </label>
           </fieldset>
         </div>
   
         <!-- Delivery Address Section (Shown only for Delivery orders) -->
-        <div *ngIf="orderType === 'delivery'" class="section">
+        <div *ngIf="selectedOrderType === 'delivery'" class="section">
           <h2>Delivery Address</h2>
           <label class="sr-only" for="street">Street Address</label>
           <input id="street" type="text" [(ngModel)]="deliveryAddress.street" name="street" placeholder="Street Address" required />
@@ -64,11 +64,11 @@
             <legend>Payment Method</legend>
             <label>
               <span class="radio-text">Cash</span>
-              <input type="radio" name="payment" value="cash" (ngModelChange)="onPaymentMethodChange($event)" [(ngModel)]="selectedPaymentMethod" />
+              <input [disabled]="selectedOrderType === 'delivery'" type="radio" name="payment" value="cash" (ngModelChange)="onPaymentMethodChange($event)" [(ngModel)]="selectedPaymentMethod" />
             </label>
             <label>
               <span class="radio-text">Debit</span>
-              <input type="radio" name="payment" value="debit" (ngModelChange)="onPaymentMethodChange($event)" [(ngModel)]="selectedPaymentMethod" />
+              <input [disabled]="selectedOrderType === 'delivery'" type="radio" name="payment" value="debit" (ngModelChange)="onPaymentMethodChange($event)" [(ngModel)]="selectedPaymentMethod" />
             </label>
             <label class="aeropay">
               <div class="payment-method">
@@ -192,3 +192,4 @@
     </div>
   </div>
   
+  <div id="widget"></div>  

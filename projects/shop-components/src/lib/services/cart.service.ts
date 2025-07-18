@@ -672,6 +672,7 @@ export class CartService {
   
     return CapacitorHttp.request(options)
       .then((response) => {
+        this.sendOrderConfirmation(pos_order_id, user_id)
         return response.data;
       })
       .catch((error) => {
@@ -769,6 +770,29 @@ export class CartService {
       console.error('Error calling Alleaves API:', error);
       throw new Error('Failed to create Alleaves customer');
     }
+  }
+  
+
+  async sendOrderConfirmation(user_id: number, order_id: number) {
+    const payload: any = { user_id, order_id };
+  
+    const headers = this.getHeaders();
+    
+    const options = {
+      url: `${environment.apiUrl}/resend/sendOrderConfirmation`,
+      method: 'POST',
+      headers,
+      data: payload,
+    };
+  
+    return CapacitorHttp.request(options)
+      .then((response) => {
+        return response.data;
+      })
+      .catch((error) => {
+        console.error('Error in placeOrder:', error);
+        throw error;
+      });
   }
   
 

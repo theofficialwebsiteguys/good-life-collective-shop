@@ -434,9 +434,11 @@ export class CheckoutComponent {
   }
 
   onOrderTypeChange(event: any) {
-    this.selectedOrderType = event.detail.value;
-    if(this.selectedOrderType === 'delivery'){
-      this.selectedPaymentMethod = 'aeropay'
+    const selectedValue = event.target.value;
+    this.selectedOrderType = selectedValue;
+
+    if (this.selectedOrderType === 'delivery') {
+      this.selectedPaymentMethod = 'aeropay';
       this.startAeroPayProcess();
     }
   }
