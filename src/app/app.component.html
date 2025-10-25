@@ -1,14 +1,25 @@
 <!-- Categories at the top -->
- <lib-ad-banner></lib-ad-banner>
-<lib-categories [iconSet]="'playful'"></lib-categories>
+ <lib-location-selection></lib-location-selection>
 
-<lib-contact></lib-contact>
+ <lib-location-dropdown></lib-location-dropdown>
+ <lib-products-carousel category="Flower" [limit]="12"></lib-products-carousel>
+ <lib-products-carousel category="Vapes" [limit]="12"></lib-products-carousel>
+ <lib-products-carousel category="Edibles" [limit]="12"></lib-products-carousel>
+ <lib-products-carousel category="Pre-Roll" [limit]="12"></lib-products-carousel>
+ <lib-products-carousel category="Concentrates" [limit]="12"></lib-products-carousel>
+ <lib-ad-banner></lib-ad-banner>
+
+<lib-categories [iconSet]="'gl-icons'"></lib-categories>
+
+<lib-merch-shop></lib-merch-shop>
+
+<!-- <lib-contact></lib-contact> -->
+
+
 
 <!-- Recent Products -->
 <!-- <lib-recent-products-carousel></lib-recent-products-carousel> -->
- <lib-recent-products-carousel 
- [brands]="['LeadFarmer', 'Hurley']">
-</lib-recent-products-carousel>
+
 
 
 <!-- The main shop system -->

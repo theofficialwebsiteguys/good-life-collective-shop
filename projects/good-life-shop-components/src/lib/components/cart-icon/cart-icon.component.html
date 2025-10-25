@@ -1,0 +1,7 @@
+<a class="cart-icon"
+   [routerLink]="'/cart'"
+   [attr.aria-label]="'View cart with ' + (cartItemCount$ | async) + ' items'">
+  <i class="fa-solid fa-cart-shopping" aria-hidden="true" [ngStyle]="{'color': iconColor}"></i>
+  <span class="sr-only">Cart</span>
+  <span class="cart-count">{{ cartItemCount$ | async }}</span>
+</a>

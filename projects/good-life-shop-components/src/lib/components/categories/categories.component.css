@@ -1,0 +1,126 @@
+:root{
+  --glass-bg: rgba(20,20,20,.55);
+  --glass-bg-light: rgba(255,255,255,.14);     /* brighter glass row */
+  --glass-brd: rgba(255,255,255,.12);
+  --ink: #f8fbf9;
+  --muted: #c6d0cc;
+  --accent: #59c998;
+  --accent-ink: #0b1e16;
+}
+
+/* container with edges (lighten edges so they don't hide icons) */
+.cats-shell{ position: relative; padding-inline: clamp(8px, 2vw, 14px); margin: 50px; }
+.edge{
+  position: absolute; top: 0; bottom: 0; width: var(--edge-w); z-index: 2;
+  pointer-events: none; transition: opacity .2s ease, visibility .2s ease;
+}
+.edge--left{ left: 0; background: linear-gradient(90deg, rgba(0,0,0,.7), rgba(0,0,0,0)); }
+.edge--right{ right: 0; background: linear-gradient(270deg, rgba(0,0,0,.7), rgba(0,0,0,0)); }
+.edge.hidden{ opacity: 0; visibility: hidden; }
+
+/* glass row */
+.glass{
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-brd);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-radius: 16px;
+  box-shadow: 0 8px 30px rgba(0,0,0,.35);
+}
+.glass--light{ background: var(--glass-bg-light); } /* 👈 brighter */
+
+.cats-row{
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: max-content;
+  gap: 14px;
+
+  /* key changes ↓ */
+  justify-content: center;            /* was: center */
+  padding: 12px calc(var(--row-pad) + var(--edge-w));  /* make room for edges */
+  scroll-padding-left: calc(var(--row-pad) + 2px);     /* snap starts clear of left edge */
+  scroll-padding-right: calc(var(--row-pad) + 2px);
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scrollbar-width: thin;
+}
+.cats-row::-webkit-scrollbar{ height: 8px; }
+.cats-row::-webkit-scrollbar-thumb{ background: rgba(255,255,255,.22); border-radius: 4px; }
+
+/* category chip: vertical stack for visibility */
+.cat{
+  appearance: none;
+  background: transparent;
+  border: 0;
+  color: var(--ink);
+  border-radius: 14px;
+  display: grid;
+  grid-template-rows: auto auto;
+  justify-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  cursor: pointer;
+  scroll-snap-align: start;
+  transition: transform .15s ease, filter .15s ease;
+}
+.cat:hover{ transform: translateY(-2px); }
+.cat:focus-visible{ outline: none; box-shadow: 0 0 0 3px rgba(120,194,255,.55); border-radius: 16px; }
+
+/* active state = strong glow + ring color */
+.cat.active .ico-wrap{
+  border-color: rgba(89,201,152,.85);
+  box-shadow:
+    0 8px 20px rgba(0,0,0,.55),
+    inset 0 0 0 2px rgba(89,201,152,.5),
+    inset 0 26px 40px rgba(255,255,255,.06);
+}
+.cat.active .label{ color: #eafff7; }
+
+/* icon bubble: bigger + ring + inner highlight */
+.ico-wrap{
+  width: 140px; height: 120px;
+  border-radius: 999px;
+  display: grid; place-items: center;
+  background:rgb(255, 255, 255);
+  border: 2px solid rgba(255,255,255,.28);
+  box-shadow:
+    0 8px 20px rgba(0,0,0,.55),
+    inset 0 0 0 1px rgba(255,255,255,.14),
+    inset 0 18px 36px rgba(255,255,255,.06);
+  position: relative;
+  overflow: hidden;
+}
+/* subtle outer ring */
+.ico-wrap::after{
+  content:""; position:absolute; inset:-3px;
+  border-radius: inherit;
+  box-shadow: 0 0 0 3px rgba(0,0,0,.35);
+  pointer-events:none;
+}
+.ico-wrap img{
+  width: 80%; height: 80%; object-fit: contain; display:block;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,.6));   /* adds contrast */
+}
+
+/* label: bigger, high-contrast, slight shadow to stand off background */
+.label{
+  font-weight: 800;
+  letter-spacing:.2px;
+  font-size: 1.2rem;
+  color: white;
+  text-shadow: 0 1px 0 rgba(0,0,0,.6);
+  white-space: nowrap;
+}
+
+/* compact on small screens */
+@media (max-width: 1680px){
+  .cats-row{
+    justify-content: start;
+  }
+  .cats-shell{ margin: 0; }
+  /* .ico-wrap{ width: 72px; height: 72px; } */
+  /* .label{ font-size: .9rem; } */
+}
+@media (prefers-reduced-motion: reduce){
+  *{ transition-duration: .001ms !important; }
+}

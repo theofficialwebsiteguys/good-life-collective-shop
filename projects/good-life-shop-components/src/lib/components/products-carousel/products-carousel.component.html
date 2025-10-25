@@ -1,0 +1,29 @@
+<div class="carousel-wrap">
+<a *ngIf="heading$ | async as heading"
+   (click)="navigateToCategory(heading)"
+   class="carousel-link">
+  <h3 class="carousel-title">
+    {{ heading }}
+    <svg class="arrow-icon" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+    </svg>
+  </h3>
+</a>
+
+
+
+  <div class="carousel-container" role="region" [attr.aria-label]="(heading$ | async) + ' Carousel'">
+    <button type="button" class="carousel-btn left" (click)="scrollProducts(-1)" aria-label="Scroll left">‹</button>
+
+    <div class="product-carousel" #productCarousel role="list">
+      <lib-product-card
+        *ngFor="let product of products$ | async; trackBy: trackById"
+        [product]="product"
+        (click)="navigateToProduct(product)"
+        role="listitem">
+      </lib-product-card>
+    </div>
+
+    <button type="button" class="carousel-btn right" (click)="scrollProducts(1)" aria-label="Scroll right">›</button>
+  </div>
+</div>

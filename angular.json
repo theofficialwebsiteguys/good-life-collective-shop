@@ -100,23 +100,23 @@
         }
       }
     },
-    "shop-components": {
+    "good-life-shop-components": {
       "projectType": "library",
-      "root": "projects/shop-components",
-      "sourceRoot": "projects/shop-components/src",
+      "root": "projects/good-life-shop-components",
+      "sourceRoot": "projects/good-life-shop-components/src",
       "prefix": "lib",
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:ng-packagr",
           "options": {
-            "project": "projects/shop-components/ng-package.json"
+            "project": "projects/good-life-shop-components/ng-package.json"
           },
           "configurations": {
             "production": {
-              "tsConfig": "projects/shop-components/tsconfig.lib.prod.json"
+              "tsConfig": "projects/good-life-shop-components/tsconfig.lib.prod.json"
             },
             "development": {
-              "tsConfig": "projects/shop-components/tsconfig.lib.json"
+              "tsConfig": "projects/good-life-shop-components/tsconfig.lib.json"
             }
           },
           "defaultConfiguration": "production"
@@ -124,7 +124,7 @@
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
-            "tsConfig": "projects/shop-components/tsconfig.spec.json",
+            "tsConfig": "projects/good-life-shop-components/tsconfig.spec.json",
             "polyfills": [
               "zone.js",
               "zone.js/testing"

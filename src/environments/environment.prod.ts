@@ -1,11 +1,10 @@
 export const environment = {
   production: true,
   apiUrl: 'https://dispensary-api-ac9613fa4c11.herokuapp.com/api',
-  venueId: 'df759ba5e7360809',
-  flower_power_api_key: '564ee591-42df-46d9-91c0-ff3507e316ec',
-  aeropay_api_key: 'cede8696-a122-4537-a94b-43dbdaf12abb',
-  aeropay_api_secret: 'd5bd2c13-206e-4595-afe6-8fc2e0839f9e',
+  aeropay_api_key: '48f5a13c-9c4f-411b-8fb8-823f0b9fa9cf',
+  aeropay_api_secret: '5e32e4cf-881d-429d-8a5b-4de424468cc3',
   aeropay_url: "https://api.aeropay.com",
-  aeropay_merchant_id: 1689,
-  db_api_key: 'c69203dbdeaf88d28f3bfa28afeaff32965744f3d3ae6321b9eff6d198b1edfb'
+  aeropay_merchant_id: 1786,
+  aeropay_merchant_id_canandaigua: 2765,
+  db_api_key: 'caf0c918d083b815a16fe0546e3802de4423e9b33c26aba8e1fa2a614966978d',
 };

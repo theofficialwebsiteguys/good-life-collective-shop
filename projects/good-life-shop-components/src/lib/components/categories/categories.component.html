@@ -1,0 +1,26 @@
+<div class="cats-shell">
+  <div class="edge edge--left" [class.hidden]="!showLeftEdge" aria-hidden="true"></div>
+  <div class="edge edge--right" [class.hidden]="!showRightEdge" aria-hidden="true"></div>
+
+  <div class="cats-row glass glass--light"
+       #row
+       role="tablist"
+       aria-label="Shop categories"
+       (scroll)="onScroll(row)">
+
+    <button *ngFor="let c of categories; trackBy: trackByName"
+            class="cat"
+            role="tab"
+            [attr.aria-selected]="c.name === activeCategory"
+            [class.active]="c.name === activeCategory"
+            (click)="navigateToCategory(c.name)"
+            (keydown.enter)="navigateToCategory(c.name)"
+            (keydown.space)="navigateToCategory(c.name)">
+      <span class="ico-wrap" aria-hidden="true">
+        <img [src]="c.iconPath" [alt]="" />
+      </span>
+      <span class="label">{{ c.name }}</span>
+    </button>
+
+  </div>
+</div>

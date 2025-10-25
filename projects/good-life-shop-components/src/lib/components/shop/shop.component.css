@@ -1,0 +1,287 @@
+/* ---------- Shell + background ---------- */
+.shop-shell { position: relative; }
+.bg-gradient {
+  position: fixed; inset: 0;
+  background: radial-gradient(1200px 600px at 10% -10%, #2b3b35 0%, rgba(0,0,0,0) 60%),
+              radial-gradient(900px 600px at 90% 0%, #24303f 0%, rgba(0,0,0,0) 55%),
+              linear-gradient(180deg, #0a0a0a 0%, #0d0d0d 100%);
+  z-index: -1;
+}
+
+/* ---------- Layout ---------- */
+.shop-container {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 24px;
+  padding: clamp(16px, 2vw, 24px);
+}
+
+@media (max-width: 1024px) {
+  .shop-container { grid-template-columns: 1fr; }
+}
+
+/* ---------- Glass utility ---------- */
+.glass {
+  background: rgba(20, 20, 20, 0.55);
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 8px 30px rgba(0,0,0,.35);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-radius: 16px;
+}
+
+/* ---------- Sidebar ---------- */
+.sidebar {
+  min-height: calc(100dvh - 2rem);
+  color: #eaeaea;
+  padding: 14px;
+  transition: transform .3s ease;
+}
+.sidebar-header {
+  display: flex; gap: 8px; justify-content: space-between; align-items: center;
+  position: sticky; top: 0; padding-bottom: 8px; background: transparent; z-index: 2;
+}
+.pill { border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.04); color: #fff;
+  padding: 6px 10px; border-radius: 999px; cursor: pointer; font-size: .85rem; }
+.pill-ghost:hover { background: rgba(255,255,255,.08); }
+.pill-danger { border-color: rgba(255,80,80,.4); color: #ffdede; }
+.pill-danger:hover { background: rgba(255,80,80,.1); }
+
+.filter-section + .filter-section { margin-top: 12px; }
+.filter-toggle {
+  appearance: none; border: 0; background: transparent; width: 100%;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 4px; cursor: pointer; color: #fff;
+}
+.filter-toggle h3 { margin: 0; font-size: .95rem; font-weight: 700; }
+.dash { color: #9bd2b0; transition: transform .2s ease; }
+.dash.expanded { transform: rotate(0.5turn); }
+
+.filter-options { display: flex; flex-wrap: wrap; gap: 8px; padding: 6px 0 2px 0; }
+.chip-option { display: contents; }
+.chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 10px; border-radius: 999px;
+  background: rgba(255,255,255,.06); color: #e7efe9;
+  border: 1px solid rgba(255,255,255,.08); font-size: .85rem;
+  transition: background .15s ease, transform .15s ease;
+}
+.filter-options input { appearance: none; position: absolute; pointer-events: none; }
+.filter-options input:checked + .chip {
+  background: rgba(89, 201, 152, .2);
+  border-color: rgba(89, 201, 152, .6);
+}
+.chip:hover { background: rgba(255,255,255,.1); transform: translateY(-1px); }
+
+.sidebar-scroll { overflow: auto; padding-right: 6px; }
+.scroll-pad { height: 24px; }
+
+/* Mobile sheet */
+.sidebar-toggle {
+  display: none;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.06);
+  color: #fff; padding: 8px 12px; border-radius: 999px; font-size: .95rem;
+}
+@media (max-width: 1024px) {
+  .sidebar-toggle { display: inline-block; }
+  .sidebar {
+    position: fixed; inset: 0 auto 0 0; width: 85vw; max-width: 360px;
+    transform: translateX(-105%); z-index: 1001;
+  }
+  .sidebar.open { transform: translateX(0); }
+  .backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 1000; }
+}
+
+/* ---------- Controls (sticky header) ---------- */
+.controls {
+  position: sticky; top: 60px;
+  padding: 10px;
+  display: grid;
+  gap: 12px;
+  z-index: 99;
+}
+
+/* Category chips row */
+.chip-row {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: max-content;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: thin;
+}
+.chip-btn {
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.06);
+  color: #eaeaea;
+  padding: 8px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: .95rem;
+  transition: transform .15s ease, background .15s ease;
+  white-space: nowrap;
+}
+.chip-btn:hover { transform: translateY(-1px); background: rgba(255,255,255,.1); }
+.chip-btn.active {
+  background: rgba(89, 201, 152, .2);
+  border-color: rgba(89, 201, 152, .6);
+  color: #dff9ee;
+}
+
+/* Search + sort */
+.sort-search-container {
+  display: grid;
+  grid-template-columns: 1fr max-content max-content max-content;
+  align-items: center;
+  gap: 10px;
+}
+.search-wrap {
+  position: relative;
+}
+.search-input {
+  width: 90%;
+  padding: 12px 14px 12px 40px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(10,10,10,.45);
+  color: #fff;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
+}
+.search-input::placeholder { color: #bfc7c2; }
+.search-icon {
+  position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+  width: 18px; height: 18px; fill: #9bb3a8; opacity: .9;
+}
+.sort-dropdown {
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.06);
+  color: #fff; padding: 10px 12px; border-radius: 12px; cursor: pointer;
+}
+
+.sort-dropdown option{
+  color: black;
+}
+
+/* Main area tweak */
+.main-content { min-width: 0; }
+
+/* Accessibility helpers */
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* Motion safety */
+@media (prefers-reduced-motion: reduce) {
+  * { transition-duration: 0.001ms !important; animation-duration: 0.001ms !important; }
+}
+
+/* Body lock (unchanged) */
+body.modal-open {
+  overflow: hidden; position: fixed; width: 100%; overscroll-behavior: none;
+}
+
+/* ==== Mobile controls layout (keep desktop unchanged) ==== */
+@media (max-width: 640px) {
+  /* Make the controls block look like one compact pill */
+  .controls {
+    padding: 8px;
+  }
+
+  .sort-search-container {
+    /* single component 'group' look */
+    background: rgba(10,10,10,.45);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 14px;
+    padding: 6px;
+
+    /* two-row grid: search on row1, sort + icons on row2 */
+    display: grid;
+    grid-template-columns: 1fr auto auto; /* col1 = sort, col2/3 = icons */
+    grid-auto-rows: auto;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* row 1: search spans full width */
+  .sort-search-container .search-wrap {
+    grid-column: 1 / -1;
+  }
+
+  .sort-search-container .search-input {
+    width: 80%;              /* override the 90% on mobile */
+    padding: 12px 14px 12px 40px;
+    border-radius: 10px;
+  }
+
+  /* row 2: sort left... */
+  .sort-search-container .sort-dropdown {
+    justify-self: start;
+    max-width: 180px;         /* keeps it tidy next to icons */
+  }
+
+  /* ...icons to the right */
+  .sort-search-container lib-cart-icon {
+    justify-self: end;
+  }
+  .sort-search-container lib-auth-nav {
+    justify-self: end;
+  }
+
+  /* tighten the chip row above so it doesn't feel cramped */
+  .chip-row {
+    gap: 6px;
+    padding-bottom: 2px;
+  }
+}
+
+
+/* --- Mobile sheet: trap scroll in the sidebar --- */
+@media (max-width: 1024px) {
+  .sidebar {
+    /* you already set: position: fixed; inset: 0 auto 0 0; width: 85vw; ... */
+    display: flex;
+    flex-direction: column;
+    height: 100dvh;                 /* full viewport height */
+    max-height: 100dvh;
+    overflow: hidden;               /* prevent the aside itself from scrolling */
+    overscroll-behavior: contain;   /* stop scroll from bubbling to body */
+    -webkit-overflow-scrolling: auto;
+    touch-action: pan-y;            /* allow vertical panning inside */
+  }
+
+  .sidebar-header {
+    flex: 0 0 auto;                 /* header stays fixed at top of sheet */
+  }
+
+  .sidebar-scroll {
+    flex: 1 1 auto;                 /* fill remaining height */
+    min-height: 0;                  /* IMPORTANT: allow child to actually shrink */
+    overflow-y: auto;               /* the ONLY scrollable area */
+    -webkit-overflow-scrolling: touch; /* smooth iOS scrolling */
+    overscroll-behavior: contain;   /* prevent rubber-band scrolling escaping */
+    padding-right: 8px;             /* keep content clear of scrollbar */
+  }
+
+  .backdrop {
+    position: fixed;
+    inset: 0;
+    touch-action: none;             /* ignore gestures so background can’t scroll */
+    overscroll-behavior: contain;
+  }
+
+  /* Optional: also stop the grid container from scroll-chaining */
+  .shop-container {
+    overscroll-behavior: none;
+  }
+}
+
+/* Your body lock already exists; this helps across devices */
+body.modal-open {
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+  overscroll-behavior: none;        /* no propagation to ancestors */
+}

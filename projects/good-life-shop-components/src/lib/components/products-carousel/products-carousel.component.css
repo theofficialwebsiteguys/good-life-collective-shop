@@ -1,0 +1,79 @@
+.carousel-title {
+  margin: 0 0 8px 150px;
+  font-size: 2.2rem;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+}
+
+.carousel-container {
+  display: flex;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  max-width: 80%;
+  padding: 10px 0;
+  margin: auto;
+}
+
+.product-carousel {
+  display: flex;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  gap: 16px;
+  padding: 12px 48px;
+  scroll-snap-type: x mandatory;
+}
+.product-carousel::-webkit-scrollbar { display: none; }
+
+.product-carousel > lib-product-card {
+  display: block;
+  flex: 0 0 clamp(220px, 24vw, 280px);
+  scroll-snap-align: start;
+  contain: layout paint;
+}
+
+.carousel-btn {
+  position: absolute;
+  top: 40%;
+  transform: translateY(-50%);
+  background: #333;
+  color: #fff;
+  border: 0;
+  width: 40px;
+  font-size: 40px;
+  cursor: pointer;
+  z-index: 2;
+}
+.carousel-btn.left { left: 4px; }
+.carousel-btn.right { right: 4px; }
+
+.carousel-link {
+  text-decoration: none;
+  color: inherit;
+
+  .carousel-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px; 
+    font-weight: 600;
+    cursor: pointer;
+
+    .arrow-icon {
+      width: 18px;
+      height: 18px;
+      transition: transform 0.2s ease;
+    }
+  }
+
+  &:hover .arrow-icon {
+    transform: translateX(3px);
+  }
+}
+
+
+@media (max-width: 1024px) {
+  .carousel-title {
+    margin: 0 0 8px 48px;
+  }
+}

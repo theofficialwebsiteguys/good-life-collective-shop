@@ -14,8 +14,8 @@ body {
   }
 
   button {
-    background-color: #25463D; /* Green */
-    color: white; /* White Text */
+    background-color: #000000; /* Green */
+    color: rgb(255, 255, 255); /* White Text */
     border: none;
     padding: 10px 15px;
     font-size: 14px;
@@ -25,12 +25,8 @@ body {
     transition: background 0.2s ease-in-out;
   }
   
-  button:hover {
-    background-color: #1e3b32; /* Darker Green on Hover */
-  }
-  
   button:disabled {
-    background-color: #A8B5A3; /* Muted Green for Disabled */
+    background-color: #b6b6b6; /* Muted Green for Disabled */
     cursor: not-allowed;
   }
   

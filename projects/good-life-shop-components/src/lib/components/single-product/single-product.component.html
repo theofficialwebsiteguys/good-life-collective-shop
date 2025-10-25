@@ -1,0 +1,97 @@
+<div *ngIf="product" class="single-product">
+  <button class="back-btn" (click)="goBack()" aria-label="Go back to product list">← Back</button>
+
+  <div class="product-grid">
+    <!-- Media -->
+    <section class="media" aria-label="Product images">
+      <div class="media-card">
+        <img
+          [src]="product.image || 'assets/' + (product.category ? product.category.toLowerCase() + '-general.png' : 'default.png')"
+          [alt]="product.title"
+          class="media-img"
+          loading="eager"
+          decoding="async"
+        />
+      </div>
+    </section>
+
+    <!-- Info -->
+    <section class="info" aria-labelledby="prod-title">
+      <!-- badges -->
+      <div class="badges" role="group" aria-label="Product metadata">
+        <span class="chip chip-outline">{{ product.category | titlecase }}</span>
+        <span class="chip chip-accent">{{ product.strainType }}</span>
+        <span *ngIf="product?.thc" class="chip">THC: {{ product.thc }}</span>
+      </div>
+
+      <!-- title & price -->
+      <p>{{ product.brand }}</p>
+      <h1 id="prod-title" class="title">{{ product.title }}</h1>
+
+
+      <div class="price-cta">
+        <p class="price">{{ product.price | currency }}</p>
+
+        <div class="qty-wrap" aria-label="Quantity selector">
+          <button class="qty-btn" (click)="decreaseQuantity()" [disabled]="quantity <= 1" aria-label="Decrease quantity">−</button>
+          <span class="qty" aria-live="polite">{{ quantity }}</span>
+          <button class="qty-btn" (click)="increaseQuantity()" [disabled]="quantity >= product.quantity" aria-label="Increase quantity">+</button>
+        </div>
+      </div>
+
+      <!-- stock -->
+      <p *ngIf="(product?.quantity ?? 0) < 5" class="stock-pill" aria-live="polite">
+        Only <strong>{{ product.quantity }}</strong> left
+      </p>
+
+      <!-- weights -->
+      <div *ngIf="availableWeights.length" class="weights" role="radiogroup" aria-label="Select weight">
+        <label class="weights-label">Weight</label>
+        <div class="weight-chips">
+          <label
+            *ngFor="let w of availableWeights; trackBy: trackByVal"
+            class="weight-chip"
+            [class.active]="w === selectedWeight"
+          >
+            <input
+              type="radio"
+              name="weight"
+              [value]="w"
+              [(ngModel)]="selectedWeight"
+              (change)="onWeightChange(w)"
+              [attr.aria-checked]="selectedWeight === w"
+            />
+            {{ w }}
+          </label>
+        </div>
+      </div>
+
+      <!-- add to cart -->
+      <button
+        class="cta"
+        (click)="addToCart()"
+        [disabled]="isAddingToCart"
+        [attr.aria-label]="isAddingToCart ? 'Adding to cart' : 'Add to cart'"
+      >
+        <span *ngIf="!isAddingToCart">Add to Cart</span>
+        <span *ngIf="isAddingToCart">Adding…</span>
+      </button>
+
+      <!-- details -->
+      <div class="details" role="region" aria-labelledby="details-h">
+        <h3 id="details-h">Details</h3>
+        <p class="desc">
+          {{ truncatedDescription }}
+          <button
+            *ngIf="(product?.desc?.length ?? 0) > 300"
+            (click)="toggleDescription()"
+            class="toggle-description"
+            [attr.aria-expanded]="showFullDescription">
+            {{ showFullDescription ? 'Show Less' : 'Read More' }}
+          </button>
+
+        </p>
+      </div>
+    </section>
+  </div>
+</div>

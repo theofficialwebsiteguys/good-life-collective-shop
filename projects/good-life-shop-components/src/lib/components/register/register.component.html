@@ -1,0 +1,132 @@
+<div class="auth-container">
+  <h2>Register for Good Life Collective Rewards</h2>
+
+  <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+    <div class="name-row">
+      <div class="form-group">
+        <label for="firstName" class="required">First Name</label>
+        <input
+          type="text"
+          id="firstName"
+          formControlName="firstName"
+          placeholder="Enter your first name"
+          required
+          autocomplete="given-name" />
+      </div>
+
+      <div class="form-group">
+        <label for="lastName" class="required">Last Name</label>
+        <input
+          type="text"
+          id="lastName"
+          formControlName="lastName"
+          placeholder="Enter your last name"
+          required
+          autocomplete="family-name" />
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="email" class="required">Email</label>
+      <input
+        type="email"
+        id="email"
+        formControlName="email"
+        placeholder="Enter your email"
+        required
+        autocomplete="email" />
+    </div>
+
+    <div class="form-group phone-group">
+      <label for="phone" class="required">Phone</label>
+      <div class="phone-inputs">
+        <select
+          id="countryCode"
+          formControlName="countryCode"
+          required
+          aria-label="Country Code">
+          <option *ngFor="let country of countries" [value]="country.code">
+            {{ country.name }} ({{ country.dialCode }})
+          </option>
+        </select>
+        <input
+          type="tel"
+          id="phone"
+          formControlName="phone"
+          placeholder="Enter your phone number"
+          required
+          autocomplete="tel" />
+      </div>
+    </div>
+
+    <div class="form-group">
+      <fieldset class="dob-group">
+        <legend class="required">Date of Birth</legend>
+        <div class="dob-container">
+          <input
+            type="tel"
+            id="dob-month"
+            formControlName="month"
+            placeholder="MM"
+            maxlength="2"
+            required
+            aria-label="Month" />
+          <input
+            type="tel"
+            id="dob-day"
+            formControlName="day"
+            placeholder="DD"
+            maxlength="2"
+            required
+            aria-label="Day" />
+          <input
+            type="tel"
+            id="dob-year"
+            formControlName="year"
+            placeholder="YYYY"
+            maxlength="4"
+            required
+            aria-label="Year" />
+        </div>
+      </fieldset>
+    </div>
+
+    <div class="form-group">
+      <label for="password" class="required">Password</label>
+      <input
+        type="password"
+        id="password"
+        formControlName="password"
+        placeholder="Enter your password"
+        required
+        autocomplete="new-password" />
+    </div>
+
+    <div class="form-group">
+      <label for="confirmPassword" class="required">Confirm Password</label>
+      <input
+        type="password"
+        id="confirmPassword"
+        formControlName="confirmPassword"
+        placeholder="Confirm your password"
+        required
+        autocomplete="new-password" />
+    </div>
+
+    <div class="form-group terms-group">
+      <input type="checkbox" id="termsAccepted" formControlName="termsAccepted" required />
+      <label for="termsAccepted">
+        I acknowledge that my personal data may be used for personalization. My data will not be sold.
+      </label>
+    </div>
+
+    <button class="auth-button" type="submit">REGISTER</button>
+  </form>
+
+  <p class="login-link">
+    Already have an account?
+    <a routerLink="/login">Login</a>
+  </p>
+
+  <p class="error-message" *ngIf="errorMessage" role="alert">{{ errorMessage }}</p>
+</div>

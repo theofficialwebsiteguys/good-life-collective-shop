@@ -1,0 +1,12 @@
+<section class="product-section" aria-labelledby="productListHeading">
+  <div class="product-grid" role="list">
+    <lib-product-card
+      *ngFor="let product of products$ | async; trackBy: trackById"
+      [product]="product"
+      (click)="navigateToProduct(product)"
+      (keydown)="handleCardKey($event, product)"
+      tabindex="0"
+      role="button">
+    </lib-product-card>
+  </div>
+</section>

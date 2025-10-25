@@ -16,8 +16,8 @@
     "experimentalDecorators": true,
     "moduleResolution": "bundler",
     "paths": {
-      "shop-components": [
-        "./dist/shop-components"
+      "good-life-shop-components": [
+        "./dist/good-life-shop-components"
       ]
     },
     "importHelpers": true,

@@ -1,0 +1,104 @@
+<div class="shop-shell">
+  <div class="bg-gradient" aria-hidden="true"></div>
+
+  <div class="shop-container">
+    <!-- Sidebar Toggle (mobile) -->
+    <button class="sidebar-toggle"
+            (click)="toggleSidebar()"
+            aria-controls="filterSidebar"
+            [attr.aria-expanded]="isSidebarOpen">
+      ☰ Filters
+    </button>
+    <div class="backdrop" *ngIf="isSidebarOpen" (click)="toggleSidebar()" aria-hidden="true"></div>
+
+    <!-- SIDEBAR (Brands only for merch) -->
+    <aside id="filterSidebar"
+           class="sidebar glass"
+           [class.open]="isSidebarOpen"
+           role="complementary"
+           aria-label="Filter options">
+      <!-- <div class="sidebar-header">
+        <button class="pill pill-ghost" *ngIf="isSidebarOpen" (click)="toggleSidebar()" aria-label="Close filters">Close</button>
+        <button class="pill pill-danger" (click)="clearFilters()" aria-label="Clear all filters">Clear Filters</button>
+      </div>
+
+      <div class="sidebar-scroll">
+        <div class="filter-section">
+          <button type="button" class="filter-toggle" (click)="toggleSection('brands')"
+                  [attr.aria-expanded]="isExpanded['brands']" aria-controls="filter-brands">
+            <h3>Brands</h3>
+            <span class="dash" [class.expanded]="isExpanded['brands']">−</span>
+          </button>
+          <div id="filter-brands" *ngIf="isExpanded['brands']" class="filter-options">
+            <ng-container *ngIf="dynamicFilterOptions$ | async as dyn">
+              <label *ngFor="let brand of dyn.brands" class="chip-option">
+                <input type="checkbox"
+                       (change)="toggleBrandFilter(brand.value)"
+                       [checked]="selectedBrands.includes(brand.value)" />
+                <span class="chip">{{ brand.label }}</span>
+              </label>
+            </ng-container>
+          </div>
+        </div>
+
+        <div class="scroll-pad" aria-hidden="true"></div>
+      </div> -->
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main-content">
+      <!-- Sticky controls -->
+      <div class="controls glass">
+        <!-- Category chips (just Apparel for now; add subchips later if desired) -->
+        <div class="chip-row" role="tablist" aria-label="Merch categories">
+          <button *ngFor="let c of categories"
+                  class="chip-btn" role="tab"
+                  [attr.aria-selected]="category === c"
+                  [class.active]="category === c"
+                  (click)="selectCategory(c)">
+            {{ c }}
+          </button>
+        </div>
+
+        <!-- Search + Sort -->
+        <div class="sort-search-container">
+          <div class="search-wrap">
+            <svg viewBox="0 0 24 24" class="search-icon" aria-hidden="true">
+              <path d="M10 2a8 8 0 105.293 14.293l4.707 4.707 1.414-1.414-4.707-4.707A8 8 0 0010 2zm0 2a6 6 0 110 12A6 6 0 0110 4z"/>
+            </svg>
+            <input type="text"
+                   [(ngModel)]="searchQuery"
+                   placeholder="Search merch…"
+                   class="search-input"
+                   aria-label="Search merch"/>
+          </div>
+
+          <label for="sortDropdown" class="visually-hidden">Sort by</label>
+          <select id="sortDropdown"
+                  [(ngModel)]="sortOption"
+                  class="sort-dropdown"
+                  (change)="updateSortOption($event)"
+                  aria-label="Sort merch by">
+            <option value="RECENT">Newest</option>
+            <option value="PRICE_ASC">Price: Low to High</option>
+            <option value="PRICE_DESC">Price: High to Low</option>
+            <option value="NAME">Alphabetical</option>
+          </select>
+
+          <lib-cart-icon iconColor="white"></lib-cart-icon>
+          <lib-auth-nav iconColor="white"></lib-auth-nav>
+        </div>
+      </div>
+
+      <!-- Product list (locked to Apparel) -->
+      <lib-product-list
+        [category]="'Apparel'"
+        [selectedBrands]="selectedBrands"
+        [selectedWeights]="[]"
+        [selectedTypes]="[]"
+        [searchQuery]="searchQuery"
+        [sortOption]="sortOption">
+      </lib-product-list>
+    </main>
+  </div>
+</div>

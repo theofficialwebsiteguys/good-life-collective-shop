@@ -1,0 +1,187 @@
+/* ===== Theme ===== */
+:host {
+  --bg: #000;
+  --card: #0b0b0b;
+  --muted: #9aa3a7;
+  --text: #f8f9fa;
+  --accent: #9CF0E0;          /* brand mint */
+  --accent-weak: rgba(156, 240, 224, 0.2);
+  --border: rgba(255,255,255,0.08);
+  --danger: #ff5a5f;
+}
+
+/* ===== Layout ===== */
+.single-product {
+  background: var(--bg);
+  color: var(--text);
+  padding: 24px 16px 48px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.back-btn {
+  background: transparent;
+  border: 0;
+  color: var(--accent);
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 12px;
+}
+
+.product-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 28px;
+}
+
+@media (min-width: 900px) {
+  .product-grid {
+    grid-template-columns: 1.1fr 1.2fr;
+    gap: 40px;
+  }
+}
+
+/* ===== Media ===== */
+.media-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px;
+  display: grid;
+  place-items: center;
+  position: sticky;
+  top: 16px; /* sticky on desktop */
+  height: 100%;
+}
+
+.media-img {
+  width: 100%;             /* take full card width */
+  height: auto;
+  object-fit: cover;       /* crop if needed */
+  border-radius: 12px;     /* optional */
+}
+
+/* ===== Info ===== */
+.info { display: grid; align-content: start; gap: 16px; }
+
+.badges {
+  display: flex; flex-wrap: wrap; gap: 8px;
+}
+
+.chip {
+  background: var(--accent-weak);
+  color: var(--text);
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  font-size: 12px;
+  padding: 6px 10px;
+}
+.chip-outline {
+  background: transparent;
+  border-color: var(--border);
+}
+.chip-accent {
+  background: rgba(156,240,224,0.12);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.title {
+  font-size: clamp(1.35rem, 2.5vw, 2rem);
+  line-height: 1.15;
+  margin: 4px 0 2px;
+}
+
+/* price + qty row */
+.price-cta { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.price { font-size: 1.6rem; font-weight: 700; }
+
+.qty-wrap {
+  display: inline-flex;
+  align-items: center;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 4px;
+  gap: 8px;
+}
+.qty-btn {
+  background: transparent;
+  color: var(--text);
+  border: 0;
+  width: 36px; height: 36px;
+  font-size: 20px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.qty-btn[disabled] { opacity: .4; cursor: not-allowed; }
+.qty { min-width: 24px; text-align: center; font-weight: 700; }
+
+/* stock */
+.stock-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(255,90,95,0.12);
+  border: 1px solid rgba(255,90,95,0.35);
+  color: #ffb3b6;
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 13px;
+}
+
+/* weights as chips */
+.weights { display: grid; gap: 8px; }
+.weights-label { font-size: 13px; color: var(--muted); }
+.weight-chips { display: flex; flex-wrap: wrap; gap: 10px; }
+
+.weight-chip {
+  position: relative;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  border-radius: 999px;
+  padding: 8px 14px;
+  cursor: pointer;
+  user-select: none;
+  transition: transform .05s ease;
+}
+.weight-chip input { position: absolute; inset: 0; opacity: 0; pointer-events: none; }
+.weight-chip.active,
+.weight-chip:hover {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(156,240,224,0.15) inset;
+}
+
+/* CTA */
+.cta {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--text);
+  color: #000;
+  border: 0;
+  padding: 14px 18px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform .06s ease, opacity .2s ease;
+}
+.cta:active { transform: translateY(1px); }
+.cta[disabled] { opacity: .6; cursor: not-allowed; }
+
+/* details */
+.details { border-top: 1px solid var(--border); padding-top: 12px; }
+.details h3 { font-size: 1rem; margin: 0 0 6px; }
+.desc { color: var(--text); opacity: .9; }
+.link {
+  background: none; border: 0; color: var(--accent);
+  font-weight: 700; cursor: pointer; margin-left: 6px;
+}
+
+/* Mobile tweaks */
+@media (max-width: 600px) {
+  .media-card { position: static; }
+  .cta { font-size: 15px; }
+}

@@ -1,14 +1,14 @@
 import { Routes } from '@angular/router';
-import { ShopComponent } from '../../projects/shop-components/src/lib/components/shop/shop.component';
-import { SingleProductComponent } from '../../projects/shop-components/src/lib/components/single-product/single-product.component';
-import { CartComponent } from '../../projects/shop-components/src/lib/components/cart/cart.component';
-import { CheckoutComponent } from '../../projects/shop-components/src/lib/components/checkout/checkout.component';
-import { LoginComponent } from '../../projects/shop-components/src/lib/components/login/login.component';
-import { RegisterComponent } from '../../projects/shop-components/src/lib/components/register/register.component';
-import { ConfirmationComponent } from '../../projects/shop-components/src/lib/components/confirmation/confirmation.component';
-import { BudtenderSalesComponent, DashboardComponent, OrdersComponent, OverviewComponent, ToolsComponent, UsersComponent } from 'admin-dashboard';
-import { ForgotPasswordComponent } from '../../projects/shop-components/src/lib/components/forgot-password/forgot-password.component';
-import { ResetPasswordComponent } from '../../projects/shop-components/src/lib/components/reset-password/reset-password.component';
+import { ShopComponent } from '../../projects/good-life-shop-components/src/lib/components/shop/shop.component';
+import { SingleProductComponent } from '../../projects/good-life-shop-components/src/lib/components/single-product/single-product.component';
+import { CartComponent } from '../../projects/good-life-shop-components/src/lib/components/cart/cart.component';
+import { CheckoutComponent } from '../../projects/good-life-shop-components/src/lib/components/checkout/checkout.component';
+import { LoginComponent } from '../../projects/good-life-shop-components/src/lib/components/login/login.component';
+import { RegisterComponent } from '../../projects/good-life-shop-components/src/lib/components/register/register.component';
+import { ConfirmationComponent } from '../../projects/good-life-shop-components/src/lib/components/confirmation/confirmation.component';
+import { BudtenderSalesComponent, DashboardComponent, OrdersComponent, OverviewComponent, ToolsComponent, UsersComponent } from 'good-life-admin-dashboard';
+import { ForgotPasswordComponent } from '../../projects/good-life-shop-components/src/lib/components/forgot-password/forgot-password.component';
+import { ResetPasswordComponent } from '../../projects/good-life-shop-components/src/lib/components/reset-password/reset-password.component';
 
 export const routes: Routes = [
     { path: '', redirectTo: '', pathMatch: 'full' },
