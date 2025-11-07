@@ -115,5 +115,16 @@ export class SingleProductComponent {
     this.routeSubscription?.unsubscribe();
   }
 
-  
+  get isOnSale(): boolean {
+    return !!this.product?.discountedPrice && Number(this.product.discountedPrice) < Number(this.product.price);
+  }
+
+  get isBogo(): boolean {
+    return Array.isArray(this.product?.['bogoRules']) && this.product['bogoRules'].length > 0;
+  }
+
+  get hasDeal(): boolean {
+    return this.isOnSale || this.isBogo || !!this.product?.discountDescription;
+  }
+
 }

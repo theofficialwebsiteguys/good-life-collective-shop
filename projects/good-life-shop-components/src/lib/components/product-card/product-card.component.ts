@@ -32,18 +32,17 @@ export class ProductCardComponent {
 
     const cartItem = { ...this.product, quantity: 1 };
     this.cartService.addToCart(cartItem);
-
-    // announce for screen readers
     this.a11y.announce(`${this.product?.title} added to cart. Quantity: 1.`, 'assertive');
 
-    // reset visual state
     setTimeout(() => {
       this.isAdded = false;
       this.isDisabled = false;
     }, 1600);
   }
 
-  onImgLoad() { this.imageLoaded = true; }
+  onImgLoad() {
+    this.imageLoaded = true;
+  }
 
   onImgError(evt: Event) {
     const img = evt.target as HTMLImageElement;
@@ -53,7 +52,6 @@ export class ProductCardComponent {
 
   placeholderFor(category?: string | null): string {
     const key = (category || 'default').toLowerCase();
-    // map to your assets; provide a default fallback
     const map: Record<string, string> = {
       flower: 'assets/flower-general.png',
       'pre-roll': 'assets/pre-roll-general.png',
@@ -78,5 +76,20 @@ export class ProductCardComponent {
     return 'hybrid';
   }
 
-  
+  /** Ensures safe numeric comparison for discounts */
+  toNumber(value: any): number {
+    const n = parseFloat(value);
+    return isNaN(n) ? 0 : n;
+  }
+
+  get isOnSale(): boolean {
+    return (
+      !!this.product.discountedPrice &&
+      this.toNumber(this.product.discountedPrice) < this.toNumber(this.product.price)
+    );
+  }
+
+  get isBogo(): boolean {
+    return !!this.product['bogoRules']?.length;
+  }
 }

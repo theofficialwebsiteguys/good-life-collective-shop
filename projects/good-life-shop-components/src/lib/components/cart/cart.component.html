@@ -1,62 +1,86 @@
 <section class="cart-container" aria-labelledby="cart-heading">
   <h2 class="sr-only" id="cart-heading">Shopping Cart</h2>
-  
+
   <!-- Empty Cart Message -->
   <div *ngIf="cartItems.length === 0" class="empty-cart">
     <p>Your cart is empty.</p>
-    <!-- <button class="continue-shopping" [routerLink]="'/shop'">Continue Shopping</button> -->
   </div>
-  
+
   <!-- Cart Items -->
   <div *ngFor="let item of cartItems" class="cart-item">
-             <img
-            [src]="
-              item.image 
-                || 'assets/' + (item.category ? item.category.toLowerCase() + '-general.png' : 'default.png')
-            "
-            [alt]="item.title"
-            class="product-image"
-          />
-  
+    <img
+      [src]="
+        item.image ||
+        'assets/' + (item.category ? item.category.toLowerCase() + '-general.png' : 'default.png')
+      "
+      [alt]="item.title"
+      class="product-image"
+    />
+
     <div class="cart-details">
       <p class="brand">{{ item.brand }}</p>
       <h3 class="title">{{ item.title }}</h3>
       <p class="variant">{{ item.weight }} - {{ item.strainType }}</p>
-      <p class="price">{{ item.price | currency }}</p>
-  
-      <div class="quantity-controls">
-        <button (click)="updateQuantity(item, item.quantity - 1)" 
-        [attr.aria-label]="'Decrease quantity for ' + item.title">
-          −
-        </button>
-        <span>{{ item.quantity }}</span>
-        <button (click)="updateQuantity(item, item.quantity + 1)" 
-        [attr.aria-label]="'Increase quantity for ' + item.title">
-          +
-        </button>
+
+      <!-- 🟢 Discount / BOGO Banner -->
+      <div *ngIf="isDiscounted(item) || isBogo(item)" class="deal-banner">
+        <ng-container *ngIf="isBogo(item); else saleBanner">
+          <span>{{ getBogoText(item) }}</span>
+        </ng-container>
+
+        <ng-template #saleBanner>
+          <span>{{ item.discountDescription || 'On Sale!' }}</span>
+        </ng-template>
       </div>
+
+
     </div>
-  
-    <button class="remove-item" (click)="removeItem(item)" 
-    [attr.aria-label]="'Remove ' + item.title">
+    
+      <!-- 🏷️ Prices -->
+      <div class="price-row">
+        <p *ngIf="isDiscounted(item)" class="price old">{{ item.price | currency }}</p>
+        <p class="price" [class.new]="isDiscounted(item)">
+          {{
+            getEffectiveItemTotal(item) | currency
+          }}
+        </p>
+      </div>
+    <!-- Quantity Controls -->
+    <div class="quantity-controls">
+      <button (click)="updateQuantity(item, item.quantity - 1)"
+        [attr.aria-label]="'Decrease quantity for ' + item.title">
+        −
+      </button>
+      <span>{{ item.quantity }}</span>
+      <button (click)="updateQuantity(item, item.quantity + 1)"
+        [attr.aria-label]="'Increase quantity for ' + item.title">
+        +
+      </button>
+    </div>
+
+    <button class="remove-item" (click)="removeItem(item)"
+      [attr.aria-label]="'Remove ' + item.title">
       <i class="fa-solid fa-trash"></i>
     </button>
+
+    
+
   </div>
-  
+
   <!-- Add More Items Button -->
   <button class="add-more-items" [routerLink]="'/shop'">+ Add items</button>
-  
+
   <!-- Subtotal Section -->
   <div class="subtotal-section" role="region" aria-label="Cart Subtotal">
     <h3>Subtotal</h3>
     <p class="subtotal-price">{{ subtotal | currency }}</p>
   </div>
-  
+
   <!-- Checkout Button -->
   <div class="checkout-container">
-    <button class="checkout-button" 
-            [routerLink]="'/checkout'" 
-            [disabled]="cartItems.length === 0">
+    <button class="checkout-button"
+      [routerLink]="'/checkout'"
+      [disabled]="cartItems.length === 0">
       Proceed to Checkout
     </button>
   </div>

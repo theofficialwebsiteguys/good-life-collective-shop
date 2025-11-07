@@ -3,7 +3,6 @@
   margin: auto;
   padding: 20px;
   border-radius: 10px;
-  background: black;
   color: white;
 }
 
@@ -140,23 +139,53 @@
 
 @media (max-width: 768px) {
   .cart-item {
-      flex-direction: column;
-      align-items: flex-start;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .product-image {
+    width: 60px;
+    height: 60px;
+    border-radius: 6px;
+  }
+
+  .cart-details {
+    flex: 1 1 55%;
+    min-width: 150px;
+  }
+
+  .price-row,
+  .quantity-controls,
+  .remove-item {
+    margin-top: 4px;
   }
 
   .quantity-controls {
-      margin-top: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
   }
 
-  .subtotal-section {
-      font-size: 16px;
+  .price-row {
+    font-size: 0.9rem;
   }
 
-  .checkout-button {
-      font-size: 1rem;
-      padding: 10px;
+  .deal-banner {
+    font-size: 12px;
+    padding: 4px 8px;
+  }
+
+  /* Keep checkout buttons readable but not oversized */
+  .checkout-button,
+  .add-more-items {
+    font-size: 1rem;
+    padding: 10px;
   }
 }
+
 
 .checkout-container {
   width: 100%;
@@ -169,3 +198,34 @@
   cursor: not-allowed;
   opacity: 0.6;
 }
+
+.price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.price.old {
+  text-decoration: line-through;
+  color: #999;
+  font-size: 0.9rem;
+}
+
+.price.new {
+  color: var(--accent, #9CF0E0);
+  font-weight: bold;
+}
+
+.deal-banner {
+  background: rgba(156, 240, 224, 0.15);
+  border: 1px solid var(--accent, #9CF0E0);
+  color: var(--accent, #9CF0E0);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  display: inline-block;
+}
+
+

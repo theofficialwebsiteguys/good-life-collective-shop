@@ -31,22 +31,50 @@
   flex: 0 0 clamp(220px, 24vw, 280px);
   scroll-snap-align: start;
   contain: layout paint;
+  padding-top: 10px;
 }
-
 .carousel-btn {
   position: absolute;
-  top: 40%;
-  transform: translateY(-50%);
-  background: #333;
+  top: 30%; /* center vertically */
+  transform: translateY(-50%); /* perfect vertical alignment */
+  background: rgb(0, 0, 0);
   color: #fff;
-  border: 0;
-  width: 40px;
-  font-size: 40px;
+  border: none;
+  width: 44px;
+  height: 44px; /* equal width & height for symmetry */
+  font-size: 1.8rem;
+  border-radius: 50%;
   cursor: pointer;
   z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease, transform 0.2s ease;
+  margin-left: 10px;
 }
-.carousel-btn.left { left: 4px; }
-.carousel-btn.right { right: 4px; }
+
+/* .carousel-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-50%) scale(1.05);
+} */
+
+.carousel-btn.left { 
+  left: 8px; 
+}
+
+.carousel-btn.right { 
+  right: 8px; 
+}
+
+/* Optional: smaller buttons on mobile */
+@media (max-width: 768px) {
+  .carousel-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 1.5rem;
+  }
+}
+
 
 .carousel-link {
   text-decoration: none;

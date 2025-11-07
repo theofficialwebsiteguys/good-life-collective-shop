@@ -1,4 +1,5 @@
 export type ProductCategory =
+  | 'OFFERS'
   | 'FLOWER'
   | 'PRE-ROLL'
   | 'VAPORIZERS'

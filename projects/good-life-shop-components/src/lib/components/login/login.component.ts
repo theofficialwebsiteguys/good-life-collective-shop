@@ -14,7 +14,11 @@ import { FormsModule } from '@angular/forms';
 export class LoginComponent {
   email: string = '';
   password: string = '';
+  newPassword: string = '';
   errorMessage: string = '';
+  successMessage: string = '';
+  requiresPasswordSetup: boolean = false;
+  pendingUser: any = null;
 
   constructor(private authService: AuthService, private router: Router) {}
 
@@ -25,8 +29,16 @@ export class LoginComponent {
     };
   
     this.authService.login(credentials).subscribe({
-      next: (user) => {
-        if (user) {
+      next: (response) => {
+        // 👇 Check if the backend says they need to set a new password
+        if (response.requiresPasswordSetup) {
+          this.requiresPasswordSetup = true;
+          this.pendingUser = response.user;
+          return;
+        }
+
+        // Normal login flow
+        if (response.sessionId) {
           this.router.navigate(['/shop']);
         } else {
           this.errorMessage = 'Invalid credentials. Please try again.';
@@ -39,4 +51,24 @@ export class LoginComponent {
     });
   }
   
+  setNewPassword() {
+    if (!this.newPassword) {
+      this.errorMessage = 'Please enter a new password.';
+      return;
+    }
+
+    const { email, business_id } = this.pendingUser;
+    this.authService.setPasswordForExistingUser(email, business_id, this.newPassword).subscribe({
+      next: () => {
+        this.successMessage = 'Password set successfully! You can now log in.';
+        this.requiresPasswordSetup = false;
+        this.password = this.newPassword;
+        this.newPassword = '';
+      },
+      error: (err) => {
+        console.error('Password setup error:', err);
+        this.errorMessage = 'Failed to set password. Please try again.';
+      }
+    });
+  }
 }

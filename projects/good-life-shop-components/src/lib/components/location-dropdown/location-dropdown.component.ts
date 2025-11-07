@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { MatDialog } from '@angular/material/dialog';
 import { AccessibilityService } from '../../services/accessibility.service';
-import { ProductsService } from '../../services/products.service';
 import { SettingsService } from '../../services/settings.service';
-import { NavigationService } from '../../services/navigation.service';
+import { LocationSelectionComponent } from '../location-selection/location-selection.component'; // adjust path
 
 @Component({
   selector: 'lib-location-dropdown',
@@ -13,38 +13,28 @@ import { NavigationService } from '../../services/navigation.service';
   styleUrls: ['./location-dropdown.component.css'],
 })
 export class LocationDropdownComponent {
-    isLoading = true;
-  locations: Array<{ location_id: string; name: string }> = [];
-  selectedId = '';
-  selectedName = '';
-  dropdownOpen = false;
+  isLoading = true;
+  formattedLocation = '';
 
   constructor(
+    private dialog: MatDialog,
     private a11y: AccessibilityService,
-    private settings: SettingsService,
-    private products: ProductsService,
-    private nav: NavigationService
+    private settings: SettingsService
   ) {}
 
-  ngOnInit() {
-    this.loadLocations();
+  async ngOnInit() {
+    await this.loadSelectedLocation();
   }
 
-  async loadLocations() {
+  async loadSelectedLocation() {
     this.isLoading = true;
     try {
-      const data = await this.settings.getFlowhubLocations();
-      this.locations = (data || []).map((d: any) => ({
-        location_id: d.location_id,
-        name: d.name,
-      }));
-
       const saved = this.settings.getSelectedLocationId?.();
       if (saved) {
-        const loc = this.locations.find(l => l.location_id === saved);
-        if (loc) {
-          this.selectedId = saved;
-          this.selectedName = loc.name;
+        const data = await this.settings.getFlowhubLocations();
+        const loc = (data || []).find((l: any) => l.location_id === saved);
+        if (loc && loc.address) {
+          this.formattedLocation = this.extractCityState(loc.address);
         }
       }
     } catch (err) {
@@ -54,21 +44,30 @@ export class LocationDropdownComponent {
     }
   }
 
-  toggleDropdown() {
-    this.dropdownOpen = !this.dropdownOpen;
+  extractCityState(address: string): string {
+    const parts = address.split(',');
+    if (parts.length >= 3) {
+      const city = parts[1].trim();
+      const state = parts[2].trim().split(' ')[0];
+      return `${city}, ${state}`;
+    }
+    return address;
   }
 
-  selectLocation(loc: { location_id: string; name: string }) {
-    this.selectedId = loc.location_id;
-    this.selectedName = loc.name;
-    this.dropdownOpen = false;
+  openLocationModal() {
+    this.a11y.announce('Opening location selector…', 'polite');
 
-    this.settings.setSelectedLocationId(loc.location_id);
-    this.products.fetchProducts(loc.location_id).subscribe({
-      next: () => this.nav.navigateToCategory('Flower'),
-      error: e => console.error(e),
+    const dialogRef = this.dialog.open(LocationSelectionComponent, {
+      width: '500px',
+      panelClass: 'location-modal',
     });
 
-    this.a11y.announce(`Selected ${loc.name}. Loading products…`, 'polite');
+    // ✅ When the user selects a location, the dialog sends back the data
+    dialogRef.afterClosed().subscribe((selectedLoc) => {
+      if (selectedLoc) {
+        this.formattedLocation = this.extractCityState(selectedLoc.address);
+        this.settings.setSelectedLocationId(selectedLoc.location_id);
+      }
+    });
   }
 }

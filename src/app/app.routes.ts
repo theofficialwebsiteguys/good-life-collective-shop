@@ -6,7 +6,7 @@ import { CheckoutComponent } from '../../projects/good-life-shop-components/src/
 import { LoginComponent } from '../../projects/good-life-shop-components/src/lib/components/login/login.component';
 import { RegisterComponent } from '../../projects/good-life-shop-components/src/lib/components/register/register.component';
 import { ConfirmationComponent } from '../../projects/good-life-shop-components/src/lib/components/confirmation/confirmation.component';
-import { BudtenderSalesComponent, DashboardComponent, OrdersComponent, OverviewComponent, ToolsComponent, UsersComponent } from 'good-life-admin-dashboard';
+import { BudtenderSalesComponent, DashboardComponent, DiscountsComponent, OrdersComponent, OverviewComponent, ToolsComponent, UsersComponent } from 'good-life-admin-dashboard';
 import { ForgotPasswordComponent } from '../../projects/good-life-shop-components/src/lib/components/forgot-password/forgot-password.component';
 import { ResetPasswordComponent } from '../../projects/good-life-shop-components/src/lib/components/reset-password/reset-password.component';
 
@@ -29,6 +29,7 @@ export const routes: Routes = [
           { path: 'orders', component: OrdersComponent },
           { path: 'users', component: UsersComponent },
           { path: 'budtender-sales', component: BudtenderSalesComponent },
+          { path: 'discounts', component: DiscountsComponent },
           { path: 'tools', component: ToolsComponent },
           // add more child routes here as needed
           { path: '', redirectTo: 'overview', pathMatch: 'full' }

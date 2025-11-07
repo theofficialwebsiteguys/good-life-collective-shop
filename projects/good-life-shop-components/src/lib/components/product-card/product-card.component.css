@@ -23,6 +23,7 @@
   grid-template-rows: auto 1fr;
   overflow: hidden;
   transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+  cursor: pointer;
 }
 .card:hover{ transform: translateY(-4px); }
 .card:focus-visible{ box-shadow: 0 0 0 3px rgba(120,194,255,.55), var(--shadow-lg); outline: none; }
@@ -45,6 +46,7 @@
   object-fit: cover; display: block;
   transform: scale(1);
   transition: transform .25s ease;
+  border-radius: 5px;
 }
 .card:hover .photo{ transform: scale(1.03); }
 
@@ -76,6 +78,9 @@
 /* Price badge sits on the image, immediately visible */
 .price-badge{
   position:absolute; left:10px; bottom:10px; 
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
   span{
     font-size: 1.25rem;
   }
@@ -146,7 +151,7 @@
 /* ------------ BODY ------------ */
 .body{ padding: 2px 14px 14px; display:grid; gap:8px; color: white; }
 .brand{
-  margin:0; font-size:1rem; letter-spacing:.14em; text-transform:uppercase;
+  margin:0; font-size:.8rem; letter-spacing:.14em; text-transform:uppercase;
   color: var(--muted);
 }
 .title{
@@ -156,11 +161,203 @@
 
 /* Optional meta row style (if you use it) */
 .meta{ display:flex; align-items:center; gap:10px; }
-.pill.tiny{ font-size:.72rem; padding-top:8px; opacity:.9; }
+.pill.tiny{ font-size:1rem; padding-top:8px; opacity:.9; }
 .dot{ width:4px; height:4px; border-radius:50%; background: rgba(255,255,255,.3); }
 
 /* Motion safety */
 @media (prefers-reduced-motion: reduce){
   .card, .photo, .cta, .cta-ico{ transition-duration:.001ms !important; animation-duration:.001ms !important; }
+}
+
+/* ----- Discounted pricing styles ----- */
+
+
+.price-badge .chip.price.old {
+  text-decoration: line-through;
+  opacity: 0.7;
+  font-weight: 600;
+  background: #7fffea;
+}
+
+.price-badge .chip.price.new {
+  background: #3ee8c4;
+  color: var(--accent-ink);
+  font-weight: 800;
+}
+
+.sale-badge {
+  display: inline-block;
+  font-size: 0.85rem;
+  background: #26a74a; /* vivid gradient green */
+  color: #fff; /* white for strong contrast */
+  font-weight: 700;
+  padding: 6px 5px;
+  border-radius: 8px;
+  margin-top: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.35),
+              0 0 12px rgba(50, 214, 107, 0.35);
+  text-align: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.discountDescription{
+  margin: 0;
+}
+
+.sale-banner {
+  top: 0.75rem;
+  left: 0.75rem;
+  right: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  background: #e53935;
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-align: center;
+  border-radius: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  z-index: 3;
+}
+
+.sale-text.bogo {
+  border-radius: 0.25rem;
+  padding: 2px 4px;
+}
+
+.cta-bottom {
+  width: 100%;
+  padding: 0.75rem 1.25rem;
+  font-size: 1.2rem;
+  font-weight: 700;
+  background: #7fffea;
+  color: rgb(43, 43, 43);
+  border: none;
+  border-radius: 0.75rem;
+  margin-top: 0.75rem;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.1s ease;
+}
+
+.cta-bottom:hover {
+  background: rgb(44, 163, 137);
+  transform: translateY(-2px);
+}
+
+.cta-bottom:disabled {
+  background: #888;
+  color: #333;
+  cursor: not-allowed;
+}
+
+/* ---------- PRICE ---------- */
+.price {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+}
+.price span { font-size: 1.4rem; }
+.price .old {
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+.price .new {
+  color: var(--accent);
+  font-size: 1.5rem;
+}
+.price .normal {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+/* ---------- TRAITS (Strain & Weight) ---------- */
+.traits {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.traits .pill {
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.15);
+  text-transform: capitalize;
+}
+.traits .pill.ghost {
+  background: rgba(255,255,255,0.1);
+  color: #f5f5f5;
+}
+.traits .pill.strain.sativa { background: #59c99830; color: #59c998; }
+.traits .pill.strain.indica { background: #8191ff30; color: #8191ff; }
+.traits .pill.strain.hybrid { background: #ffd16630; color: #ffd166; }
+
+/* ---------- META ---------- */
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+}
+.pill.tiny {
+  font-size: 0.85rem;
+  opacity: 0.9;
+}
+.dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.4);
+}
+
+
+
+.card.surface {
+  background: rgb(54, 54, 54);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  color: var(--text);
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+  height: 100%; /* ensures uniform height within grid parent */
+}
+
+.stage {
+  position: relative;
+  margin: 5px;
+  border-radius: 5px;
+  overflow: hidden;
+  aspect-ratio: 1 / 1;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* pushes CTA down */
+  flex-grow: 1;
+  padding: 10px 14px 14px;
+}
+
+.title-price {
+  margin-bottom: 0.5rem;
+}
+
+.traits,
+.meta {
+  margin-top: auto; /* keeps consistent bottom spacing */
+}
+
+/* Make all buttons perfectly aligned at the bottom */
+.cta-bottom {
+  margin-top: auto;
+  align-self: stretch;
 }
 

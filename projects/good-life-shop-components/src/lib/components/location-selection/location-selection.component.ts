@@ -5,6 +5,9 @@ import { ProductsService } from '../../services/products.service';
 import { SettingsService } from '../../services/settings.service';
 import { NavigationService } from '../../services/navigation.service';
 import { FormsModule } from '@angular/forms';
+import { CartService } from '../../services/cart.service';
+import { MatDialogRef } from '@angular/material/dialog';
+import { Optional } from '@angular/core';
 
 type ServiceType = 'pickup' | 'delivery';
 export interface DailyHours { open: string; close: string } // 'HH:mm' 24h
@@ -43,7 +46,9 @@ export class LocationSelectionComponent {
     private a11y: AccessibilityService,
     private settings: SettingsService,
     private products: ProductsService,
-    private nav: NavigationService
+    private nav: NavigationService,
+    private cartService: CartService,
+    @Optional() private dialogRef?: MatDialogRef<LocationSelectionComponent>
   ) {}
 
   ngOnInit() {
@@ -74,23 +79,23 @@ export class LocationSelectionComponent {
         // --- Hardcoded Hours for Rochester ---
         if (name.includes('rochester')) {
           loc.hours = {
-            0: { open: '09:00', close: '21:00' },
+            0: { open: '10:00', close: '21:00' }, //sunday
             1: { open: '09:00', close: '21:00' },
             2: { open: '09:00', close: '21:00' },
             3: { open: '09:00', close: '21:00' },
-            4: { open: '09:00', close: '22:00' },
+            4: { open: '09:00', close: '21:00' },
             5: { open: '09:00', close: '22:00' },
-            6: { open: '09:00', close: '22:00' },
+            6: { open: '09:00', close: '22:00' }, //saturday
           };
 
           loc.deliveryHours = {
-            0: { open: '09:00', close: '19:00' },
-            1: { open: '09:00', close: '19:00' },
-            2: { open: '09:00', close: '19:00' },
-            3: { open: '09:00', close: '19:00' },
-            4: { open: '09:00', close: '19:00' },
-            5: { open: '09:00', close: '20:00' },
-            6: { open: '09:00', close: '20:00' },
+            0: { open: '10:30', close: '19:00' },
+            1: { open: '10:30', close: '19:00' },
+            2: { open: '10:30', close: '19:00' },
+            3: { open: '10:30', close: '19:00' },
+            4: { open: '10:30', close: '19:00' },
+            5: { open: '10:30', close: '19:00' },
+            6: { open: '10:30', close: '19:00' },
           };
 
           loc.timezone = 'America/New_York';
@@ -103,8 +108,8 @@ export class LocationSelectionComponent {
             2: { open: '09:00', close: '21:00' },
             3: { open: '09:00', close: '21:00' },
             4: { open: '09:00', close: '21:00' },
-            5: { open: '09:00', close: '22:00' },
-            6: { open: '09:00', close: '22:00' },
+            5: { open: '09:00', close: '21:00' },
+            6: { open: '09:00', close: '21:00' },
           };
 
           loc.timezone = 'America/New_York';
@@ -152,6 +157,7 @@ export class LocationSelectionComponent {
 
   selectLocation(loc: LocationItem) {
     this.settings.setSelectedLocationId(loc.location_id);
+    this.cartService.clearCart();
 
     this.a11y.announce(`Selected ${loc.name}. Loading products.`, 'polite');
   }
@@ -322,6 +328,7 @@ export class LocationSelectionComponent {
 
     this.a11y.announce(`Selected ${loc.name}. Loading products.`, 'polite');
 
+    this.dialogRef?.close(loc);
     this.locationChosen.emit(loc); // ✅ tell parent we’re done
   }
 }

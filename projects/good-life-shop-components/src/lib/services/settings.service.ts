@@ -8,6 +8,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { CapacitorHttp, HttpResponse } from '@capacitor/core';
 import { ProductsService } from './products.service';
 import { NavigationService } from './navigation.service';
+import { ConfigService } from './config.service';
 
 export interface Banner {
   image: string;
@@ -17,6 +18,12 @@ export interface Banner {
   shop?: boolean;
 }
 
+export interface LoyaltyConfig {
+  scope: 'business' | 'location';
+  pointsEarnRate: number;     // points per $1 earned
+  pointsRedeemValue: number;  // $ per point when redeeming (e.g., 0.01)
+  maxPercentOff: number;      // % cap on discount via points
+}
 
 @Injectable({
   providedIn: 'root',
@@ -32,12 +39,17 @@ export class SettingsService {
   private selectedLocationIdSubject = new BehaviorSubject<string | null>(null);
   selectedLocationId$ = this.selectedLocationIdSubject.asObservable();
 
+  private loyaltySubject = new BehaviorSubject<LoyaltyConfig | null>(null);
+  loyalty$ = this.loyaltySubject.asObservable();
+
+
   constructor(
     @Inject(DOCUMENT) private document: Document,
     private authService: AuthService,
     private http: HttpClient,
     private productsService: ProductsService,
-    private navService: NavigationService
+    private navService: NavigationService,
+    private configService: ConfigService
   ) {
     this.authService.isLoggedIn().subscribe((isLoggedIn) => {
       this.isLoggedIn = isLoggedIn;
@@ -99,8 +111,6 @@ export class SettingsService {
     const venueId = this.getSelectedLocationId();
     const venues = this.locationsSubject.value;
 
-    console.log(venueId)
-    console.log(venues)
     const selectedVenue = venues.find(v => v.location_id === venueId);
     return selectedVenue?.name ?? null;
   }
@@ -119,20 +129,35 @@ export class SettingsService {
     return null;
   }
   
+  // private getHeaders(): { [key: string]: string } {
+  //   const sessionData = localStorage.getItem('sessionData');
+  //   const token = sessionData ? JSON.parse(sessionData).token : null;
+  
+  //   if (!token) {
+  //     console.error('No API key found, user needs to log in.');
+  //     throw new Error('Unauthorized: No API key found');
+  //   }
+  
+  //   return {
+  //     Authorization: token,
+  //     'Content-Type': 'application/json',
+  //   };
+  // }
+
   private getHeaders(): { [key: string]: string } {
     const sessionData = localStorage.getItem('sessionData');
     const token = sessionData ? JSON.parse(sessionData).token : null;
-  
-    if (!token) {
-      console.error('No API key found, user needs to log in.');
-      throw new Error('Unauthorized: No API key found');
-    }
-  
-    return {
-      Authorization: token,
-      'Content-Type': 'application/json',
+    const headers: { [key: string]: string } = {
+      'Content-Type': 'application/json', // Ensure JSON data format
     };
+
+    const apiKey = this.configService.getApiKey() || '';
+  
+    headers['x-auth-api-key'] = apiKey; // Set API key header for guests
+  
+    return headers;
   }
+
 
   getDarkModeEnabled = (): boolean =>
     localStorage.getItem(this.DARK_MODE_ENABLED) === 'true' && this.isLoggedIn;
@@ -238,7 +263,7 @@ export class SettingsService {
   );
   isDarkModeEnabled$ = this.isDarkModeEnabled.asObservable();
 
-  getCarouselImages(): Observable<{ images: Banner[] }> {
+  getCarouselImages(): Observable<any> {
     const url = `${environment.apiUrl}/banner/images`;
 
     const location_id = this.getSelectedLocationId();
@@ -259,6 +284,30 @@ export class SettingsService {
       map((response: any) => response.data) // Extract the `data` property
     );
   }
+
+  getActiveBanners(): Observable<any[]> {
+    const url = `${environment.apiUrl}/banner/active`;
+    const location_id = this.getSelectedLocationId();
+
+    const params: any = {};
+    if (location_id) params.location_id = location_id;
+
+    const options = {
+      method: 'GET',
+      url,
+      params,
+      headers: { 'x-auth-api-key': environment.db_api_key },
+    };
+
+    return from(CapacitorHttp.request(options)).pipe(
+      map((res: any) => res.data),
+      catchError((err) => {
+        console.error('Failed to fetch active banners:', err);
+        return [];
+      })
+    );
+  }
+
 
   async sendMessage(name: string, email: string, message: string) {
     const emailData = {
@@ -329,7 +378,22 @@ export class SettingsService {
     }
   }
   
-  
+  fetchLoyaltyConfig(): Observable<any> {
+
+    const location_id = this.getSelectedLocationId() ?? '';
+    const options = {
+      url: `${environment.apiUrl}/businesses/loyalty${location_id ? `?location_id=${location_id}` : ''}`,
+      method: 'GET',
+      headers: this.getHeaders()
+    };
+
+    return from(CapacitorHttp.request(options).then(response => response.data));
+  }
+
+  /** Synchronous snapshot (returns null until fetched) */
+  getLoyaltySnapshot(): LoyaltyConfig | null {
+    return this.loyaltySubject.value;
+  }
 
   
 }

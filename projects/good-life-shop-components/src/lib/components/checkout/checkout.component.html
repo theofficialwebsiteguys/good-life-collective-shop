@@ -1,222 +1,266 @@
 <div class="checkout-container">
-    <!-- Back Button -->
-    <div class="checkout-header">
-      <button class="back-button" (click)="goBack()">← Back</button>
-    </div>
-  
-    <div *ngIf="errorMessage" class="error-banner">
-      {{ errorMessage }}
-    </div>
+  <!-- Back Button -->
+  <div class="checkout-header">
+    <button class="back-button" (click)="goBack()">← Back</button>
+  </div>
 
-    <div class="checkout-content">
-      <!-- Left: Contact & Order Details -->
-      <div class="checkout-left">
-        <!-- Contact Information Section -->
-        <div class="section">
-          <h2>Contact Information</h2>
-          <form>
-            <div class="input-group">
-              <label class="sr-only" for="firstName">First Name</label>
-              <input id="firstName" type="text" [(ngModel)]="userInfo.fname" name="firstName" placeholder="First Name" required />
-              <label class="sr-only" for="lastName">Last Name</label>
-              <input id="lastName" type="text" [(ngModel)]="userInfo.lname" name="lastName" placeholder="Last Name" required />
-            </div>
-            <div class="input-group">
-              <label class="sr-only" for="email">Email</label>
-              <input id="email" type="email" [(ngModel)]="userInfo.email" name="email" placeholder="Email" required />
-              <label class="sr-only" for="phone">Phone</label>
-              <input id="phone" type="tel" [(ngModel)]="userInfo.phone" name="phone" placeholder="Phone" required />
-            </div>
-          </form>
-        </div>
-  
-        <!-- Order Type Section -->
-        <div class="section">
-          <fieldset class="radio-group">
-            <legend>Order Type</legend>
-            <label>
-              <span class="radio-text">Pickup</span>
-              <input type="radio" name="orderType" value="pickup" [(ngModel)]="selectedOrderType" (change)="onOrderTypeChange($event)"/>
-            </label>
-            <label>
-              <span class="radio-text">Delivery</span>
-              <span *ngIf="enableDelivery && finalTotal < 100" class="warning">(Min $100 required)</span>
-              <span *ngIf="!enableDelivery" class="warning">Delivery is currently turned off.</span>
-              <input type="radio" name="orderType" value="delivery" [(ngModel)]="selectedOrderType" [disabled]="!enableDelivery || finalTotal < 100" (change)="onOrderTypeChange($event)"/>
-            </label>
-          </fieldset>
-        </div>
-  
-        <!-- Delivery Address Section (Shown only for Delivery orders) -->
-        <div *ngIf="selectedOrderType === 'delivery'" class="section">
-          <h2>Delivery Address</h2>
-          <label class="sr-only" for="street">Street Address</label>
-          <input id="street" type="text" (input)="onAddressInputChange()" [(ngModel)]="deliveryAddress.street" name="street" placeholder="Street Address" required />
-          <label class="sr-only" for="apt">Apartment / Suite (Optional)</label>
-          <input id="apt" type="text" (input)="onAddressInputChange()" [(ngModel)]="deliveryAddress.apt" name="apt" placeholder="Apartment / Suite (Optional)" />
-          <div class="input-group">
-            <label class="sr-only" for="city">City</label>
-            <input id="city" type="text" (input)="onAddressInputChange()" [(ngModel)]="deliveryAddress.city" name="city" placeholder="City" required />
-            <label class="sr-only" for="zip">ZIP Code</label>
-            <input id="zip" type="text" (input)="onAddressInputChange()" [(ngModel)]="deliveryAddress.zip" name="zip" placeholder="ZIP Code" required />
+  <div *ngIf="errorMessage" class="error-banner">{{ errorMessage }}</div>
+
+  <div class="checkout-content">
+    <!-- LEFT: FORM SECTIONS -->
+    <div class="checkout-left">
+
+      <!-- CONTACT INFORMATION -->
+      <div class="section">
+        <h2 class="section-title">Contact Information</h2>
+        <br>
+        <!-- <p class="section-subtitle">We'll use this to confirm your order.</p> -->
+
+        <div class="form-row">
+          <div class="form-field">
+            <label>First Name</label>
+            <input type="text" [(ngModel)]="userInfo.fname" name="firstName" required />
+          </div>
+          <div class="form-field">
+            <label>Last Name</label>
+            <input type="text" [(ngModel)]="userInfo.lname" name="lastName" required />
           </div>
         </div>
-  
-        <!-- Payment Method Section -->
-        <div class="section">
-          <fieldset class="radio-group">
-            <legend>Payment Method</legend>
-            <label>
-              <span class="radio-text">Cash</span>
-              <input #cashRef [disabled]="selectedOrderType === 'delivery'" type="radio" name="payment" value="cash" (ngModelChange)="onPaymentMethodChange($event)" [(ngModel)]="selectedPaymentMethod" />
-            </label>
-            <label>
-              <span class="radio-text">Debit</span>
-              <input [disabled]="selectedOrderType === 'delivery'" type="radio" name="payment" value="debit" (ngModelChange)="onPaymentMethodChange($event)" [(ngModel)]="selectedPaymentMethod" />
-            </label>
-            <label class="aeropay">
-              <div class="payment-method">
-                <div class="aeropay-container">
-                  <img class="aeropay-logo" src="assets/aeropay.png" alt="Powered by Aeropay">
-                  <input 
-                    #aeropayRef
-                    type="radio" 
-                    name="payment" 
-                    value="aeropay" 
-                    (change)="onPaymentMethodChange('aeropay', aeropayRef, cashRef)" 
-                    [(ngModel)]="selectedPaymentMethod"
-                  />
-                </div>
-                <div *ngIf="selectedPaymentMethod === 'aeropay'" class="aeropay-box">
-                  <!-- Loading State -->
-                  <div *ngIf="isFetchingAeroPay" class="loading-container">
-                    <span class="spinner"></span>
-                    <p>Fetching AeroPay details...</p>
-                  </div>
-                  <!-- Verification Required -->
-                  <div *ngIf="verificationRequired" class="verification-container">
-                    <p>Enter Verification Code:</p>
-                    <div class="verification-input">
-                      <input type="text" [(ngModel)]="verificationCode" placeholder="Code" />
-                      <button (click)="verifyAeroPayUser()">✔</button>
-                    </div>
-                  </div>
-                  <!-- Bank Selection -->
-                  <div *ngIf="showBankSelection && !isGuest" class="aeropay-banks">
-                    <div class="bank-list">
-                      <div class="bank-card" *ngFor="let bank of userBankAccounts" 
-                           (click)="selectBank(bank.bankAccountId)" 
-                           [class.selected-bank]="selectedBankId === bank.bankAccountId">
-                        <span class="bank-icon"><i class="fa-solid fa-credit-card"></i></span>
-                        <div class="bank-details">
-                          <h3>{{ bank.bankName }}</h3>
-                          <p>****{{ bank.accountLast4 }}</p>
-                        </div>
-                        <span *ngIf="selectedBankId === bank.bankAccountId" class="checkmark">✔</span>
-                      </div>
-                    </div>
-                    <button class="connect-bank-button" (click)="retrieveAerosyncCredentials()">
-                      <span *ngIf="loadingAerosync" class="spinner"></span>
-                      <span *ngIf="!loadingAerosync">Connect Bank</span>
-                    </button>
 
-                  </div>
-                  <div *ngIf="showBankSelection && isGuest" class="aeropay-banks">
-                    <div class="bank-list">
-                      <div class="bank-card" 
-                          *ngFor="let bank of userBankAccounts" 
-                          (click)="selectBank(bank.bankAccountId)" 
-                          [class.selected-bank]="selectedBankId === bank.bankAccountId">
-                        <span class="bank-icon"><i class="fa-solid fa-credit-card"></i></span>
-                        <div class="bank-details">
-                          <h3>{{ bank.bankName }}</h3>
-                          <p>****{{ bank.accountLast4 }}</p>
-                        </div>
-                        <span *ngIf="selectedBankId === bank.bankAccountId" class="checkmark">✔</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <button class="aeropay-button" [disabled]="isLinkingBank" (click)="startAeroPayProcess()" *ngIf="selectedPaymentMethod === 'aeropay' && isGuest && !isFetchingAeroPay && !showBankSelection && !verificationRequired">
-                    <span *ngIf="isLinkingBank" class="spinner"></span>
-                    <span *ngIf="!isLinkingBank">Continue with AeroPay</span>
-                  </button>
-                </div>
-              </div>
-            </label>
-          </fieldset>
+        <div class="form-row">
+          <div class="form-field">
+            <label>Email</label>
+            <input type="email" [(ngModel)]="userInfo.email" name="email" required />
+          </div>
+          <div class="form-field">
+            <label>Phone</label>
+            <input type="tel" [(ngModel)]="userInfo.phone" name="phone" required />
+          </div>
         </div>
       </div>
-  
-      <!-- Right: Order Summary and Cart Preview -->
-      <div class="checkout-right">
-        <div class="summary-box" role="region" aria-labelledby="order-summary-heading">
-          <h2 id="order-summary-heading">Order Summary</h2>
-          <div class="summary-item">
-            <span>Subtotal:</span>
-            <span>{{ finalSubtotal | currency }}</span>
+
+      <!-- ORDER TYPE -->
+      <div class="section">
+        <h2 class="section-title">Order Type</h2>
+        <p class="section-subtitle">Choose how you’d like to receive your order.</p>
+
+        <div class="radio-options">
+          <label>
+            <input type="radio" name="orderType" value="pickup"
+                   [(ngModel)]="selectedOrderType"
+                   (change)="onOrderTypeChange($event)" />
+            Pickup
+          </label>
+          <label>
+            <input type="radio" name="orderType" value="delivery"
+                   [(ngModel)]="selectedOrderType"
+                   [disabled]="!enableDelivery || finalTotal < deliveryMin"
+                   (change)="onOrderTypeChange($event)" />
+            Delivery
+            <span *ngIf="enableDelivery && finalTotal < deliveryMin" class="warning">(Min ${{ deliveryMin }} required)</span>
+            <span *ngIf="!enableDelivery" class="warning">(Delivery off)</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- DELIVERY ADDRESS -->
+      <div *ngIf="selectedOrderType === 'delivery'" class="section">
+        <h2 class="section-title">Delivery Details</h2>
+        <p class="section-subtitle">Please provide your full address for delivery.</p>
+
+        <div class="form-field">
+          <label>Street Address</label>
+          <input type="text" [(ngModel)]="deliveryAddress.street" name="street" (input)="onAddressInputChange()" required />
+        </div>
+
+        <div class="form-field">
+          <label>Apartment / Suite (optional)</label>
+          <input type="text" [(ngModel)]="deliveryAddress.apt" name="apt" (input)="onAddressInputChange()" />
+        </div>
+
+        <div class="form-row">
+          <div class="form-field">
+            <label>City</label>
+            <input type="text" [(ngModel)]="deliveryAddress.city" name="city" (input)="onAddressInputChange()" required />
           </div>
-          <div class="summary-item" *ngIf="userInfo.points">
-            <span>Available Points:</span>
-            <span>{{ userInfo.points }}</span>
-          </div> 
-          <div class="summary-item" *ngIf="userInfo.points">
-            <span>Potential Savings:</span>
-            <span>{{ (userInfo.points * pointValue) | currency }}</span>
+          <div class="form-field">
+            <label>ZIP Code</label>
+            <input type="text" [(ngModel)]="deliveryAddress.zip" name="zip" (input)="onAddressInputChange()" required />
           </div>
-          <div class="points-slider" *ngIf="userInfo.points">
-            <label for="pointsRange">Adjust points to redeem for discount:</label>
-            <input 
-              type="range" 
-              id="pointsRange"
-              [(ngModel)]="pointsToRedeem" 
-              [min]="0" 
-              [max]="maxRedeemablePoints" 
-              [step]="1"
-              (change)="updateTotals()"
-              aria-label="Adjust points to redeem for discount"
-            />
+        </div>
+
+        <!-- Date / Time -->
+        <div class="form-row">
+          <div class="form-field">
+            <label>Delivery Date</label>
+            <input type="date" [(ngModel)]="selectedDeliveryDate" name="deliveryDate"
+                   [min]="minDate" (change)="onDateSelected($event)" required />
           </div>
-          <div class="summary-item" *ngIf="userInfo.points">
-            <span>Points to Redeem:</span>
-            <span>{{ pointsToRedeem }}</span>
+          <div class="form-field">
+            <label>Delivery Time</label>
+            <select [(ngModel)]="selectedDeliveryTime" name="deliveryTime" required>
+              <option value="" disabled selected>Select Time</option>
+              <option *ngFor="let time of timeOptions" [value]="time.value">{{ time.display }}</option>
+            </select>
           </div>
-          <div class="summary-item" *ngIf="userInfo.points">
-            <span>Discount Applied:</span>
-            <span>{{ pointsToRedeem * pointValue | currency }}</span>
-          </div>            
-          <div class="summary-item">
-            <span>Tax:</span>
-            <span>{{ finalTax | currency }}</span>
+        </div>
+      </div>
+
+      <!-- PAYMENT METHOD -->
+      <div class="section">
+        <h2 class="section-title">Payment Method</h2>
+        <p class="section-subtitle">Select your preferred payment option.</p>
+
+        <div class="radio-options">
+          <label>
+            <input #cashRef type="radio" name="payment" value="cash"
+                   [(ngModel)]="selectedPaymentMethod"
+                   [disabled]="selectedOrderType === 'delivery'"
+                   (ngModelChange)="onPaymentMethodChange($event)" />
+            Cash
+          </label>
+
+          <label>
+            <input type="radio" name="payment" value="debit"
+                   [(ngModel)]="selectedPaymentMethod"
+                   [disabled]="selectedOrderType === 'delivery'"
+                   (ngModelChange)="onPaymentMethodChange($event)" />
+            Debit
+          </label>
+
+          <label class="aeropay-option" *ngIf="!(selectedOrderType === 'pickup' && currentLocationKey === 'canandaigua')">
+            <input #aeropayRef type="radio" name="payment" value="aeropay"
+                   [(ngModel)]="selectedPaymentMethod"
+                   (change)="onPaymentMethodChange('aeropay', aeropayRef, cashRef)" />
+            <img src="assets/aeropay.png" alt="AeroPay" />
+            <span>Pay By Bank</span>
+          </label>
+        </div>
+
+        <!-- AeroPay Expanded -->
+        <div *ngIf="selectedPaymentMethod === 'aeropay'" class="aeropay-box">
+          <div *ngIf="isFetchingAeroPay" class="loading-container">
+            <span class="spinner"></span>
+            <p>Fetching AeroPay details...</p>
           </div>
-          <div class="summary-item total">
-            <span>Total:</span>
-            <span>{{ finalTotal | currency }}</span>
+
+          <div *ngIf="verificationRequired" class="verification-container">
+            <p>Enter Verification Code:</p>
+            <div class="verification-input">
+              <input type="text" [(ngModel)]="verificationCode" placeholder="Code" />
+              <button (click)="verifyAeroPayUser()">✔</button>
+            </div>
           </div>
-          <button 
-            class="checkout-button" 
-            (click)="placeOrder()" 
-            [disabled]="isLoading || !isFormValid() || (selectedPaymentMethod === 'aeropay' && !selectedBankId)"
-            [title]="selectedPaymentMethod === 'aeropay' && !selectedBankId ? 'Aeropay Incomplete' : ''"
-          >
-            <span *ngIf="isLoading" class="spinner"></span>
-            <span *ngIf="!isLoading">Submit Order</span>
+
+          <div *ngIf="showBankSelection && !isGuest" class="aeropay-banks">
+            <div class="bank-list">
+              <div class="bank-card"
+                   *ngFor="let bank of userBankAccounts"
+                   (click)="selectBank(bank.bankAccountId)"
+                   [class.selected-bank]="selectedBankId === bank.bankAccountId">
+                <span class="bank-icon"><i class="fa-solid fa-credit-card"></i></span>
+                <div class="bank-details">
+                  <h3>{{ bank.bankName }}</h3>
+                  <p>****{{ bank.accountLast4 }}</p>
+                </div>
+                <span *ngIf="selectedBankId === bank.bankAccountId" class="checkmark">✔</span>
+              </div>
+            </div>
+            <button class="connect-bank-button" (click)="retrieveAerosyncCredentials()">
+              <span *ngIf="loadingAerosync" class="spinner"></span>
+              <span *ngIf="!loadingAerosync">Connect Bank</span>
+            </button>
+          </div>
+          <div *ngIf="showBankSelection && isGuest" class="aeropay-banks">
+            <div class="bank-list">
+              <div class="bank-card" 
+                  *ngFor="let bank of userBankAccounts" 
+                  (click)="selectBank(bank.bankAccountId)" 
+                  [class.selected-bank]="selectedBankId === bank.bankAccountId">
+                <span class="bank-icon"><i class="fa-solid fa-credit-card"></i></span>
+                <div class="bank-details">
+                  <h3>{{ bank.bankName }}</h3>
+                  <p>****{{ bank.accountLast4 }}</p>
+                </div>
+                <span *ngIf="selectedBankId === bank.bankAccountId" class="checkmark">✔</span>
+              </div>
+            </div>
+          </div>
+          <button class="aeropay-button"
+                  [disabled]="isLinkingBank"
+                  (click)="startAeroPayProcess()"
+                  *ngIf="selectedPaymentMethod === 'aeropay' && isGuest && !isFetchingAeroPay && !showBankSelection && !verificationRequired">
+            <span *ngIf="isLinkingBank" class="spinner"></span>
+            <span *ngIf="!isLinkingBank">Continue with AeroPay</span>
           </button>
         </div>
-  
-        <div class="cart-preview" role="region" aria-labelledby="cart-preview-heading">
-          <h2 id="cart-preview-heading">Your Items</h2>
-          <div *ngFor="let item of cartItems" class="cart-item">
-            <img [src]="item.image || 'assets/' + (item.category ? item.category.toLowerCase() + '-general.png' : 'default.png')" [alt]="item.title" class="product-image" />
-            <div class="item-details">
-              <span class="item-quantity">{{ item.quantity }}x</span>
-              <span class="item-title">{{ item.title }}</span>
-              <span class="item-price">{{ item.price | currency }}</span>
+      </div>
+    </div>
+
+    <!-- RIGHT: ORDER SUMMARY -->
+    <div class="checkout-right">
+      <div class="summary-box" role="region" aria-labelledby="order-summary-heading">
+        <h2 id="order-summary-heading">Order Summary</h2>
+
+        <div class="summary-row"><span>Subtotal:</span><span>{{ finalSubtotal | currency }}</span></div>
+
+        <div *ngIf="userInfo.points">
+          <div class="summary-row"><span>Available Points:</span><span>{{ userInfo.points }}</span></div>
+          <div class="summary-row"><span>Potential Savings:</span><span>{{ (userInfo.points * pointValue) | currency }}</span></div>
+
+          <div class="points-section">
+            <div class="points-label">Redeem Points:</div>
+            <div class="points-grid">
+              <button *ngFor="let option of redemptionOptions"
+                      class="points-btn"
+                      [class.selected]="pointsToRedeem === option.points"
+                      (click)="selectPoints(option.points)">
+                {{ option.display }}
+              </button>
+            </div>
+          </div>
+
+          <div class="summary-row"><span>Discount Applied:</span><span>-{{ (pointsToRedeem * pointValue) | currency }}</span></div>
+        </div>
+
+        <div class="summary-row"><span>Tax:</span><span>{{ finalTax | currency }}</span></div>
+
+        <div *ngIf="selectedOrderType === 'delivery'" class="summary-row">
+          <span>Delivery Fee:</span><span>{{ deliveryFee | currency }}</span>
+        </div>
+
+        <div class="summary-row total"><span>Total:</span><span>{{ finalTotal | currency }}</span></div>
+
+        <button class="checkout-submit" (click)="placeOrder()"
+                [disabled]="isLoading || !isFormValid() || (selectedPaymentMethod === 'aeropay' && !selectedBankId)"  [title]="selectedPaymentMethod === 'aeropay' && !selectedBankId ? 'Aeropay Incomplete' : ''">
+          <span *ngIf="isLoading" class="spinner"></span>
+          <span *ngIf="!isLoading">Submit Order</span>
+        </button>
+      </div>
+
+      <!-- CART PREVIEW -->
+      <div class="cart-preview">
+        <h2>Your Items</h2>
+        <div *ngFor="let item of cartItems" class="cart-item">
+          <img [src]="item.image || 'assets/' + (item.category ? item.category.toLowerCase() + '-general.png' : 'default.png')"
+               [alt]="item.title" class="product-image" />
+          <div class="item-details">
+            <span class="item-quantity">{{ item.quantity }}x</span>
+            <span class="item-title">{{ item.title }}</span>
+            <span class="item-price">{{ item.price | currency }}</span>
+            <div *ngIf="isDiscounted(item) || isBogo(item)" class="deal-banner">
+              <ng-container *ngIf="isBogo(item); else saleBanner">
+                <span>{{ getBogoText(item) }}</span>
+              </ng-container>
+              <ng-template #saleBanner>
+                <span>{{ item.discountDescription || 'On Sale!' }}</span>
+              </ng-template>
             </div>
           </div>
         </div>
       </div>
     </div>
   </div>
-  
+</div>
+
   <div id="widget"></div>  

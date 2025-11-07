@@ -216,19 +216,45 @@ export class ProductsService {
         let filteredProducts = productArray;
     
 
-        // ✅ Filter by category
-        if (category) {
-          const normalizedCategory = category.toLowerCase();
+       if (category) {
+        const normalizedCategory = category.toLowerCase();
+
+        if (normalizedCategory === 'offers') {
+          filteredProducts = filteredProducts.filter((p: any) => {
+            // 🟢 Percent or flat discounts (with discountedPrice applied)
+            const hasStandardDiscount =
+              typeof p.discountedPrice === 'number' &&
+              p.discountedPrice < Number(p.price);
+
+            // 🟡 Active description + numeric discount value
+            const hasManualDiscount =
+              !!p.discountDescription &&
+              (p.discountType === 'percent' || p.discountType === 'flat');
+
+            // 🔵 BOGO or bundle rule present
+            const hasBogoOrBundle =
+              (Array.isArray(p.bogoRules) && p.bogoRules.length > 0) ||
+              (Array.isArray(p.bundleProducts) && p.bundleProducts.length > 0);
+
+            // ✅ Return true if any of these apply
+            return hasStandardDiscount || hasManualDiscount || hasBogoOrBundle;
+          });
+        } else {
           filteredProducts = filteredProducts.filter(
             p => p.category?.toLowerCase() === normalizedCategory
           );
         }
+      }
+
+
 
   
         // ✅ Filter by search query
         if (searchQuery.trim() !== '') {
           filteredProducts = filteredProducts.filter(p =>
-            p.title.toLowerCase().includes(searchQuery.toLowerCase())
+            p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            p.brand.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            p.strainType.toLowerCase().includes(searchQuery.toLowerCase())
           );
         }
   
@@ -293,60 +319,134 @@ export class ProductsService {
     return match ? parseFloat(match[0]) : 0;
   }
 
-  getProductFilterOptions(): Observable<ProductFilterOptions> {
-    return this.products$.pipe(
-      map((productArray) => {
-        const brands = new Set<string>();
-        const weightMap = new Map<string, { label: string; value: string; sort: number }>();
+  // getProductFilterOptions(): Observable<ProductFilterOptions> {
+  //   return this.products$.pipe(
+  //     map((productArray) => {
+  //       const brands = new Set<string>();
+  //       const weightMap = new Map<string, { label: string; value: string; sort: number }>();
 
-        const selectedCat = this.navigationService.getSelectedCategory()?.toUpperCase();
+  //       const selectedCat = this.navigationService.getSelectedCategory()?.toUpperCase();
 
-        productArray.forEach((p: any) => {
-          if (p?.category?.toUpperCase() !== selectedCat) return;
+  //       productArray.forEach((p: any) => {
+  //         if (p?.category?.toUpperCase() !== selectedCat) return;
 
-          // brands
-          if (p?.brand) brands.add(p.brand);
+  //         // brands
+  //         if (p?.brand) brands.add(p.brand);
 
-          // weights (amount + unit)
-          const amount = p?.weight;                 // "3.5", 3.5, etc.
-          const rawUnit = p?.weightUnit ?? p?.unit; // "g", "mg", "oz", "ml", etc.
-          if (amount == null) return;
+  //         // weights (amount + unit)
+  //         const amount = p?.weight;                 // "3.5", 3.5, etc.
+  //         const rawUnit = p?.weightUnit ?? p?.unit; // "g", "mg", "oz", "ml", etc.
+  //         if (amount == null) return;
 
-          const unit = String(rawUnit ?? '').trim().toLowerCase();
-          const amountStr = String(amount).trim();
-          const key = `${amountStr}|${unit}`;       // e.g. "3.5|g"
-          const label = unit ? `${amountStr} ${unit}` : amountStr;
+  //         const unit = String(rawUnit ?? '').trim().toLowerCase();
+  //         const amountStr = String(amount).trim();
+  //         const key = `${amountStr}|${unit}`;       // e.g. "3.5|g"
+  //         const label = unit ? `${amountStr} ${unit}` : amountStr;
 
-          // sort to grams (mg→g, oz→g). ml goes after solids; unknown units last.
-          const n = parseFloat(amountStr);
-          let sort = Number.POSITIVE_INFINITY;
-          if (!Number.isNaN(n)) {
-            if (unit === 'mg') sort = n / 1000;
-            else if (unit === 'g') sort = n;
-            else if (unit === 'oz') sort = n * 28.3495;
-            else if (unit === 'ml') sort = 1_000_000 + n; // keep liquids after solids
-            else sort = 2_000_000 + n;                    // unknown units last
-          }
+  //         // sort to grams (mg→g, oz→g). ml goes after solids; unknown units last.
+  //         const n = parseFloat(amountStr);
+  //         let sort = Number.POSITIVE_INFINITY;
+  //         if (!Number.isNaN(n)) {
+  //           if (unit === 'mg') sort = n / 1000;
+  //           else if (unit === 'g') sort = n;
+  //           else if (unit === 'oz') sort = n * 28.3495;
+  //           else if (unit === 'ml') sort = 1_000_000 + n; // keep liquids after solids
+  //           else sort = 2_000_000 + n;                    // unknown units last
+  //         }
 
-          if (!weightMap.has(key)) {
-            weightMap.set(key, { label, value: key, sort });
-          }
+  //         if (!weightMap.has(key)) {
+  //           weightMap.set(key, { label, value: key, sort });
+  //         }
+  //       });
+
+  //       return {
+  //         brands: Array.from(brands).map(b => ({ label: b, value: b })),
+  //         weights: Array.from(weightMap.values())
+  //           .sort((a, b) => a.sort - b.sort)
+  //           .map(({ label, value }) => ({ label, value })),
+  //       };
+  //     })
+  //   );
+  // }
+
+getProductFilterOptions(): Observable<ProductFilterOptions> {
+  return combineLatest([this.products$, this.currentCategory$]).pipe(
+    map(([productArray, selectedCat]) => {
+      const brands = new Set<string>();
+      const weightMap = new Map<string, { label: string; value: string; sort: number }>();
+
+      if (!selectedCat) return { brands: [], weights: [] };
+
+      const normalizedCat = selectedCat.toUpperCase();
+
+      // 🟢 Filter base set depending on category
+      let relevantProducts = productArray;
+
+      if (normalizedCat === 'OFFERS') {
+        // 🔥 Special logic: include only discounted / promo items
+        relevantProducts = productArray.filter((p: any) => {
+          const hasStandardDiscount =
+            typeof p.discountedPrice === 'number' && p.discountedPrice < Number(p.price);
+
+          const hasManualDiscount =
+            !!p.discountDescription && (p.discountType === 'percent' || p.discountType === 'flat');
+
+          const hasBogoOrBundle =
+            (Array.isArray(p.bogoRules) && p.bogoRules.length > 0) ||
+            (Array.isArray(p.bundleProducts) && p.bundleProducts.length > 0);
+
+          return hasStandardDiscount || hasManualDiscount || hasBogoOrBundle;
         });
+      } else {
+        // 🧭 Normal category filtering
+        relevantProducts = productArray.filter(
+          (p: any) => p?.category?.toUpperCase() === normalizedCat
+        );
+      }
 
-        return {
-          brands: Array.from(brands).map(b => ({ label: b, value: b })),
-          weights: Array.from(weightMap.values())
-            .sort((a, b) => a.sort - b.sort)
-            .map(({ label, value }) => ({ label, value })),
-        };
-      })
-    );
-  }
+      // 🧩 Collect filters from the relevant set
+      relevantProducts.forEach((p: any) => {
+        if (p?.brand) brands.add(p.brand);
+
+        const amount = p?.weight;
+        const rawUnit = p?.weightUnit ?? p?.unit;
+        if (amount == null) return;
+
+        const unit = String(rawUnit ?? '').trim().toLowerCase();
+        const amountStr = String(amount).trim();
+        const key = `${amountStr}|${unit}`;
+        const label = unit ? `${amountStr} ${unit}` : amountStr;
+
+        const n = parseFloat(amountStr);
+        let sort = Number.POSITIVE_INFINITY;
+        if (!Number.isNaN(n)) {
+          if (unit === 'mg') sort = n / 1000;
+          else if (unit === 'g') sort = n;
+          else if (unit === 'oz') sort = n * 28.3495;
+          else if (unit === 'ml') sort = 1_000_000 + n;
+          else sort = 2_000_000 + n;
+        }
+
+        if (!weightMap.has(key)) {
+          weightMap.set(key, { label, value: key, sort });
+        }
+      });
+
+      return {
+        brands: Array.from(brands).map((b) => ({ label: b, value: b })),
+        weights: Array.from(weightMap.values())
+          .sort((a, b) => a.sort - b.sort)
+          .map(({ label, value }) => ({ label, value })),
+      };
+    })
+  );
+}
+
 
 
   updateCategory(category: ProductCategory) {
     this.currentCategory.next(category); 
-    this.route.navigateByUrl('/products');
+    // this.route.navigateByUrl('/products');
   }
 
   getCurrentCategory(): ProductCategory {
@@ -355,6 +455,7 @@ export class ProductsService {
 
   getCategories(): CategoryWithImage[] {
     return [
+      { category: 'OFFERS', imageUrl: 'assets/icons/discount.png' },
       { category: 'FLOWER', imageUrl: 'assets/icons/flower.png' },
       { category: 'PRE-ROLL', imageUrl: 'assets/icons/prerolls.png' },
       { category: 'EDIBLES', imageUrl: 'assets/icons/edibles.png' },

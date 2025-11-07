@@ -9,6 +9,8 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NavigationService } from '../../services/navigation.service';
+import { ProductsService } from '../../services/products.service';
+import { Router } from '@angular/router';
 
 interface Category {
   name: string;
@@ -40,10 +42,11 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy {
   private onScrollBound?: () => void;
   private onResizeBound?: () => void;
 
-  constructor(private navigationService: NavigationService) {}
+  constructor(private navigationService: NavigationService, private productService: ProductsService, private router: Router) {}
 
   ngOnInit(): void {
     this.categories = [
+      { name: 'Offers',        iconPath: `assets/icons/${this.iconSet}/offers.png` },
       { name: 'Flower',        iconPath: `assets/icons/${this.iconSet}/flower.png` },
       { name: 'Pre-Roll',      iconPath: `assets/icons/${this.iconSet}/prerolls.png` },
       { name: 'Edibles',       iconPath: `assets/icons/${this.iconSet}/edibles.png` },
@@ -80,9 +83,12 @@ export class CategoriesComponent implements OnInit, AfterViewInit, OnDestroy {
   /** Click/keyboard activation */
   navigateToCategory(category: string): void {
     this.activeCategory = category;
-    this.navigationService.navigateToCategory(category);
-    // Optionally scroll the selected chip into view:
-    // this.scrollActiveIntoView();
+    this.productService.updateCategory(category.toUpperCase() as any);
+
+    this.router.navigate(['/shop'], {
+      queryParams: { category: category, brand: null },
+      queryParamsHandling: 'merge'
+    });
   }
 
   /** Called by (scroll) in the template or via listeners */

@@ -116,7 +116,13 @@ export class AuthService {
       })
         .then((response) => {
           if (response.status === 200) {
-            const { sessionId, user, expiresAt } = response.data;
+            const data = response.data;
+            if (data.requiresPasswordSetup) {
+              observer.next(data); // pass full object through
+              observer.complete();
+              return;
+            }
+            const { sessionId, user, expiresAt } = data;
             this.storeSessionData(sessionId, expiresAt);
             this.authStatus.next(true);
             this.userSubject.next(user);
@@ -403,6 +409,29 @@ export class AuthService {
       console.error('Error sending email', error);
       throw error;
     }
+  }
+
+  setPasswordForExistingUser(email: string, business_id: number, password: string): Observable<any> {
+    return new Observable((observer) => {
+      CapacitorHttp.post({
+        url: `${this.apiUrl}/set-password`,
+        headers: {
+          'Content-Type': 'application/json',
+          'x-auth-api-key': environment.db_api_key,
+        },
+        data: { email, business_id, password },
+      })
+        .then((response) => {
+          this.login({
+            email: email,
+            password: password,
+          }).subscribe();
+          this.router.navigate(['/shop']);
+          observer.next(response.data);
+          observer.complete();
+        })
+        .catch((error) => observer.error(error));
+    });
   }
 
 }

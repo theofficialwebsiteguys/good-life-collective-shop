@@ -24,13 +24,35 @@
         <span *ngIf="product?.thc" class="chip">THC: {{ product.thc }}</span>
       </div>
 
-      <!-- title & price -->
-      <p>{{ product.brand }}</p>
+      <!-- title & brand -->
+      <p class="brand">{{ product.brand }}</p>
       <h1 id="prod-title" class="title">{{ product.title }}</h1>
 
+      <!-- 🟢 Discount / Deal Banner -->
+      <div *ngIf="hasDeal" class="deal-banner">
+        <ng-container *ngIf="isBogo; else normalDiscount">
+          <span>
+            Buy {{ product['bogoRules'][0]?.buy_quantity }} Get
+            {{ product['bogoRules'][0]?.get_quantity }}
+            {{ product['bogoRules'][0]?.discount_value || product['bogoRules'][0]?.discount_percent }}% Off
+          </span>
+        </ng-container>
 
+        <ng-template #normalDiscount>
+          <span>{{ product.discountDescription || 'On Sale!' }}</span>
+        </ng-template>
+      </div>
+
+      <!-- 🏷️ Price Section -->
       <div class="price-cta">
-        <p class="price">{{ product.price | currency }}</p>
+        <ng-container *ngIf="isOnSale; else regularPrice">
+          <p class="price old">{{ product.price | currency }}</p>
+          <p class="price new">{{ product.discountedPrice | currency }}</p>
+        </ng-container>
+
+        <ng-template #regularPrice>
+          <p class="price">{{ product.price | currency }}</p>
+        </ng-template>
 
         <div class="qty-wrap" aria-label="Quantity selector">
           <button class="qty-btn" (click)="decreaseQuantity()" [disabled]="quantity <= 1" aria-label="Decrease quantity">−</button>
@@ -71,8 +93,7 @@
         class="cta"
         (click)="addToCart()"
         [disabled]="isAddingToCart"
-        [attr.aria-label]="isAddingToCart ? 'Adding to cart' : 'Add to cart'"
-      >
+        [attr.aria-label]="isAddingToCart ? 'Adding to cart' : 'Add to cart'">
         <span *ngIf="!isAddingToCart">Add to Cart</span>
         <span *ngIf="isAddingToCart">Adding…</span>
       </button>
@@ -89,7 +110,6 @@
             [attr.aria-expanded]="showFullDescription">
             {{ showFullDescription ? 'Show Less' : 'Read More' }}
           </button>
-
         </p>
       </div>
     </section>

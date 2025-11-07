@@ -1,29 +1,6 @@
-<div class="loc-dd" [class.open]="dropdownOpen">
-  <button
-    class="dropdown-trigger"
-    type="button"
-    (click)="toggleDropdown()"
-    aria-haspopup="listbox"
-    [attr.aria-expanded]="dropdownOpen"
-  >
-    {{ selectedName || (isLoading ? 'Loading stores…' : 'Select a store') }}
-    <span class="arrow" [class.up]="dropdownOpen">▾</span>
-  </button>
-
-  <ul
-    *ngIf="dropdownOpen"
-    class="dropdown-menu"
-    role="listbox"
-    aria-label="Store locations"
-  >
-    <li
-      *ngFor="let loc of locations"
-      role="option"
-      (click)="selectLocation(loc)"
-      tabindex="0"
-      [attr.aria-selected]="loc.location_id === selectedId"
-    >
-      {{ loc.name }}
-    </li>
-  </ul>
+<div class="location-chip" (click)="openLocationModal()">
+  <span class="label">Shopping At:</span>
+  <span class="name">
+    {{ formattedLocation || (isLoading ? 'Loading…' : 'Select') }}
+  </span>
 </div>

@@ -18,4 +18,8 @@ export type Product = {
   price: string; // .price
   image: string;  // either .image OR .images[0]
   quantity: number;
+  discountDescription?: string;
+  discountType?: string;
+  discountValue?: number;
+  discountedPrice?: number;
 };

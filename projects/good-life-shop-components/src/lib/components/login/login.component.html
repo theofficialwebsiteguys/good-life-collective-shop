@@ -1,4 +1,4 @@
-<div class="auth-container">
+<div class="auth-container" *ngIf="!requiresPasswordSetup">
   <h2>Log In</h2>
 
   <label for="email">Email <span class="required">*</span></label>
@@ -29,4 +29,25 @@
   </p>
 
   <p class="error-message" *ngIf="errorMessage" role="alert">{{ errorMessage }}</p>
+</div>
+
+
+<div class="auth-container" *ngIf="requiresPasswordSetup" >
+  <h2>Create a Password</h2>
+  <p class="info-text">
+    Welcome back! We found your account, but you’ll need to create a new password to continue.
+  </p>
+
+  <label for="newPassword">New Password <span class="required">*</span></label>
+  <input
+    id="newPassword"
+    type="password"
+    [(ngModel)]="newPassword"
+    placeholder="Enter a new password"
+    aria-required="true" />
+
+  <button class="auth-button" (click)="setNewPassword()">Save Password</button>
+
+  <p class="error-message" *ngIf="errorMessage" role="alert">{{ errorMessage }}</p>
+  <p class="success-message" *ngIf="successMessage">{{ successMessage }}</p>
 </div>

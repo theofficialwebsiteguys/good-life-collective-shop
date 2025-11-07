@@ -1,7 +1,9 @@
-<div class="card surface" tabindex="0"
-     (keyup.enter)="addToCart($event)"
-     (keyup.space)="addToCart($event)">
-
+<div
+  class="card surface"
+  tabindex="0"
+  (keyup.enter)="addToCart($event)"
+  (keyup.space)="addToCart($event)"
+>
   <!-- IMAGE STAGE -->
   <div class="stage" [class.loading]="!imageLoaded">
     <img
@@ -13,46 +15,74 @@
       (load)="onImgLoad()"
       (error)="onImgError($event)"
     />
-
-    <!-- Corner badges -->
-    <div class="corner left">
-      <span *ngIf="product?.strainType"
-            class="chip strain {{ strainClass(product.strainType) }}">{{ product.strainType }}</span>
-    </div>
-    <div class="corner right">
-      <span *ngIf="product?.weight && product['unit']" class="chip ghost">
-        {{ product.weight }} {{ product['unit'] }}
-      </span>
-    </div>
-
-    <!-- Price badge anchored to bottom-left of image for high salience -->
-    <div class="price-badge">
-      <span class="chip price">{{ product.price | currency }}</span>
-    </div>
-
-    <!-- Add to cart -->
-    <button type="button"
-            class="cta"
-            (click)="addToCart($event)"
-            [disabled]="isDisabled"
-            [attr.aria-label]="isAdded ? (product.title + ' added to cart') : ('Add ' + product.title + ' to cart')">
-      <span class="cta-ico" [class.added]="isAdded"></span>
-    </button>
-
-    <!-- Subtle top glow -->
     <div class="halo" aria-hidden="true"></div>
   </div>
 
   <!-- BODY -->
   <div class="body">
-    <p class="brand" [title]="product.brand">{{ product.brand }}</p>
-    <h3 class="title" [title]="product.title">{{ product.title }}</h3>
+    <!-- SALE OR BOGO -->
+    <div *ngIf="isOnSale || isBogo" class="sale-banner">
+      <span *ngIf="isOnSale">{{ product.discountDescription }}</span>
+      <span *ngIf="isBogo" class="sale-text bogo">
+        Buy {{ product['bogoRules'][0]?.buy_quantity }}
+        Get {{ product['bogoRules'][0]?.get_quantity }}
+        {{
+          product['bogoRules'][0]?.discount_type === 'percent'
+            ? (product['bogoRules'][0]?.discount_value ||
+              product['bogoRules'][0]?.discount_percent ||
+              0) + '% Off'
+            : '$' + (product['bogoRules'][0]?.discount_value || 0) + ' Off'
+        }}
+      </span>
+    </div>
 
-    <!-- Optional meta row (uncomment if you want another tag e.g., THC) -->
+    <!-- DETAILS -->
+    
+    <div class="price" [class.discounted]="isOnSale">
+      <ng-container *ngIf="isOnSale; else regularPrice">
+        <span class="old">{{ product.price | currency }}</span>
+        <span class="new">{{ product.discountedPrice | currency }}</span>
+      </ng-container>
+      <ng-template #regularPrice>
+        <span class="normal">{{ product.price | currency }}</span>
+      </ng-template>
+    </div>
+    <p class="brand" [title]="product.brand">{{ product.brand }}</p>
+    <div class="title-price">
+      <h3 class="title" [title]="product.title">{{ product.title }}</h3>
+      
+    </div>
+
+    <!-- STRAIN + WEIGHT -->
+    <div class="traits">
+      <span
+        *ngIf="product?.strainType"
+        class="pill strain {{ strainClass(product.strainType) }}"
+        >{{ product.strainType }}</span
+      >
+      <span
+        *ngIf="product?.weight && product['unit']"
+        class="pill ghost"
+      >
+        {{ product.weight }} {{ product['unit'] }}
+      </span>
+    </div>
+
+    <!-- THC / CBD -->
     <div class="meta">
       <span class="pill tiny">{{ product.thc }} THC</span>
       <span class="dot"></span>
       <span class="pill tiny">{{ product.cbd }} CBD</span>
     </div>
+
+    <!-- ADD TO CART -->
+    <button
+      type="button"
+      class="cta-bottom"
+      (click)="addToCart($event)"
+      [disabled]="isDisabled"
+    >
+      {{ isAdded ? 'Added to Cart' : 'Add to Cart' }}
+    </button>
   </div>
 </div>

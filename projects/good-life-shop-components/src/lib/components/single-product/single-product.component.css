@@ -109,7 +109,6 @@
   background: transparent;
   color: var(--text);
   border: 0;
-  width: 36px; height: 36px;
   font-size: 20px;
   border-radius: 999px;
   cursor: pointer;
@@ -185,3 +184,30 @@
   .media-card { position: static; }
   .cta { font-size: 15px; }
 }
+
+.deal-banner {
+  background: rgba(156, 240, 224, 0.12);
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-weight: 600;
+  font-size: 14px;
+  margin-top: 8px;
+  margin-bottom: 8px;
+  display: inline-block;
+}
+
+.price.old {
+  text-decoration: line-through;
+  color: #999;
+}
+
+.price.new {
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 1.8rem;
+}
+
+
+

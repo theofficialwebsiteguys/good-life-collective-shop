@@ -2,6 +2,7 @@
   <!-- Gradient backdrop -->
   <div class="bg-gradient" aria-hidden="true"></div>
 
+    <div class="shop-wrapper">
   <div class="shop-container">
     <!-- Sidebar Toggle (mobile) -->
     <button class="sidebar-toggle" (click)="toggleSidebar()"
@@ -27,53 +28,67 @@
         <div class="filter-section">
           <button type="button" class="filter-toggle" (click)="toggleSection('types')"
                   [attr.aria-expanded]="isExpanded['types']" aria-controls="filter-types">
-            <h3>Strain Types</h3>
+            <h3>Strain Type</h3>
             <span class="dash" [class.expanded]="isExpanded['types']">−</span>
           </button>
-          <div id="filter-types" *ngIf="isExpanded['types']" class="filter-options">
-            <label *ngFor="let type of types" class="chip-option">
-              <input type="checkbox" (change)="toggleTypeFilter(type.name)"
-                     [checked]="selectedTypes.includes(type.name)"/>
-              <span class="chip">{{ type.name }}</span>
+
+          <div id="filter-types" *ngIf="isExpanded['types']" class="filter-column-list">
+            <label *ngFor="let type of types" class="brand-option">
+              <input type="checkbox"
+                    (change)="toggleTypeFilter(type.name)"
+                    [checked]="selectedTypes.includes(type.name)" />
+              <span>{{ type.name }}</span>
             </label>
           </div>
         </div>
 
-        <!-- Brands -->
-        <div class="filter-section">
-          <button type="button" class="filter-toggle" (click)="toggleSection('brands')"
-                  [attr.aria-expanded]="isExpanded['brands']" aria-controls="filter-brands">
-            <h3>Brands</h3>
-            <span class="dash" [class.expanded]="isExpanded['brands']">−</span>
+      <!-- Brands -->
+      <div class="filter-section">
+        <button type="button" class="filter-toggle" (click)="toggleSection('brands')"
+                [attr.aria-expanded]="isExpanded['brands']" aria-controls="filter-brands">
+          <h3>Brands</h3>
+          <span class="dash" [class.expanded]="isExpanded['brands']">−</span>
+        </button>
+
+        <div id="filter-brands" *ngIf="isExpanded['brands']" class="brands-column">
+          <ng-container *ngIf="dynamicFilterOptions$ | async as dyn">
+            <label *ngFor="let brand of displayedBrands" class="brand-option">
+              <input type="checkbox" (change)="toggleBrandFilter(brand.value)"
+                    [checked]="selectedBrands.includes(brand.value)" />
+              <span>{{ brand.label }}</span>
+            </label>
+          </ng-container>
+
+          <button *ngIf="hasMoreBrands"
+                  class="show-more-btn"
+                  (click)="toggleShowMoreBrands()"
+                  type="button">
+            {{ showAllBrands ? 'Show Less' : 'Show More' }}
           </button>
-          <div id="filter-brands" *ngIf="isExpanded['brands']" class="filter-options">
-            <ng-container *ngIf="dynamicFilterOptions$ | async as dyn">
-              <label *ngFor="let brand of dyn.brands" class="chip-option">
-                <input type="checkbox" (change)="toggleBrandFilter(brand.value)"
-                       [checked]="selectedBrands.includes(brand.value)" />
-                <span class="chip">{{ brand.label }}</span>
-              </label>
-            </ng-container>
-          </div>
         </div>
+      </div>
+
+
 
         <!-- Weights -->
-        <div class="filter-section">
-          <button type="button" class="filter-toggle" (click)="toggleSection('weights')"
-                  [attr.aria-expanded]="isExpanded['weights']" aria-controls="filter-weights">
-            <h3>Weights</h3>
-            <span class="dash" [class.expanded]="isExpanded['weights']">−</span>
-          </button>
-          <div id="filter-weights" *ngIf="isExpanded['weights']" class="filter-options">
-            <ng-container *ngIf="dynamicFilterOptions$ | async as dyn">
-              <label *ngFor="let weight of dyn.weights" class="chip-option">
-                <input type="checkbox" (change)="toggleWeightsFilter(weight.value)"
-                       [checked]="selectedWeights.includes(weight.value)" />
-                <span class="chip">{{ weight.label }}</span>
-              </label>
-            </ng-container>
-          </div>
-        </div>
+      <div class="filter-section">
+      <button type="button" class="filter-toggle" (click)="toggleSection('weights')"
+              [attr.aria-expanded]="isExpanded['weights']" aria-controls="filter-weights">
+        <h3>Weight</h3>
+        <span class="dash" [class.expanded]="isExpanded['weights']">−</span>
+      </button>
+
+      <div id="filter-weights" *ngIf="isExpanded['weights']" class="filter-column-list">
+        <ng-container *ngIf="dynamicFilterOptions$ | async as dyn">
+          <label *ngFor="let weight of dyn.weights" class="brand-option">
+            <input type="checkbox"
+                  (change)="toggleWeightsFilter(weight.value)"
+                  [checked]="selectedWeights.includes(weight.value)" />
+            <span>{{ weight.label }}</span>
+          </label>
+        </ng-container>
+      </div>
+    </div>
 
         <div class="scroll-pad" aria-hidden="true"></div>
       </div>
@@ -126,5 +141,6 @@
         [sortOption]="sortOption">
       </lib-product-list>
     </main>
+  </div>
   </div>
 </div>

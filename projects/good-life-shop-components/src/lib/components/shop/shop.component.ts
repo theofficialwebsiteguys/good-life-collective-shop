@@ -34,7 +34,7 @@ export class ShopComponent implements OnInit {
 
   // Category chips for header
   categories: string[] = [
-    'Flower', 'Pre-Roll', 'Edibles', 'Vapes', 'Concentrates',
+    'Offers', 'Flower', 'Pre-Roll', 'Edibles', 'Vapes', 'Concentrates',
     'Beverage', 'Tinctures', 'Topicals', 'Accessories'
   ];
 
@@ -49,12 +49,18 @@ export class ShopComponent implements OnInit {
 
   dynamicFilterOptions$: Observable<ProductFilterOptions> = of({ brands: [], weights: [] });
 
+  showAllBrands = false;
+  displayedBrands: any[] = [];
+  allBrands: any[] = [];
+  hasMoreBrands = false;
+
   private _scrollY = 0;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private productService: ProductsService
+    private productService: ProductsService,
+    private navigationService: NavigationService
   ) {}
 
   ngOnInit(): void {
@@ -67,21 +73,47 @@ export class ShopComponent implements OnInit {
     this.productService.products$.subscribe(() => this.fetchDynamicFilters());
 
     this.sortOption = localStorage.getItem('sortOption') || 'RECENT';
+
+    this.dynamicFilterOptions$.subscribe((dyn) => {
+        if (dyn?.brands) {
+          this.allBrands = dyn.brands;
+          this.hasMoreBrands = dyn.brands.length > 10;
+          this.updateDisplayedBrands();
+        }
+      });
   }
+
+
+toggleShowMoreBrands() {
+  this.showAllBrands = !this.showAllBrands;
+  this.updateDisplayedBrands();
+}
+
+private updateDisplayedBrands() {
+  this.displayedBrands = this.showAllBrands
+    ? this.allBrands
+    : this.allBrands.slice(0, 10);
+}
 
   updateSortOption(event: Event) { 
     event.stopPropagation();
     localStorage.setItem('sortOption', this.sortOption); 
   }
 
-  /* Category chip click */
   selectCategory(c: string) {
     this.category = c;
-    // Update URL (optional)
-    this.router.navigate([], { queryParams: { category: c }, queryParamsHandling: 'merge' });
-    // Optionally clear search when switching categories:
-    // this.searchQuery = '';
+    this.productService.updateCategory(c.toUpperCase() as any);
+
+    this.selectedBrands = [];
+    this.selectedWeights = [];
+    this.selectedTypes = [];
+
+    this.router.navigate([], {
+      queryParams: { category: c, brand: null },
+      queryParamsHandling: 'merge'
+    });
   }
+
 
   toggleSidebar(): void {
     this.isSidebarOpen = !this.isSidebarOpen;

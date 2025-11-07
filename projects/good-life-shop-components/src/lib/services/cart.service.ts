@@ -21,7 +21,7 @@ export interface CartItem {
   image: string;
   brand: string;
   desc: string;
-  price: string;
+  price: string | number;
   quantity: number;
   title: string;
   strainType: string;
@@ -29,7 +29,25 @@ export interface CartItem {
   weight: string;
   category: string;
   id_item?: string;
+  discountNote?: string | null;
+
+  /**  Discount Fields */
+  discountedPrice?: number; // the actual discounted price from backend
+  discountDescription?: string; // e.g. "25% off" or "Holiday Sale"
+  discountType?: 'flat' | 'percent' | 'bundle' | 'bogo' | string;
+  discountValue?: number; // percent value (25) or flat ($5)
+  hasDiscount?: boolean;
+
+  /**  BOGO Rules */
+  bogoRules?: {
+    buy_quantity: number;
+    get_quantity: number;
+    discount_value?: number; // value of discount (e.g., 12.5)
+    discount_percent?: number; // optional alias if backend sends this
+    discount_type?: 'flat' | 'percent'; // type of discount
+  }[];
 }
+
 
 @Injectable({
   providedIn: 'root',
@@ -197,31 +215,56 @@ export class CartService {
     points_redeem: number,
     orderType: string,
     deliveryAddress: any,
-    userInfo?: any
+    userInfo?: any,
+    cartDiscountNote?: string,
+    overrideCartItems?: CartItem[],
+    deliveryFee?: number
   ): Promise<{ orderId: number; status: number }> {
-    const cartItems = this.getCart();
-
-    // 1) Get user info as a Promise
-    let user_info: any;
+    const cartItems = overrideCartItems && overrideCartItems.length > 0
+      ? overrideCartItems
+      : this.getCart();
 
     // 2) Build payload
     const orderItems: any = {
       items: cartItems.map(item => ({
         productId: item.id,
         quantityPurchased: item.quantity,
+        discountNote: item.discountNote || null,
       })),
       orderType,
-      discountNote: '',
-      ...(orderType === 'delivery' && deliveryAddress ? {
-        address: {
-          street:  deliveryAddress.street,
-          street2: deliveryAddress.street2 || '',
-          city:    deliveryAddress.city,
-          state:   deliveryAddress.state,
-          zip:     deliveryAddress.zip,
-        }
-      } : {})
+      cartDiscountNote: cartDiscountNote || '',
     };
+
+    // If delivery, attach address and delivery times
+    if (orderType === 'delivery' && deliveryAddress) {
+      orderItems.address = {
+        street1:  deliveryAddress.address1,
+        street2: deliveryAddress.address2 || '',
+        city:    deliveryAddress.city,
+        state:   deliveryAddress.state,
+        zip:     deliveryAddress.zip,
+      };
+
+      if (deliveryAddress.delivery_date && deliveryAddress.delivery_time) {
+        // Parse as local time
+        const localDateTime = new Date(`${deliveryAddress.delivery_date}T${deliveryAddress.delivery_time}`);
+
+        // Convert once to UTC ISO (toISOString already does the offset)
+        const startIso = localDateTime.toISOString();
+
+        const endIso = new Date(localDateTime.getTime() + 30 * 60 * 1000).toISOString();
+
+        orderItems.requestedFulfillmentTimeStart = startIso;
+        orderItems.requestedFulfillmentTimeEnd = endIso;
+      }
+
+      if(deliveryFee){
+        orderItems.fees = {
+          fees: [{ name: 'Delivery Fee', amount: Math.round(deliveryFee * 100) }]
+        }
+      }
+
+    }
 
     const customer = {
       firstName: userInfo.fname,
@@ -397,9 +440,9 @@ export class CartService {
       return addedItems;
     }
 
-  async placeOrder(user_id: number = 19139, pos_order_id: number, points_add: number, points_redeem: number, amount: number, cart: any, email?: string, customer_name?: string) {
-    const payload = { user_id, pos_order_id, points_add, points_redeem, amount, cart, customer_name };
-  
+  async placeOrder(user_id: number = 19139, pos_order_id: number, points_add: number, points_redeem: number, amount: number, cart: any, email?: string, customer_name?: string, customer_email?: string, customer_phone?: string, order_type?: string) {
+    const payload = { user_id, pos_order_id, points_add, points_redeem, amount, cart, customer_name, customer_email, customer_phone, order_type };
+
     const location_id = this.settingsService.getSelectedLocationId() ?? '';
 
     const headers = this.getHeaders();
@@ -451,8 +494,9 @@ export class CartService {
   }  
 
   checkDeliveryEligibility(): Observable<{ deliveryAvailable: boolean }> {
+    const location_id = this.settingsService.getSelectedLocationId() ?? '';
     const options = {
-      url: `${environment.apiUrl}/businesses/delivery-eligibility`,
+      url: `${environment.apiUrl}/businesses/delivery-eligibility${location_id ? `?location_id=${location_id}` : ''}`,
       method: 'GET',
       headers: this.getHeaders()
     };
@@ -462,8 +506,10 @@ export class CartService {
   }
 
   async getDeliveryZone(): Promise<any> {
+    const location_id = this.settingsService.getSelectedLocationId() ?? '';
+
     const options = {
-      url: `${environment.apiUrl}/businesses/zone`,
+      url: `${environment.apiUrl}/businesses/zone${location_id ? `?location_id=${location_id}` : ''}`,
       method: 'GET',
       headers: this.getHeaders()
     };
@@ -478,8 +524,9 @@ export class CartService {
   }
   
   async checkAddressInZone(address: string): Promise<{ inZone: boolean, lat: number, lng: number }> {
+    const location_id = this.settingsService.getSelectedLocationId() ?? '';
     const options = {
-      url: `${environment.apiUrl}/businesses/zone/check`,
+      url: `${environment.apiUrl}/businesses/zone/check${location_id ? `?location_id=${location_id}` : ''}`,
       method: 'POST',
       headers: this.getHeaders(),
       data: { address }
