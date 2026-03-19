@@ -14,6 +14,7 @@ import { ConfigService as ShopConfig } from '../../projects/good-life-shop-compo
 import { LocationSelectionComponent } from '../../projects/good-life-shop-components/src/lib/components/location-selection/location-selection.component';
 import { LocationDropdownComponent } from '../../projects/good-life-shop-components/src/public-api';
 import { MerchShopComponent } from '../../projects/good-life-shop-components/src/lib/components/merch-shop/merch-shop.component';
+import { SettingsService } from '../../projects/good-life-shop-components/src/lib/services/settings.service';
 
 
 @Component({
@@ -24,10 +25,15 @@ import { MerchShopComponent } from '../../projects/good-life-shop-components/src
   styleUrl: './app.component.scss'
 })
 export class AppComponent {
-  constructor(private navigationService: NavigationService, private configService: ConfigService, private shopConfig: ShopConfig) {
+  constructor(private navigationService: NavigationService, private configService: ConfigService, private shopConfig: ShopConfig, private settingsService: SettingsService) {
     this.configService.setApiKey('caf0c918d083b815a16fe0546e3802de4423e9b33c26aba8e1fa2a614966978d');
     this.shopConfig.setApiKey('caf0c918d083b815a16fe0546e3802de4423e9b33c26aba8e1fa2a614966978d');
   }
+
+  ngOnInit() {
+    this.settingsService.getFlowhubLocations();
+  }
+
 
   isViewingProduct(): boolean {
     let product = false;

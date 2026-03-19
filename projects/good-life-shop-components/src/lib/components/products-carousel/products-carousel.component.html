@@ -12,18 +12,41 @@
 
 
 
-  <div class="carousel-container" role="region" [attr.aria-label]="(heading$ | async) + ' Carousel'">
-    <button type="button" class="carousel-btn left" (click)="scrollProducts(-1)" aria-label="Scroll left">‹</button>
+  <div class="carousel-container" role="region" [attr.aria-label]="(heading$ | async) + ' Carousel'"
+       [class.fade-left]="!atStart" [class.fade-right]="!atEnd">
+    <button type="button" class="carousel-btn left" (click)="scrollProducts(-1)" aria-label="Scroll left">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
 
-    <div class="product-carousel" #productCarousel role="list">
+    <div class="product-carousel" #productCarousel role="list" (scroll)="onCarouselScroll()">
+      <!-- Skeleton while loading -->
+      <ng-container *ngIf="isLoading">
+        <div class="skeleton-card" *ngFor="let n of skeletonItems" aria-hidden="true">
+          <div class="skeleton-img"></div>
+          <div class="skeleton-body">
+            <div class="skeleton-line price"></div>
+            <div class="skeleton-line brand"></div>
+            <div class="skeleton-line title"></div>
+            <div class="skeleton-line short"></div>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- Products -->
       <lib-product-card
-        *ngFor="let product of products$ | async; trackBy: trackById"
+        *ngFor="let product of (products$ | async) ?? []; trackBy: trackById"
         [product]="product"
         (click)="navigateToProduct(product)"
         role="listitem">
       </lib-product-card>
     </div>
 
-    <button type="button" class="carousel-btn right" (click)="scrollProducts(1)" aria-label="Scroll right">›</button>
+    <button type="button" class="carousel-btn right" (click)="scrollProducts(1)" aria-label="Scroll right">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
   </div>
 </div>

@@ -9,7 +9,7 @@ export const environment = {
   flower_power_api_key: '564ee591-42df-46d9-91c0-ff3507e316ec',
   aeropay_api_key: '98c66a5e-3cfc-4826-9777-04f6c8a314e6',
   aeropay_api_secret: '86dd76cb-1b06-42ae-8910-648eca263126',
-  aeropay_url: "https://staging-api.aeropay.com",
+  aeropay_url: "https://api.sandbox-pay.aero.inc",
   aeropay_merchant_id: 1977,
   db_api_key: 'caf0c918d083b815a16fe0546e3802de4423e9b33c26aba8e1fa2a614966978d',
   flowhub_location_rochester: '0e443789-178c-45aa-aefb-e4f55fe46b84',

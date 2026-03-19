@@ -1,117 +1,493 @@
 <div *ngIf="product" class="single-product">
-  <button class="back-btn" (click)="goBack()" aria-label="Go back to product list">← Back</button>
 
-  <div class="product-grid">
-    <!-- Media -->
-    <section class="media" aria-label="Product images">
+  <button
+    class="back-btn"
+    (click)="goBack()"
+    aria-label="Go back to product list">
+    ← Back
+  </button>
+
+  <div class="product-layout">
+
+    <!-- ========================= -->
+    <!-- LEFT SIDE – MEDIA        -->
+    <!-- ========================= -->
+    <div class="product-media">
+
       <div class="media-card">
         <img
-          [src]="product.image || 'assets/' + (product.category ? product.category.toLowerCase() + '-general.png' : 'default.png')"
+          [src]="product.image || placeholderFor(product.category, product.title)"
           [alt]="product.title"
-          class="media-img"
           loading="eager"
           decoding="async"
         />
       </div>
-    </section>
 
-    <!-- Info -->
-    <section class="info" aria-labelledby="prod-title">
-      <!-- badges -->
-      <div class="badges" role="group" aria-label="Product metadata">
-        <span class="chip chip-outline">{{ product.category | titlecase }}</span>
-        <span class="chip chip-accent">{{ product.strainType }}</span>
-        <span *ngIf="product?.thc" class="chip">THC: {{ product.thc }}</span>
+    </div>
+
+
+    <!-- ========================= -->
+    <!-- RIGHT SIDE – INFO        -->
+    <!-- ========================= -->
+    <div class="product-info">
+
+      <!-- ---------- META ROW ---------- -->
+      <div class="meta-row">
+        <span class="chip chip-outline">
+          {{ product.category | titlecase }}
+        </span>
+
+        <span *ngIf="product.strainType"
+              class="chip chip-accent">
+          {{ product.strainType }}
+        </span>
+
+        <span *ngIf="potencyEntries.length"
+              class="chip chip-data">
+          {{ potencyEntries[0].value | number:'1.0-2' }}% THC
+        </span>
+
+        <span *ngIf="totalTerpenesDisplay"
+              class="chip chip-data">
+          {{ totalTerpenesDisplay }} Terps
+        </span>
       </div>
 
-      <!-- title & brand -->
+
+      <!-- ---------- BRAND + TITLE ---------- -->
       <p class="brand">{{ product.brand }}</p>
-      <h1 id="prod-title" class="title">{{ product.title }}</h1>
 
-      <!-- 🟢 Discount / Deal Banner -->
-      <div *ngIf="hasDeal" class="deal-banner">
-        <ng-container *ngIf="isBogo; else normalDiscount">
+      <h1 class="product-title">
+        {{ product.title }}
+      </h1>
+
+
+      <!-- ========================= -->
+      <!-- DEALS / DISCOUNTS        -->
+      <!-- ========================= -->
+      <div *ngIf="hasDiscount && !bundleDeal"
+           class="deal-section">
+
+        <!-- BOGO -->
+        <div *ngIf="activeBogo" class="bogo-ui">
+
+          <!-- BUY PRODUCT VIEW -->
+          <ng-container *ngIf="isBuyProduct">
+            <strong>{{ activeBogo.name }}</strong>
+            <p class="muted">{{ activeBogo.description }}</p>
+
+            <div class="bogo-products">
+              <div *ngFor="let p of bogoRelatedProducts"
+                   class="bogo-card">
+
+               <div class="discount-thumb">
+                <img [src]="p.image || placeholderFor(p.category, p.title)" />
+              </div>
+
+
+
+                <div class="bogo-info">
+                  <p class="bogo-title">{{ p.title }}</p>
+                  <p class="bogo-free">FREE</p>
+                </div>
+
+                <button
+                  class="bogo-add"
+                  [class.added]="isDealItemAdded(p.id)"
+                  [disabled]="isDealItemAdded(p.id)"
+                  (click)="addDealItemToCart(p, activeBogo.getQty)">
+
+                  <ng-container *ngIf="!isDealItemAdded(p.id); else addedFree">
+                    Add Free Item
+                  </ng-container>
+
+                  <ng-template #addedFree>✓ Added</ng-template>
+                </button>
+
+              </div>
+            </div>
+          </ng-container>
+
+
+          <!-- REWARD PRODUCT VIEW -->
+          <ng-container *ngIf="isRewardProduct">
+            <strong>Free with Purchase</strong>
+
+            <p class="muted">
+              Buy {{ activeBogo.buyQty }} of the items below to get this free.
+            </p>
+
+            <div class="bogo-products">
+              <div *ngFor="let p of bogoRelatedProducts"
+                   class="bogo-card">
+
+               <div class="discount-thumb">
+                  <img [src]="p.image || placeholderFor(p.category, p.title)" />
+                </div>
+
+
+                <div class="bogo-info">
+                  <p class="bogo-title">{{ p.title }}</p>
+                </div>
+
+                <button
+                  class="bogo-add"
+                  [class.added]="isDealItemAdded(p.id)"
+                  [disabled]="isDealItemAdded(p.id)"
+                  (click)="addDealItemToCart(p, activeBogo.buyQty)">
+
+                  <ng-container *ngIf="!isDealItemAdded(p.id); else addedBuy">
+                    Add {{ activeBogo.buyQty }}
+                  </ng-container>
+
+                  <ng-template #addedBuy>✓ Added</ng-template>
+                </button>
+
+              </div>
+            </div>
+          </ng-container>
+
+        </div>
+
+
+        <!-- PERCENT / FLAT DEAL -->
+        <div *ngIf="!activeBogo && !bundleDeal && priceDiscount">
+
+          <ng-container *ngIf="isCartDeal; else simplePriceDrop">
+
+            <strong>
+              {{ priceDiscount?.name || ('Buy ' + cartDealMinQty + ' to Save') }}
+            </strong>
+
+            <p class="muted">
+              Add <strong>{{ cartDealMinQty }}</strong> to unlock
+              <ng-container *ngIf="priceDiscount.kind === 'flat'">
+                <strong>{{ priceDiscount.value | currency }}</strong> off
+              </ng-container>
+              <ng-container *ngIf="priceDiscount.kind === 'percent'">
+                <strong>{{ priceDiscount.value }}%</strong> off
+              </ng-container>
+            </p>
+
+            <div class="bogo-products">
+              <div *ngFor="let p of dealRelatedProducts"
+                   class="bogo-card">
+
+               <div class="discount-thumb">
+                  <img [src]="p.image || placeholderFor(p.category, p.title)" />
+                </div>
+
+
+                <div class="bogo-info">
+                  <p class="bogo-title">{{ p.title }}</p>
+                  <p class="muted">{{ p.price | currency }}</p>
+                </div>
+
+                <button
+                  class="bogo-add"
+                  [class.added]="isDealItemAdded(p.id)"
+                  [disabled]="isDealItemAdded(p.id)"
+                  (click)="addDealItemToCart(p, 1)">
+
+                  <ng-container *ngIf="!isDealItemAdded(p.id); else addedCartDeal">
+                    Add 1
+                  </ng-container>
+
+                  <ng-template #addedCartDeal>✓ Added</ng-template>
+                </button>
+
+              </div>
+            </div>
+
+          </ng-container>
+
+          <ng-template #simplePriceDrop>
+            <strong>{{ priceDiscount?.name || discountLabel }}</strong>
+            <p *ngIf="priceDiscount.description"
+               class="muted">
+              {{ priceDiscount.description }}
+            </p>
+          </ng-template>
+
+        </div>
+
+      </div>
+
+
+      <!-- ========================= -->
+      <!-- PRICE CARD               -->
+      <!-- ========================= -->
+      <div class="price-card">
+
+        <div class="price-display">
+          <ng-container *ngIf="isPriceDiscounted; else regularPrice">
+            <span class="price-new">
+              {{ discountedPrice | currency }}
+            </span>
+            <span class="price-old">
+              {{ product.price | currency }}
+            </span>
+          </ng-container>
+
+          <ng-template #regularPrice>
+            <span class="price-main">
+              {{ displayPrice | currency }}
+            </span>
+          </ng-template>
+        </div>
+
+
+        <!-- DELI TIERS -->
+        <div *ngIf="isDeli" class="weights">
+          <label>Amount</label>
+
+          <div class="weight-chips">
+            <label *ngFor="let t of product?.weightTierInformation"
+                   [class.active]="t === selectedTier">
+
+              <input
+                type="radio"
+                name="tier"
+                [checked]="t === selectedTier"
+                (change)="selectTier(t)" />
+
+              {{ t.name }}
+            </label>
+          </div>
+        </div>
+
+
+        <!-- Quantity -->
+        <div class="qty-selector">
+          <button (click)="decreaseQuantity()">−</button>
+          <span>{{ quantity }}</span>
+          <button (click)="increaseQuantity()">+</button>
+        </div>
+
+
+        <!-- Add to Cart -->
+        <button
+          class="add-to-cart"
+          (click)="addToCart()"
+          [disabled]="isAddingToCart">
+
+          <span *ngIf="!isAddingToCart">
+            Add to Cart – <ng-container *ngIf="isPriceDiscounted; else regularPrice">
           <span>
-            Buy {{ product['bogoRules'][0]?.buy_quantity }} Get
-            {{ product['bogoRules'][0]?.get_quantity }}
-            {{ product['bogoRules'][0]?.discount_value || product['bogoRules'][0]?.discount_percent }}% Off
+            {{ discountedPrice | currency }}
           </span>
+          </ng-container>
+           <ng-template #regularPrice>
+            <span>
+              {{ displayPrice | currency }}
+            </span>
+          </ng-template>
+          </span>
+
+          <span *ngIf="isAddingToCart">
+            Adding…
+          </span>
+
+        </button>
+
+      </div>
+
+
+      <!-- ========================= -->
+      <!-- BUNDLE SECTION            -->
+      <!-- ========================= -->
+      <div *ngIf="bundleDeal"
+           class="bundle-container">
+
+        <div class="bundle-header">
+          <h3>Bundle Deal</h3>
+          <p>{{ bundleItems.length }} items included</p>
+        </div>
+
+        <div class="bundle-items">
+          <div class="bundle-item"
+               *ngFor="let item of bundleItems">
+
+            <img [src]="item.image || placeholderFor(item.category, item.title)" />
+
+            <div>
+              <p>{{ item.brand }} — {{ item.title }}</p>
+            </div>
+
+            <div>{{ item.price | currency }}</div>
+          </div>
+        </div>
+
+        <button
+          class="bundle-cta"
+          (click)="addBundleToCart()"
+          [disabled]="isAddingBundle">
+
+          <span *ngIf="!isAddingBundle">
+            Add Entire Bundle to Cart
+          </span>
+
+          <span *ngIf="isAddingBundle">
+            Adding Bundle…
+          </span>
+
+        </button>
+
+      </div>
+
+
+      <!-- ========================= -->
+      <!-- DESCRIPTION               -->
+      <!-- ========================= -->
+      <div class="section">
+        <h3>Description</h3>
+
+        <!-- If description exists -->
+        <ng-container *ngIf="product?.desc?.trim()?.length; else noDescription">
+          <p>
+            {{ truncatedDescription }}
+            <button
+              *ngIf="(product?.desc?.length ?? 0) > 300"
+              (click)="toggleDescription()"
+              class="toggle-btn">
+              {{ showFullDescription ? 'Show Less' : 'Read More' }}
+            </button>
+          </p>
         </ng-container>
 
-        <ng-template #normalDiscount>
-          <span>{{ product.discountDescription || 'On Sale!' }}</span>
+        <!-- Fallback -->
+        <ng-template #noDescription>
+          <p class="muted no-description">
+            No description available.
+          </p>
         </ng-template>
       </div>
 
-      <!-- 🏷️ Price Section -->
-      <div class="price-cta">
-        <ng-container *ngIf="isOnSale; else regularPrice">
-          <p class="price old">{{ product.price | currency }}</p>
-          <p class="price new">{{ product.discountedPrice | currency }}</p>
-        </ng-container>
 
-        <ng-template #regularPrice>
-          <p class="price">{{ product.price | currency }}</p>
-        </ng-template>
 
-        <div class="qty-wrap" aria-label="Quantity selector">
-          <button class="qty-btn" (click)="decreaseQuantity()" [disabled]="quantity <= 1" aria-label="Decrease quantity">−</button>
-          <span class="qty" aria-live="polite">{{ quantity }}</span>
-          <button class="qty-btn" (click)="increaseQuantity()" [disabled]="quantity >= product.quantity" aria-label="Increase quantity">+</button>
+      <!-- ========================= -->
+      <!-- SCIENCE SECTION           -->
+      <!-- ========================= -->
+          <!-- Potency + Terpenes -->
+<div *ngIf="product['potency']" class="science-section">
+
+  <!-- POTENCY -->
+  <div *ngIf="potencyEntries.length" class="potency-card">
+    <h3>Potency</h3>
+
+    <div class="potency-grid">
+      <div
+        *ngFor="let p of potencyEntries"
+        class="potency-item"
+      >
+        <span class="potency-label">{{ p.label }}</span>
+        <span class="potency-value">{{ p.value | number:'1.0-2' }}%</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- TERPENES -->
+  <div *ngIf="sortedTerpenes.length" class="terpene-card">
+    <h3>
+      Terpenes
+      <span *ngIf="totalTerpenesDisplay" class="muted">
+        ({{ totalTerpenesDisplay }} Total)
+      </span>
+    </h3>
+
+    <div class="terpene-layout">
+
+      <!-- Donut -->
+   <div class="terpene-donut">
+  <svg viewBox="0 0 42 42" class="donut">
+
+    <!-- Background -->
+    <circle
+      class="donut-bg"
+      cx="21"
+      cy="21"
+      r="15.9155"
+    ></circle>
+
+    <!-- Segments -->
+    <ng-container *ngFor="let t of terpeneChartData; let i = index">
+    <circle
+      class="donut-segment"
+      cx="21"
+      cy="21"
+      r="15.9155"
+      [attr.stroke]="terpeneColor(i)"
+      [attr.stroke-dasharray]="t.percent + ' ' + (100 - t.percent)"
+      [attr.stroke-dashoffset]="-t.offset"
+      (pointerenter)="hoveredTerpene = t"
+      (pointerleave)="hoveredTerpene = null"
+    ></circle>
+
+    </ng-container>
+
+    <!-- Center Label -->
+   <!-- Center Label -->
+<g transform="rotate(90 21 21)">
+  <text
+    x="21"
+    y="19"
+    text-anchor="middle"
+    class="donut-text-title"
+  >
+    {{ hoveredTerpene ? hoveredTerpene.name : 'Total Terpenes' }}
+  </text>
+
+  <text
+    x="21"
+    y="23"
+    text-anchor="middle"
+    class="donut-text-value"
+  >
+    {{ hoveredTerpene 
+        ? (hoveredTerpene.percent | number:'1.0-1') + '%' 
+        : totalTerpenesDisplay }}
+  </text>
+</g>
+
+
+  </svg>
+
+</div>
+
+
+
+      <!-- List -->
+      <div class="terpene-list">
+        <div
+          *ngFor="let t of terpeneChartData; let i = index"
+          class="terpene-row"
+        >
+          <span class="dot" [style.background]="terpeneColor(i)"></span>
+
+          <span class="terpene-name">
+            {{ t.name }}
+          </span>
+
+          <div class="terpene-bar">
+            <div
+              class="terpene-fill"
+              [style.width.%]="t.percent"
+              [style.background]="terpeneColor(i)"
+            ></div>
+          </div>
+
+          <span class="terpene-value">
+            {{ t.value }} {{ t.unit }}
+          </span>
         </div>
+
       </div>
 
-      <!-- stock -->
-      <p *ngIf="(product?.quantity ?? 0) < 5" class="stock-pill" aria-live="polite">
-        Only <strong>{{ product.quantity }}</strong> left
-      </p>
+    </div>
+  </div>
 
-      <!-- weights -->
-      <div *ngIf="availableWeights.length" class="weights" role="radiogroup" aria-label="Select weight">
-        <label class="weights-label">Weight</label>
-        <div class="weight-chips">
-          <label
-            *ngFor="let w of availableWeights; trackBy: trackByVal"
-            class="weight-chip"
-            [class.active]="w === selectedWeight"
-          >
-            <input
-              type="radio"
-              name="weight"
-              [value]="w"
-              [(ngModel)]="selectedWeight"
-              (change)="onWeightChange(w)"
-              [attr.aria-checked]="selectedWeight === w"
-            />
-            {{ w }}
-          </label>
-        </div>
-      </div>
+</div>
 
-      <!-- add to cart -->
-      <button
-        class="cta"
-        (click)="addToCart()"
-        [disabled]="isAddingToCart"
-        [attr.aria-label]="isAddingToCart ? 'Adding to cart' : 'Add to cart'">
-        <span *ngIf="!isAddingToCart">Add to Cart</span>
-        <span *ngIf="isAddingToCart">Adding…</span>
-      </button>
-
-      <!-- details -->
-      <div class="details" role="region" aria-labelledby="details-h">
-        <h3 id="details-h">Details</h3>
-        <p class="desc">
-          {{ truncatedDescription }}
-          <button
-            *ngIf="(product?.desc?.length ?? 0) > 300"
-            (click)="toggleDescription()"
-            class="toggle-description"
-            [attr.aria-expanded]="showFullDescription">
-            {{ showFullDescription ? 'Show Less' : 'Read More' }}
-          </button>
-        </p>
-      </div>
-    </section>
+    </div>
   </div>
 </div>

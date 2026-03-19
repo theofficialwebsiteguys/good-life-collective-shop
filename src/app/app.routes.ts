@@ -29,7 +29,22 @@ export const routes: Routes = [
           { path: 'orders', component: OrdersComponent },
           { path: 'users', component: UsersComponent },
           { path: 'budtender-sales', component: BudtenderSalesComponent },
-          { path: 'discounts', component: DiscountsComponent },
+          {
+          path: 'discounts/new',
+          loadComponent: () =>
+            import('good-life-admin-dashboard')
+              .then(m => m.DiscountsBuilderComponent),
+          },
+          {
+            path: 'discounts/:id/edit',
+            loadComponent: () =>
+              import('good-life-admin-dashboard')
+                .then(m => m.DiscountsBuilderComponent),
+          },
+          {
+            path: 'discounts',
+            component: DiscountsComponent,
+          },
           { path: 'tools', component: ToolsComponent },
           // add more child routes here as needed
           { path: '', redirectTo: 'overview', pathMatch: 'full' }

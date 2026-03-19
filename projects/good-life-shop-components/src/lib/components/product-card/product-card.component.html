@@ -1,14 +1,14 @@
 <div
   class="card surface"
   tabindex="0"
-  (keyup.enter)="addToCart($event)"
-  (keyup.space)="addToCart($event)"
+  (keyup.enter)="onCtaClick($event)"
+  (keyup.space)="onCtaClick($event)"
 >
   <!-- IMAGE STAGE -->
   <div class="stage" [class.loading]="!imageLoaded">
     <img
       class="photo"
-      [src]="product.image || placeholderFor(product.category)"
+      [src]="product.image || placeholderFor(product.category, product.title)"
       [alt]="product.title"
       loading="lazy"
       decoding="async"
@@ -18,30 +18,55 @@
     <div class="halo" aria-hidden="true"></div>
   </div>
 
-  <!-- BODY -->
-  <div class="body">
-    <!-- SALE OR BOGO -->
-    <div *ngIf="isOnSale || isBogo" class="sale-banner">
-      <span *ngIf="isOnSale">{{ product.discountDescription }}</span>
-      <span *ngIf="isBogo" class="sale-text bogo">
-        Buy {{ product['bogoRules'][0]?.buy_quantity }}
-        Get {{ product['bogoRules'][0]?.get_quantity }}
-        {{
-          product['bogoRules'][0]?.discount_type === 'percent'
-            ? (product['bogoRules'][0]?.discount_value ||
-              product['bogoRules'][0]?.discount_percent ||
-              0) + '% Off'
-            : '$' + (product['bogoRules'][0]?.discount_value || 0) + ' Off'
-        }}
-      </span>
-    </div>
+    <!-- BODY -->
+    <div class="body">
+      <div *ngIf="hasDiscount" class="sale-banner">
+
+        <div *ngIf="bogo" class="sale-chip bogo">
+           <span class="sub" *ngIf="bogo.name">
+            {{ bogo.name }}
+          </span> 
+          <br>
+          <strong *ngIf="bogo.role === 'buy'">
+            <ng-container *ngIf="bogo.getProductId === product.posProductId; else crossProduct">
+              Buy {{ bogo.buyQty }} Get {{ bogo.getQty }} at a discount.
+            </ng-container>
+
+            <ng-template #crossProduct>
+              <!-- Buy {{ bogo.buyQty }} → Get a Free Item -->
+               {{ bogo.description }}
+            </ng-template>
+          </strong>
+
+
+          <strong *ngIf="bogo.role === 'get'">
+            Discounted with qualifying purchase
+          </strong>
+
+          <!-- <span class="sub" *ngIf="bogo.description">
+            {{ bogo.description }}
+          </span> -->
+        </div>
+
+
+        <!-- Percent / Flat -->
+        <div *ngIf="!bogo && dealBannerText" class="sale-chip discount">
+          <strong>{{ dealBannerText }}</strong>
+        </div>
+
+        <div *ngIf="bundle" class="sale-chip bundle">
+          Part of a {{ bundle.bundleSize }}-item bundle
+        </div>
+
+
+      </div>
 
     <!-- DETAILS -->
     
-    <div class="price" [class.discounted]="isOnSale">
-      <ng-container *ngIf="isOnSale; else regularPrice">
+   <div class="price" [class.discounted]="isPriceDiscounted">
+      <ng-container *ngIf="isPriceDiscounted; else regularPrice">
         <span class="old">{{ product.price | currency }}</span>
-        <span class="new">{{ product.discountedPrice | currency }}</span>
+        <span class="new">{{ discountedPrice | currency }}</span>
       </ng-container>
       <ng-template #regularPrice>
         <span class="normal">{{ product.price | currency }}</span>
@@ -70,19 +95,25 @@
 
     <!-- THC / CBD -->
     <div class="meta">
-      <span class="pill tiny">{{ product.thc }} THC</span>
+      <span class="pill tiny">
+        THC {{ thcDisplay }}
+      </span>
       <span class="dot"></span>
-      <span class="pill tiny">{{ product.cbd }} CBD</span>
+      <span class="pill tiny">
+        CBD {{ cbdDisplay }}
+      </span>
     </div>
 
+
     <!-- ADD TO CART -->
-    <button
-      type="button"
-      class="cta-bottom"
-      (click)="addToCart($event)"
-      [disabled]="isDisabled"
-    >
-      {{ isAdded ? 'Added to Cart' : 'Add to Cart' }}
-    </button>
+   <button
+    type="button"
+    class="cta-bottom"
+    (click)="onCtaClick($event)"
+    [disabled]="isDisabled"
+  >
+    {{ hasWeightTiers ? 'Select Options' : (isAdded ? 'Added to Cart' : 'Add to Cart') }}
+  </button>
+
   </div>
 </div>

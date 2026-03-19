@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
-import { BehaviorSubject, catchError, from, map, Observable } from 'rxjs';
+import { BehaviorSubject, catchError, combineLatest, filter, from, map, Observable, of, switchMap, take } from 'rxjs';
 
 import { AuthService } from './auth.service';
 import { environment } from '../../environments/environment.prod';
@@ -9,6 +9,7 @@ import { CapacitorHttp, HttpResponse } from '@capacitor/core';
 import { ProductsService } from './products.service';
 import { NavigationService } from './navigation.service';
 import { ConfigService } from './config.service';
+import { DiscountsService } from './discounts.service';
 
 export interface Banner {
   image: string;
@@ -49,7 +50,8 @@ export class SettingsService {
     private http: HttpClient,
     private productsService: ProductsService,
     private navService: NavigationService,
-    private configService: ConfigService
+    private configService: ConfigService,
+    private discountsService: DiscountsService
   ) {
     this.authService.isLoggedIn().subscribe((isLoggedIn) => {
       this.isLoggedIn = isLoggedIn;
@@ -78,16 +80,18 @@ export class SettingsService {
 
     try {
       const response = await CapacitorHttp.request(options);
-      const locations = response.data.locations
-       .map((location: any) => {
-        let key = 'UNKNOWN';
+      const locations = response.data.locations.map((location: any) => {
+      let key = 'UNKNOWN';
 
-        if (location.name.includes('Rochester')) key = 'ROCHESTER';
-        else if (location.name.includes('CANANDAIGUA')) key = 'CANANDAIGUA';
+      if (location.name.includes('Rochester')) key = 'ROCHESTER';
+      else if (location.name.includes('CANANDAIGUA')) key = 'CANANDAIGUA';
+      const state = this.extractStateFromAddress(location.address);
 
         return {
           ...location,
           key,
+          state,                // ✅ NY / OR
+          taxRate: this.getTaxRateForState(state), // ✅ computed once
         };
       });
 
@@ -99,13 +103,178 @@ export class SettingsService {
     }
   }
 
-  setSelectedLocationId(id: string): void {
-    this.selectedLocationIdSubject.next(id);
-    localStorage.setItem('selectedLocationId', id);
-    this.productsService.fetchProducts(id).subscribe({
-      error: (e) => console.error('Error fetching products:', e),
-    });
+  private getTaxRateForState(state: string): number {
+    switch (state) {
+      case 'OR':
+        // ⚠️ Replace with your exact Oregon cannabis effective rate
+        return 0.2;
+      case 'NY':
+      default:
+        return 0.13;
+    }
   }
+
+  getSelectedLocation(): any | null {
+    const id = this.getSelectedLocationId();
+    return this.locationsSubject.value.find(l => l.location_id === id) ?? null;
+  }
+
+  getSelectedTaxRate(): number {
+    return this.getSelectedLocation()?.taxRate ?? 0.13;
+  }
+
+  getSelectedLocationState(): string {
+    return this.getSelectedLocation()?.state ?? 'NY';
+  }
+
+
+
+  // setSelectedLocationId(id: string): void {
+  //   this.selectedLocationIdSubject.next(id);
+  //   localStorage.setItem('selectedLocationId', id);
+  //   this.productsService.fetchProducts(id).subscribe({
+  //     error: (e) => console.error('Error fetching products:', e),
+  //   });
+  // }
+
+  private extractStateFromAddress(address?: string): string {
+    if (!address) return 'NY'; // safe default
+
+    // Matches ", NY 12345" or ", OR 97103"
+    const match = address.match(/,\s*([A-Z]{2})\s+\d{5}/i);
+    return match ? match[1].toUpperCase() : 'NY';
+  }
+
+
+// setSelectedLocationId(id: string): void {
+//   this.selectedLocationIdSubject.next(id);
+//   localStorage.setItem('selectedLocationId', id);
+
+//   combineLatest([
+//       this.locations$,
+//     this.productsService.fetchProducts(id),
+//     this.discountsService.loadDiscounts(id),
+//   ]).subscribe({
+//     next: ([locations, products, dr]) => {
+//       const discounts = dr?.discounts ?? [];
+
+//         const location = locations.find(l => l.location_id === id);
+//        console.log(location)
+//       const isOregon = location?.state === 'OR';
+//       console.log(isOregon)
+//       const taxRate = location?.taxRate ?? 0;
+//       console.log(taxRate)
+
+//       // ✅ 1️⃣ Normalize product prices ONCE
+//       const normalizedProducts = products.map((p: any) => {
+//       const basePrice =
+//         typeof p.basePrice === 'number'
+//           ? p.basePrice
+//           : Number(p.price);
+
+
+//         if (!isOregon) {
+//           return {
+//             ...p,
+//             basePrice,
+//             price: basePrice,        // unchanged
+//             isTaxIncluded: false,
+//           };
+//         }
+
+//         const taxedPrice = Number(
+//           (basePrice * (1 + taxRate)).toFixed(2)
+//         );
+
+//         return {
+//           ...p,
+//           basePrice,
+//           price: taxedPrice,        // 🔥 baked-in tax
+//           isTaxIncluded: true,
+//         };
+//       });
+
+//       // Store discounts globally
+//       this.discountsService.setDiscounts(discounts);
+
+//       // Apply to product listings (visual only)
+//       const enriched = this.discountsService.applyDiscountsToProducts(
+//         normalizedProducts,
+//         discounts
+//       );
+
+//       this.productsService.setProducts(enriched);
+//     },
+//   });
+// }
+
+locationsReady$ = this.locations$.pipe(
+  filter(locs => locs.length > 0),
+  take(1)
+);
+
+setSelectedLocationId(id: string): void {
+  localStorage.setItem('selectedLocationId', id);
+
+  this.locationsReady$
+    .pipe(
+      switchMap(locations => {
+        this.selectedLocationIdSubject.next(id);
+
+        return combineLatest([
+          of(locations),
+          this.productsService.fetchProducts(id),
+          this.discountsService.loadDiscounts(id),
+        ]);
+      }),
+      take(1)
+    )
+    .subscribe(([locations, products, dr]) => {
+      const discounts = dr?.discounts ?? [];
+
+      const location = locations.find(
+        l => String(l.location_id) === String(id)
+      );
+
+      if (!location) {
+        console.error('❌ Location missing during normalization', id);
+        return;
+      }
+
+      const isOregon = location.state === 'OR';
+      const taxRate = location.taxRate ?? 0;
+
+      const normalizedProducts = products.map((p: any) => {
+        const basePrice =
+          typeof p.rawPrice === 'number'
+            ? p.rawPrice
+            : typeof p.basePrice === 'number'
+              ? p.basePrice
+              : Number(p.price);
+
+        if (!isOregon) {
+          return { ...p, basePrice, price: basePrice, isTaxIncluded: false };
+        }
+
+        return {
+          ...p,
+          basePrice,
+          price: Number((basePrice * (1 + taxRate)).toFixed(2)),
+          isTaxIncluded: true,
+        };
+      });
+
+      this.discountsService.setDiscounts(discounts);
+
+      this.productsService.setProducts(
+        this.discountsService.applyDiscountsToProducts(
+          normalizedProducts,
+          discounts
+        )
+      );
+    });
+}
+
 
   getSelectedLocationKey(): string | null {
     const venueId = this.getSelectedLocationId();
@@ -345,22 +514,18 @@ export class SettingsService {
     return from(CapacitorHttp.request(options).then(response => response.data));
   }
 
+
   async getDeliveryZone(): Promise<any> {
     const options = {
       url: `${environment.apiUrl}/businesses/zone`,
       method: 'GET',
       headers: this.getHeaders()
     };
-  
-    try {
-      const response = await CapacitorHttp.request(options);
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching delivery zone:', error);
-      throw error;
-    }
+
+    const response = await CapacitorHttp.request(options);
+    return response.data;
   }
-  
+
   async checkAddressInZone(businessId: number, address: string): Promise<{ inZone: boolean, lat: number, lng: number }> {
     const options = {
       url: `${environment.apiUrl}/businesses/zone/check`,
@@ -390,10 +555,23 @@ export class SettingsService {
     return from(CapacitorHttp.request(options).then(response => response.data));
   }
 
-  /** Synchronous snapshot (returns null until fetched) */
-  getLoyaltySnapshot(): LoyaltyConfig | null {
-    return this.loyaltySubject.value;
-  }
+  async getDiscounts(): Promise<any[]> {
+    const location_id = this.getSelectedLocationId() ?? '';
+    const options = {
+      url: `${environment.apiUrl}/alpine/discounts${location_id ? `?location_id=${location_id}` : ''}`,
+      method: 'GET',
+      headers: { 'x-auth-api-key': environment.db_api_key },
+    };
 
+    try {
+      const response = await CapacitorHttp.request(options);
+
+      console.log('Fetched discounts:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching discounts:', error);
+      return [];
+    }
+  }
   
 }

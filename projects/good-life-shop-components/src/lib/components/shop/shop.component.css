@@ -121,9 +121,7 @@
 .shop-shell { position: relative; }
 .bg-gradient {
   position: fixed; inset: 0;
-  background: radial-gradient(1200px 600px at 10% -10%, #2b3b35 0%, rgba(0,0,0,0) 60%),
-              radial-gradient(900px 600px at 90% 0%, #24303f 0%, rgba(0,0,0,0) 55%),
-              linear-gradient(180deg, #0a0a0a 0%, #0d0d0d 100%);
+  background: #1f2020;
   z-index: -1;
 }
 
@@ -189,17 +187,20 @@
 .chip-option { display: contents; }
 .chip {
   display: inline-flex; align-items: center; gap: 6px;
-  padding: 6px 10px; border-radius: 999px;
-  background: rgba(255,255,255,.06); color: #e7efe9;
-  border: 1px solid rgba(255,255,255,.08); font-size: .85rem;
-  transition: background .15s ease, transform .15s ease;
+  padding: 5px 12px; border-radius: 999px;
+  background: rgba(255,255,255,.06); color: #dde8e4;
+  border: 1px solid rgba(255,255,255,.1); font-size: .84rem;
+  font-weight: 500; cursor: pointer; user-select: none;
+  transition: background .15s ease, border-color .15s ease, color .15s ease, transform .1s ease;
 }
 .filter-options input { appearance: none; position: absolute; pointer-events: none; }
-.filter-options input:checked + .chip {
-  background: rgba(89, 201, 152, .2);
-  border-color: rgba(89, 201, 152, .6);
+.filter-options input:checked + .chip,
+.chip.chip-active {
+  background: rgba(105, 252, 237, .15);
+  border-color: rgba(105, 252, 237, .5);
+  color: #b2fff8;
 }
-.chip:hover { background: rgba(255,255,255,.1); transform: translateY(-1px); }
+.chip:hover { background: rgba(255,255,255,.11); transform: translateY(-1px); }
 
 
 /* Mobile sheet */
@@ -214,10 +215,12 @@
   .sidebar {
     position: fixed; inset: 0 auto 0 0; width: 85vw; max-width: 360px;
     transform: translateX(-105%); z-index: 1001;
+    border-radius: 0;
   }
   .sidebar.open { transform: translateX(0); }
   .backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 1000; }
 }
+
 
 /* ---------- Controls (sticky header) ---------- */
 .controls {
@@ -414,6 +417,179 @@ body.modal-open {
   padding: 8px 0;
   overflow-y: auto;
   scrollbar-width: thin;
+}
+
+/* ── Active / variant chip states ────────────────────────── */
+.chip.chip-active {
+  background: rgba(105, 252, 237, 0.15);
+  border-color: rgba(105, 252, 237, 0.5);
+  color: #69fced;
+}
+
+/* On Sale chip */
+.deal-chip {
+  border-color: rgba(255, 200, 50, 0.25);
+  color: #c8a84b;
+}
+
+.deal-chip.chip-active {
+  background: rgba(255, 200, 50, 0.15);
+  border-color: rgba(255, 200, 50, 0.55);
+  color: #f5c518;
+}
+/* Strain chips — colors match product card pills */
+.strain-chip.strain-sativa {
+  background: rgba(89, 201, 152, 0.12);
+  border-color: rgba(89, 201, 152, 0.4);
+  color: #59c998;
+}
+
+.strain-chip.strain-sativa.chip-active {
+  background: rgba(89, 201, 152, 0.25);
+  border-color: rgba(89, 201, 152, 0.8);
+  color: #59c998;
+}
+
+.strain-chip.strain-hybrid {
+  background: rgba(255, 209, 102, 0.12);
+  border-color: rgba(255, 209, 102, 0.4);
+  color: #ffd166;
+}
+
+.strain-chip.strain-hybrid.chip-active {
+  background: rgba(255, 209, 102, 0.25);
+  border-color: rgba(255, 209, 102, 0.8);
+  color: #ffd166;
+}
+
+.strain-chip.strain-indica {
+  background: rgba(129, 145, 255, 0.12);
+  border-color: rgba(129, 145, 255, 0.4);
+  color: #8191ff;
+}
+
+.strain-chip.strain-indica.chip-active {
+  background: rgba(129, 145, 255, 0.25);
+  border-color: rgba(129, 145, 255, 0.8);
+  color: #8191ff;
+}
+
+/* Sativa Dominant — same green family as sativa */
+.strain-chip.strain-sativa-dom {
+  background: rgba(89, 201, 152, 0.12);
+  border-color: rgba(89, 201, 152, 0.4);
+  color: #59c998;
+}
+
+.strain-chip.strain-sativa-dom.chip-active {
+  background: rgba(89, 201, 152, 0.25);
+  border-color: rgba(89, 201, 152, 0.8);
+  color: #59c998;
+}
+
+/* Indica Dominant — same purple family as indica */
+.strain-chip.strain-indica-dom {
+  background: rgba(129, 145, 255, 0.12);
+  border-color: rgba(129, 145, 255, 0.4);
+  color: #8191ff;
+}
+
+.strain-chip.strain-indica-dom.chip-active {
+  background: rgba(129, 145, 255, 0.25);
+  border-color: rgba(129, 145, 255, 0.8);
+  color: #8191ff;
+}
+
+/* Vape Type chips */
+.vape-type-chip.vape-type-vape-aio {
+  background: rgba(255, 160, 100, 0.12);
+  border-color: rgba(255, 160, 100, 0.4);
+  color: #ffa064;
+}
+
+.vape-type-chip.vape-type-vape-aio.chip-active {
+  background: rgba(255, 160, 100, 0.25);
+  border-color: rgba(255, 160, 100, 0.8);
+  color: #ffa064;
+}
+
+.vape-type-chip.vape-type-vape-510 {
+  background: rgba(100, 200, 255, 0.12);
+  border-color: rgba(100, 200, 255, 0.4);
+  color: #64c8ff;
+}
+
+.vape-type-chip.vape-type-vape-510.chip-active {
+  background: rgba(100, 200, 255, 0.25);
+  border-color: rgba(100, 200, 255, 0.8);
+  color: #64c8ff;
+}
+
+/* ── THC Range Sliders ─────────────────────────────────────── */
+.potency-section {
+  padding: 8px 0 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.range-row {
+  display: grid;
+  grid-template-columns: 36px 1fr 38px;
+  align-items: center;
+  gap: 8px;
+}
+
+.range-label {
+  font-size: 0.75rem;
+  color: #8a9a96;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.range-val {
+  font-size: 0.8rem;
+  color: #69fced;
+  font-weight: 600;
+  text-align: right;
+  min-width: 34px;
+}
+
+.thc-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.1);
+  outline: none;
+  cursor: pointer;
+}
+
+.thc-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #69fced;
+  cursor: pointer;
+  box-shadow: 0 0 6px rgba(105, 252, 237, 0.4);
+  transition: box-shadow 0.15s;
+}
+
+.thc-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #69fced;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 0 6px rgba(105, 252, 237, 0.4);
+}
+
+.thc-slider::-webkit-slider-thumb:hover {
+  box-shadow: 0 0 10px rgba(105, 252, 237, 0.7);
 }
 
 

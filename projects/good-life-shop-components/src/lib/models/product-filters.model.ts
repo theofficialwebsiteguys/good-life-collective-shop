@@ -58,7 +58,9 @@ export const OPTIONS_DIRECTIONS: DirectionOptions = [
 ];
 
 export const OPTIONS_STRAINS: StrainOptions = [
-  { label: 'Hybrid', value: 'HYBRID' },
+  { label: 'Hybrid', value: '50/50' },
   { label: 'Indica', value: 'INDICA' },
   { label: 'Sativa', value: 'SATIVA' },
+  { label: 'Indica-Dominant', value: 'INDICA-DOM' },
+  { label: 'Sativa-Dominant', value: 'SATIVA-DOM' },
 ];

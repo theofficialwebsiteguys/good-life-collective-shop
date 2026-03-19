@@ -2,145 +2,199 @@
   <!-- Gradient backdrop -->
   <div class="bg-gradient" aria-hidden="true"></div>
 
-    <div class="shop-wrapper">
-  <div class="shop-container">
-    <!-- Sidebar Toggle (mobile) -->
-    <button class="sidebar-toggle" (click)="toggleSidebar()"
-            aria-controls="filterSidebar"
-            [attr.aria-expanded]="isSidebarOpen">
-      ☰ Filters
-    </button>
-    <div class="backdrop" *ngIf="isSidebarOpen" (click)="toggleSidebar()" aria-hidden="true"></div>
-
-    <!-- GLASS SIDEBAR -->
-    <aside id="filterSidebar"
-           class="sidebar glass"
-           [class.open]="isSidebarOpen"
-           role="complementary"
-           aria-label="Filter options">
-      <div class="sidebar-header">
-        <button class="pill pill-ghost" *ngIf="isSidebarOpen" (click)="toggleSidebar()" aria-label="Close filters">Close</button>
-        <button class="pill pill-danger" (click)="clearFilters()" aria-label="Clear all filters">Clear Filters</button>
-      </div>
-
-      <div class="sidebar-scroll">
-        <!-- Strain Types -->
-        <div class="filter-section">
-          <button type="button" class="filter-toggle" (click)="toggleSection('types')"
-                  [attr.aria-expanded]="isExpanded['types']" aria-controls="filter-types">
-            <h3>Strain Type</h3>
-            <span class="dash" [class.expanded]="isExpanded['types']">−</span>
-          </button>
-
-          <div id="filter-types" *ngIf="isExpanded['types']" class="filter-column-list">
-            <label *ngFor="let type of types" class="brand-option">
-              <input type="checkbox"
-                    (change)="toggleTypeFilter(type.name)"
-                    [checked]="selectedTypes.includes(type.name)" />
-              <span>{{ type.name }}</span>
-            </label>
-          </div>
-        </div>
-
-      <!-- Brands -->
-      <div class="filter-section">
-        <button type="button" class="filter-toggle" (click)="toggleSection('brands')"
-                [attr.aria-expanded]="isExpanded['brands']" aria-controls="filter-brands">
-          <h3>Brands</h3>
-          <span class="dash" [class.expanded]="isExpanded['brands']">−</span>
-        </button>
-
-        <div id="filter-brands" *ngIf="isExpanded['brands']" class="brands-column">
-          <ng-container *ngIf="dynamicFilterOptions$ | async as dyn">
-            <label *ngFor="let brand of displayedBrands" class="brand-option">
-              <input type="checkbox" (change)="toggleBrandFilter(brand.value)"
-                    [checked]="selectedBrands.includes(brand.value)" />
-              <span>{{ brand.label }}</span>
-            </label>
-          </ng-container>
-
-          <button *ngIf="hasMoreBrands"
-                  class="show-more-btn"
-                  (click)="toggleShowMoreBrands()"
-                  type="button">
-            {{ showAllBrands ? 'Show Less' : 'Show More' }}
-          </button>
-        </div>
-      </div>
-
-
-
-        <!-- Weights -->
-      <div class="filter-section">
-      <button type="button" class="filter-toggle" (click)="toggleSection('weights')"
-              [attr.aria-expanded]="isExpanded['weights']" aria-controls="filter-weights">
-        <h3>Weight</h3>
-        <span class="dash" [class.expanded]="isExpanded['weights']">−</span>
+  <div class="shop-wrapper">
+    <div class="shop-container">
+      <!-- Sidebar Toggle (mobile) -->
+      <button class="sidebar-toggle" (click)="toggleSidebar()"
+              aria-controls="filterSidebar"
+              [attr.aria-expanded]="isSidebarOpen">
+        ☰ Filters
       </button>
+      <div class="backdrop" *ngIf="isSidebarOpen" (click)="toggleSidebar()" aria-hidden="true"></div>
 
-      <div id="filter-weights" *ngIf="isExpanded['weights']" class="filter-column-list">
-        <ng-container *ngIf="dynamicFilterOptions$ | async as dyn">
-          <label *ngFor="let weight of dyn.weights" class="brand-option">
-            <input type="checkbox"
-                  (change)="toggleWeightsFilter(weight.value)"
-                  [checked]="selectedWeights.includes(weight.value)" />
-            <span>{{ weight.label }}</span>
-          </label>
-        </ng-container>
-      </div>
-    </div>
-
-        <div class="scroll-pad" aria-hidden="true"></div>
-      </div>
-    </aside>
-
-    <!-- MAIN -->
-    <main class="main-content">
-      <!-- Sticky controls -->
-      <div class="controls glass">
-        <!-- Category chips -->
-        <div class="chip-row" role="tablist" aria-label="Product categories">
-          <button *ngFor="let c of categories"
-                  class="chip-btn" role="tab"
-                  [attr.aria-selected]="category === c"
-                  [class.active]="category === c"
-                  (click)="selectCategory(c)">
-            {{ c }}
-          </button>
+      <!-- GLASS SIDEBAR -->
+      <aside id="filterSidebar"
+             class="sidebar glass"
+             [class.open]="isSidebarOpen"
+             role="complementary"
+             aria-label="Filter options">
+        <div class="sidebar-header">
+          <button class="pill pill-ghost" *ngIf="isSidebarOpen" (click)="toggleSidebar()" aria-label="Close filters">Close</button>
+          <button class="pill pill-danger" (click)="clearFilters()" aria-label="Clear all filters">Clear Filters</button>
         </div>
 
-        <!-- Search + Sort -->
-        <div class="sort-search-container">
-          <div class="search-wrap">
-            <svg viewBox="0 0 24 24" class="search-icon" aria-hidden="true"><path d="M10 2a8 8 0 105.293 14.293l4.707 4.707 1.414-1.414-4.707-4.707A8 8 0 0010 2zm0 2a6 6 0 110 12A6 6 0 0110 4z"/></svg>
-            <input type="text" [(ngModel)]="searchQuery" placeholder="Search products…" class="search-input" aria-label="Search products"/>
+        <div class="sidebar-scroll">
+
+          <!-- On Sale -->
+          <div class="filter-section">
+            <button type="button" class="filter-toggle" (click)="toggleSection('deals')"
+                    [attr.aria-expanded]="isExpanded['deals']" aria-controls="filter-deals">
+              <h3>Deals</h3>
+              <span class="dash" [class.expanded]="isExpanded['deals']">−</span>
+            </button>
+            <div id="filter-deals" *ngIf="isExpanded['deals']" class="filter-options">
+              <label class="chip-option">
+                <input type="checkbox" [(ngModel)]="onSaleOnly" />
+                <span class="chip deal-chip" [class.chip-active]="onSaleOnly">On Sale</span>
+              </label>
+            </div>
           </div>
 
-          <label for="sortDropdown" class="visually-hidden">Sort by</label>
-          <select id="sortDropdown" [(ngModel)]="sortOption" class="sort-dropdown" (change)="updateSortOption($event)" aria-label="Sort products by">
-            <option value="RECENT">Newest</option>
-            <option value="PRICE_ASC">Price: Low to High</option>
-            <option value="PRICE_DESC">Price: High to Low</option>
-            <option value="THC_ASC">THC: Low to High</option>
-            <option value="THC_DESC">THC: High to Low</option>
-            <option value="NAME">Alphabetical</option>
-          </select>
+          <!-- Strain Types -->
+          <div class="filter-section">
+            <button type="button" class="filter-toggle" (click)="toggleSection('types')"
+                    [attr.aria-expanded]="isExpanded['types']" aria-controls="filter-types">
+              <h3>Strain Type</h3>
+              <span class="dash" [class.expanded]="isExpanded['types']">−</span>
+            </button>
+            <div id="filter-types" *ngIf="isExpanded['types']" class="filter-options">
+              <label *ngFor="let type of types" class="chip-option">
+                <input type="checkbox"
+                       (change)="toggleTypeFilter(type.value)"
+                       [checked]="selectedTypes.includes(type.value)" />
+                <span class="chip strain-chip strain-{{type.class}}"
+                      [class.chip-active]="selectedTypes.includes(type.value)">
+                  {{ type.label }}
+                </span>
+              </label>
+            </div>
+          </div>
 
-          <lib-cart-icon  iconColor="white"></lib-cart-icon>
-          <lib-auth-nav iconColor="white"></lib-auth-nav>
+          <!-- Vape Type (only for Vapes category) -->
+          <div class="filter-section" *ngIf="category === 'Vapes'">
+            <button type="button" class="filter-toggle" (click)="toggleSection('vapeTypes')"
+                    [attr.aria-expanded]="isExpanded['vapeTypes']" aria-controls="filter-vape-types">
+              <h3>Vape Type</h3>
+              <span class="dash" [class.expanded]="isExpanded['vapeTypes']">−</span>
+            </button>
+            <div id="filter-vape-types" *ngIf="isExpanded['vapeTypes']" class="brands-column">
+              <label *ngFor="let vt of vapeTypes" class="brand-option">
+                <input type="checkbox"
+                       (change)="toggleVapeTypeFilter(vt.value)"
+                       [checked]="selectedVapeTypes.includes(vt.value)" />
+                <span>{{ vt.label }}</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- THC Potency -->
+          <!-- <div class="filter-section">
+            <button type="button" class="filter-toggle" (click)="toggleSection('potency')"
+                    [attr.aria-expanded]="isExpanded['potency']" aria-controls="filter-potency">
+              <h3>THC %</h3>
+              <span class="dash" [class.expanded]="isExpanded['potency']">−</span>
+            </button>
+            <div id="filter-potency" *ngIf="isExpanded['potency']" class="potency-section">
+              <div class="range-row">
+                <span class="range-label">Min</span>
+                <input type="range" min="0" max="100" step="1" [(ngModel)]="thcMin" class="thc-slider" />
+                <span class="range-val">{{ thcMin }}%</span>
+              </div>
+              <div class="range-row">
+                <span class="range-label">Max</span>
+                <input type="range" min="0" max="100" step="1" [(ngModel)]="thcMax" class="thc-slider" />
+                <span class="range-val">{{ thcMax }}%</span>
+              </div>
+            </div>
+          </div> -->
+
+          <!-- Brands -->
+          <div class="filter-section">
+            <button type="button" class="filter-toggle" (click)="toggleSection('brands')"
+                    [attr.aria-expanded]="isExpanded['brands']" aria-controls="filter-brands">
+              <h3>Brands</h3>
+              <span class="dash" [class.expanded]="isExpanded['brands']">−</span>
+            </button>
+            <div id="filter-brands" *ngIf="isExpanded['brands']" class="brands-column">
+              <ng-container *ngIf="dynamicFilterOptions$ | async as dyn">
+                <label *ngFor="let brand of displayedBrands" class="brand-option">
+                  <input type="checkbox" (change)="toggleBrandFilter(brand.value)"
+                         [checked]="selectedBrands.includes(brand.value)" />
+                  <span>{{ brand.label }}</span>
+                </label>
+              </ng-container>
+              <button *ngIf="hasMoreBrands" class="show-more-btn" (click)="toggleShowMoreBrands()" type="button">
+                {{ showAllBrands ? 'Show Less' : 'Show All Brands' }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Size / Weight -->
+          <div class="filter-section">
+            <button type="button" class="filter-toggle" (click)="toggleSection('weights')"
+                    [attr.aria-expanded]="isExpanded['weights']" aria-controls="filter-weights">
+              <h3>Size</h3>
+              <span class="dash" [class.expanded]="isExpanded['weights']">−</span>
+            </button>
+            <div id="filter-weights" *ngIf="isExpanded['weights']" class="filter-options">
+              <ng-container *ngIf="dynamicFilterOptions$ | async as dyn">
+                <label *ngFor="let weight of dyn.weights" class="chip-option">
+                  <input type="checkbox"
+                         (change)="toggleWeightsFilter(weight.value)"
+                         [checked]="selectedWeights.includes(weight.value)" />
+                  <span class="chip" [class.chip-active]="selectedWeights.includes(weight.value)">
+                    {{ weight.label }}
+                  </span>
+                </label>
+              </ng-container>
+            </div>
+          </div>
+
+          <div class="scroll-pad" aria-hidden="true"></div>
         </div>
-      </div>
+      </aside>
 
-      <!-- Product list -->
-      <lib-product-list 
-        [category]="category"
-        [selectedBrands]="selectedBrands"
-        [selectedWeights]="selectedWeights"
-        [selectedTypes]="selectedTypes"
-        [searchQuery]="searchQuery"
-        [sortOption]="sortOption">
-      </lib-product-list>
-    </main>
-  </div>
+      <!-- MAIN -->
+      <main class="main-content">
+        <!-- Sticky controls -->
+        <div class="controls glass">
+          <!-- Category chips -->
+          <div class="chip-row" role="tablist" aria-label="Product categories">
+            <button *ngFor="let c of categories"
+                    class="chip-btn" role="tab"
+                    [attr.aria-selected]="category === c"
+                    [class.active]="category === c"
+                    (click)="selectCategory(c)">
+              {{ c }}
+            </button>
+          </div>
+
+          <!-- Search + Sort -->
+          <div class="sort-search-container">
+            <div class="search-wrap">
+              <svg viewBox="0 0 24 24" class="search-icon" aria-hidden="true"><path d="M10 2a8 8 0 105.293 14.293l4.707 4.707 1.414-1.414-4.707-4.707A8 8 0 0010 2zm0 2a6 6 0 110 12A6 6 0 0110 4z"/></svg>
+              <input type="text" [(ngModel)]="searchQuery" placeholder="Search products…" class="search-input" aria-label="Search products"/>
+            </div>
+
+            <label for="sortDropdown" class="visually-hidden">Sort by</label>
+            <select id="sortDropdown" [(ngModel)]="sortOption" class="sort-dropdown" (change)="updateSortOption($event)" aria-label="Sort products by">
+              <option value="RECENT">Newest</option>
+              <option value="PRICE_ASC">Price: Low to High</option>
+              <option value="PRICE_DESC">Price: High to Low</option>
+              <option value="THC_ASC">THC: Low to High</option>
+              <option value="THC_DESC">THC: High to Low</option>
+              <option value="NAME">Alphabetical</option>
+            </select>
+
+            <lib-cart-icon iconColor="white"></lib-cart-icon>
+            <lib-auth-nav iconColor="white"></lib-auth-nav>
+          </div>
+        </div>
+
+        <!-- Product list -->
+        <lib-product-list
+          [category]="category"
+          [selectedBrands]="selectedBrands"
+          [selectedWeights]="selectedWeights"
+          [selectedTypes]="selectedTypes"
+          [selectedVapeTypes]="selectedVapeTypes"
+          [searchQuery]="searchQuery"
+          [sortOption]="sortOption"
+          [onSaleOnly]="onSaleOnly"
+          [thcMin]="thcMin"
+          [thcMax]="thcMax">
+        </lib-product-list>
+      </main>
+    </div>
   </div>
 </div>

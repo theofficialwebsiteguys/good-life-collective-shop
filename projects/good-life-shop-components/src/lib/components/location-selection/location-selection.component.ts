@@ -101,15 +101,49 @@ export class LocationSelectionComponent {
           loc.timezone = 'America/New_York';
         }
 
-        if (name.includes('canandaigua')) {
+        if (name.includes('buffalo')) {
           loc.hours = {
-            0: { open: '11:00', close: '18:00' },
+            0: { open: '10:00', close: '20:00' }, //sunday
             1: { open: '09:00', close: '21:00' },
             2: { open: '09:00', close: '21:00' },
             3: { open: '09:00', close: '21:00' },
             4: { open: '09:00', close: '21:00' },
-            5: { open: '09:00', close: '21:00' },
-            6: { open: '09:00', close: '21:00' },
+            5: { open: '09:00', close: '23:00' },
+            6: { open: '09:00', close: '23:00' }, //saturday
+          };
+
+          loc.deliveryHours = {
+            0: { open: '10:30', close: '19:00' },
+            1: { open: '10:30', close: '19:00' },
+            2: { open: '10:30', close: '19:00' },
+            3: { open: '10:30', close: '19:00' },
+            4: { open: '10:30', close: '19:00' },
+            5: { open: '10:30', close: '19:00' },
+            6: { open: '10:30', close: '19:00' },
+          };
+
+          loc.timezone = 'America/New_York';
+        }
+
+        if (name.includes('canandaigua')) {
+          loc.hours = {
+            0: { open: '10:00', close: '20:00' },
+            1: { open: '09:00', close: '21:00' },
+            2: { open: '09:00', close: '21:00' },
+            3: { open: '09:00', close: '21:00' },
+            4: { open: '09:00', close: '21:00' },
+            5: { open: '09:00', close: '22:00' },
+            6: { open: '09:00', close: '22:00' },
+          };
+
+          loc.deliveryHours = {
+            0: { open: '10:30', close: '19:30' },//sunday
+            1: { open: '09:30', close: '20:30' },//monday
+            2: { open: '09:30', close: '20:30' },
+            3: { open: '09:30', close: '20:30' },
+            4: { open: '09:30', close: '20:30' },
+            5: { open: '09:30', close: '21:30' },//friday
+            6: { open: '09:30', close: '21:30' },//saturday
           };
 
           loc.timezone = 'America/New_York';
@@ -157,7 +191,6 @@ export class LocationSelectionComponent {
 
   selectLocation(loc: LocationItem) {
     this.settings.setSelectedLocationId(loc.location_id);
-    this.cartService.clearCart();
 
     this.a11y.announce(`Selected ${loc.name}. Loading products.`, 'polite');
   }
@@ -322,6 +355,7 @@ export class LocationSelectionComponent {
 
     const loc = this.selectedLocation;
     this.settings.setSelectedLocationId(loc.location_id);
+    this.cartService.clearCart();
     this.products.fetchProducts(loc.location_id).subscribe({
       error: (e) => console.error('Error fetching products:', e),
     });

@@ -1,0 +1,59 @@
+<div class="checkout-rewards">
+  <div class="header">
+    <h3>Rewards & Discounts</h3>
+    <p>Redeemable in-store at checkout</p>
+  </div>
+
+  <!-- Progress toward next reward -->
+  <div *ngIf="!showAllRewards && pointsToNext !== null" class="progress">
+    <div class="bar">
+      <div
+        class="fill"
+        [style.width.%]="(userPoints / (userPoints + pointsToNext)) * 100"
+      ></div>
+    </div>
+    <span>{{ pointsToNext }} pts until {{ nextReward?.label }}</span>
+  </div>
+
+  <!-- Reward list -->
+  <div
+    class="reward-list"
+    [class.expanded]="showAllRewards"
+  >
+    <div
+      *ngFor="let reward of visibleRewards"
+      class="reward-row"
+      [class.unlocked]="reward.unlocked"
+      [class.best]="reward.id === bestUnlocked?.id"
+      [class.applied]="reward.applied"
+      (click)="onRewardClick(reward)"
+    >
+      <div class="left">
+        <span class="title">
+          {{ reward.label }}
+          <span *ngIf="reward.id === bestUnlocked?.id" class="best-badge">
+            Best value
+          </span>
+        </span>
+        <span class="desc">{{ reward.rewardText }}</span>
+      </div>
+
+      <div class="right">
+        <span *ngIf="!reward.applied" class="points">{{ reward.unlockText }}</span>
+        <span *ngIf="reward.applied" class="applied-badge">
+          Applied
+        </span>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Toggle -->
+  <button
+   *ngIf="displayDiscounts.length > 3"
+    class="toggle-btn"
+    (click)="showAllRewards = !showAllRewards"
+  >
+    {{ showAllRewards ? 'Hide rewards' : 'View all rewards' }}
+  </button>
+</div>

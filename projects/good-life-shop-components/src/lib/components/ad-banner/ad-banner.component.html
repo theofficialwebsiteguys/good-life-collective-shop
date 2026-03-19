@@ -1,28 +1,17 @@
 <div
   *ngIf="ads.length > 0"
-  class="ad-banner feather"
+  class="ad-banner"
   role="button"
   tabindex="0"
   (click)="onBannerClick(ads[currentAdIndex])"
-  (keydown.enter)="onBannerClick(ads[currentAdIndex])"
-  (keydown.space)="onBannerClick(ads[currentAdIndex])"
   (mouseenter)="pause()"
   (mouseleave)="resume()"
 >
-  <!-- Ambient blurred backdrop of the same image -->
   <img
-    class="ad-bg"
-    [src]="ads[currentAdIndex]"
-    alt=""
-    aria-hidden="true"
-  />
-
-  <!-- Main banner image with feathered mask -->
-  <img
-    class="ad-image"
     [src]="ads[currentAdIndex]"
     alt="Advertisement banner"
-    decoding="async"
+    class="ad-image"
     loading="lazy"
+    decoding="async"
   />
 </div>

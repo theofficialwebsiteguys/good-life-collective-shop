@@ -4,6 +4,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { AccessibilityService } from '../../services/accessibility.service';
 import { SettingsService } from '../../services/settings.service';
 import { LocationSelectionComponent } from '../location-selection/location-selection.component'; // adjust path
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'lib-location-dropdown',
@@ -15,7 +16,7 @@ import { LocationSelectionComponent } from '../location-selection/location-selec
 export class LocationDropdownComponent {
   isLoading = true;
   formattedLocation = '';
-
+  sub!: Subscription;
   constructor(
     private dialog: MatDialog,
     private a11y: AccessibilityService,
@@ -23,7 +24,26 @@ export class LocationDropdownComponent {
   ) {}
 
   async ngOnInit() {
-    await this.loadSelectedLocation();
+     this.sub = this.settings.selectedLocationId$.subscribe((id) => {
+      if (id) {
+        this.refreshLocation(id);
+      }
+    });
+
+    this.loadSelectedLocation();
+  }
+
+  ngOnDestroy() {
+    this.sub?.unsubscribe();
+  }
+
+  async refreshLocation(id: string) {
+    const locations = await this.settings.getFlowhubLocations();
+    const loc = locations.find(l => l.location_id === id);
+
+    if (loc?.address) {
+      this.formattedLocation = this.extractCityState(loc.address);
+    }
   }
 
   async loadSelectedLocation() {

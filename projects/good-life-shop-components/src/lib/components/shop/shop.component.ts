@@ -25,11 +25,18 @@ export class ShopComponent implements OnInit {
   selectedBrands: string[] = [];
   selectedWeights: string[] = [];
   selectedTypes: string[] = [];
+  selectedVapeTypes: string[] = [];
   searchQuery = '';
   sortOption = 'RECENT';
 
+  // Vape sub-type filter
+  vapeTypes = [
+    { value: 'aio', label: 'Disposable / AIO', class: 'vape-aio' },
+    { value: '510', label: 'Cartridge / 510', class: 'vape-510' },
+  ];
+
   // UI state
-  isExpanded: Record<string, boolean> = { categories: true, types: true, brands: true, weights: true };
+  isExpanded: Record<string, boolean> = { categories: true, types: true, brands: true, weights: true, potency: true, deals: true, vapeTypes: true };
   isSidebarOpen = false;
 
   // Category chips for header
@@ -38,14 +45,18 @@ export class ShopComponent implements OnInit {
     'Beverage', 'Tinctures', 'Topicals', 'Accessories'
   ];
 
-  // Static types (leave as-is)
+  // Strain types — values match p.strainType from the API
   types = [
-    { name: 'Sativa', count: 13 },
-    { name: 'Sativa-dom', count: 13 },
-    { name: '50/50', count: 32 },
-    { name: 'Indica-dom', count: 11 },
-    { name: 'Indica', count: 11 }
+    { value: 'SATIVA', label: 'Sativa', class: 'sativa' },
+    { value: '50/50', label: 'Hybrid', class: 'hybrid' },
+    { value: 'INDICA', label: 'Indica', class: 'indica' },
+    { value: 'SATIVA-DOM', label: 'Sativa-Dominant', class: 'sativa-dom' },
+    { value: 'INDICA-DOM', label: 'Indica-Dominant', class: 'indica-dom' },
   ];
+
+  onSaleOnly = false;
+  thcMin = 0;
+  thcMax = 100;
 
   dynamicFilterOptions$: Observable<ProductFilterOptions> = of({ brands: [], weights: [] });
 
@@ -162,12 +173,22 @@ private updateDisplayedBrands() {
       : [...this.selectedWeights, weight];
   }
 
+  toggleVapeTypeFilter(vapeType: string): void {
+    this.selectedVapeTypes = this.selectedVapeTypes.includes(vapeType)
+      ? this.selectedVapeTypes.filter(v => v !== vapeType)
+      : [...this.selectedVapeTypes, vapeType];
+  }
+
   clearFilters() {
     this.selectedBrands = [];
     this.selectedTypes = [];
     this.selectedWeights = [];
+    this.selectedVapeTypes = [];
     this.searchQuery = '';
     this.sortOption = 'RECENT';
+    this.onSaleOnly = false;
+    this.thcMin = 0;
+    this.thcMax = 100;
   }
 }
 

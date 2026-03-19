@@ -1,7 +1,7 @@
-import { Component, OnInit, ElementRef, ViewChild, Input } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ElementRef, ViewChild, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, take } from 'rxjs/operators';
 import { Product } from '../../models/product.model';
 import { ProductsService } from '../../services/products.service';
 import { NavigationService } from '../../services/navigation.service';
@@ -14,7 +14,7 @@ import { ProductCardComponent } from '../product-card/product-card.component';
   templateUrl: './products-carousel.component.html',
   styleUrl: './products-carousel.component.css'
 })
-export class ProductsCarouselComponent implements OnInit {
+export class ProductsCarouselComponent implements OnInit, AfterViewInit {
   @ViewChild('productCarousel', { static: false }) productCarousel!: ElementRef<HTMLDivElement>;
 
   /** NEW: pass a single category to show products from that category only. */
@@ -36,6 +36,14 @@ export class ProductsCarouselComponent implements OnInit {
   );
 
   products$: Observable<Product[]> = of([]);
+
+  isLoading = true;
+  readonly skeletonItems = new Array(5).fill(0);
+
+  atStart = true;
+  atEnd = true;
+
+  private edgeCheckTimer: any;
 
   constructor(
     private productService: ProductsService,
@@ -72,6 +80,27 @@ export class ProductsCarouselComponent implements OnInit {
         return res.slice(0, Math.max(1, limit));
       })
     );
+
+    this.products$.pipe(take(1)).subscribe(() => {
+      this.isLoading = false;
+      setTimeout(() => this.checkScrollEdges(), 150);
+    });
+  }
+
+  ngAfterViewInit(): void {
+    setTimeout(() => this.checkScrollEdges(), 0);
+  }
+
+  onCarouselScroll(): void {
+    clearTimeout(this.edgeCheckTimer);
+    this.edgeCheckTimer = setTimeout(() => this.checkScrollEdges(), 60);
+  }
+
+  checkScrollEdges(): void {
+    const el = this.productCarousel?.nativeElement;
+    if (!el) return;
+    this.atStart = el.scrollLeft < 8;
+    this.atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 8;
   }
 
   scrollProducts(direction: number): void {

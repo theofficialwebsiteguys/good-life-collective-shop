@@ -19,6 +19,9 @@ export class LoginComponent {
   successMessage: string = '';
   requiresPasswordSetup: boolean = false;
   pendingUser: any = null;
+  pendingAiqUser: any = null;
+  dob: string = ''; // YYYY-MM-DD
+
 
   constructor(private authService: AuthService, private router: Router) {}
 
@@ -34,6 +37,10 @@ export class LoginComponent {
         if (response.requiresPasswordSetup) {
           this.requiresPasswordSetup = true;
           this.pendingUser = response.user;
+          this.pendingAiqUser = response.user;
+          this.dob = response.user?.dob
+            ? new Date(response.user.dob).toISOString().split('T')[0]
+            : '';
           return;
         }
 
@@ -57,8 +64,13 @@ export class LoginComponent {
       return;
     }
 
+    if (!this.dob) {
+      this.errorMessage = 'Please enter your date of birth.';
+      return;
+    }
+
     const { email, business_id } = this.pendingUser;
-    this.authService.setPasswordForExistingUser(email, business_id, this.newPassword).subscribe({
+    this.authService.setPasswordForExistingUser(email, business_id, this.newPassword, this.dob, this.pendingAiqUser).subscribe({
       next: () => {
         this.successMessage = 'Password set successfully! You can now log in.';
         this.requiresPasswordSetup = false;

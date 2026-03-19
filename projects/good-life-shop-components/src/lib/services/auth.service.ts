@@ -171,6 +171,13 @@ export class AuthService {
     this.userSubject.next(user);
   }
 
+  deductPoints(points: number): void {
+    const current = this.getCurrentUser();
+    if (!current) return;
+    const updated = { ...current, points: Math.max(0, (current.points || 0) - points) };
+    this.storeUserInfo(updated);
+  }
+
   private getSessionData(): { token: string; expiry: Date } | null {
     const sessionData = localStorage.getItem('sessionData');
     return sessionData ? JSON.parse(sessionData) : null;
@@ -224,6 +231,11 @@ export class AuthService {
     });
   }
 
+  private getSelectedLocationId(): string | null {
+    return localStorage.getItem('selectedLocationId');
+  }
+
+
   validateSession(): void {
     const sessionData = this.getSessionData();
 
@@ -236,9 +248,22 @@ export class AuthService {
 
     const headers = this.getCurrentUser() ? this.getSessionHeaders() : this.getHeaders();
 
-    const url = !this.getCurrentUser()
-    ? `${this.apiUrl}/validate-session?bypassUserCheck=true`
-    : `${this.apiUrl}/validate-session`;
+    const locationId = this.getSelectedLocationId();
+
+    const params: string[] = [];
+
+    if (!this.getCurrentUser()) {
+      params.push('bypassUserCheck=true');
+    }
+
+    if (locationId) {
+      params.push(`location_id=${locationId}`);
+    }
+
+    const query = params.length ? `?${params.join('&')}` : '';
+
+    const url = `${this.apiUrl}/validate-session${query}`;
+
 
     CapacitorHttp.get({
       url,
@@ -411,7 +436,8 @@ export class AuthService {
     }
   }
 
-  setPasswordForExistingUser(email: string, business_id: number, password: string): Observable<any> {
+  setPasswordForExistingUser(email: string, business_id: number, password: string, dob: string, aiq_user?: any): Observable<any> {
+    const location_id = this.getSelectedLocationId();
     return new Observable((observer) => {
       CapacitorHttp.post({
         url: `${this.apiUrl}/set-password`,
@@ -419,7 +445,7 @@ export class AuthService {
           'Content-Type': 'application/json',
           'x-auth-api-key': environment.db_api_key,
         },
-        data: { email, business_id, password },
+        data: { email, business_id, password, aiq_user, location_id, dob },
       })
         .then((response) => {
           this.login({

@@ -1,0 +1,188 @@
+.checkout-rewards {
+  padding-top: 16px;
+  padding-bottom: 40px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.progress {
+  margin-bottom: 10px;
+
+  .bar {
+    height: 6px;
+    background: #e6eae2;
+    border-radius: 999px;
+    overflow: hidden;
+    margin-bottom: 4px;
+  }
+
+  .fill {
+    height: 100%;
+    background: black;
+    transition: width 0.3s ease;
+  }
+
+  span {
+    font-size: 0.75rem;
+    color: #6e7768;
+  }
+}
+
+.reward-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 220px;
+  overflow: hidden;
+  transition: max-height 0.35s ease;
+
+  &.expanded {
+    max-height: 420px;
+    overflow-y: auto;
+  }
+}
+
+
+.reward-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #e3e8dd;
+  background: #f7faf9;
+
+  &.unlocked {
+    background: #ffffff;
+    .points {
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: #7fffea;
+      color: #000000;
+    }
+
+    .title {
+      font-size: 0.9rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #000000;
+    }
+
+    .desc {
+      font-size: 0.75rem;
+      color: #748484;
+    }
+
+  }
+
+  &.best {
+    border-color: var(--ion-color-primary);
+  }
+
+  .title {
+    font-size: 0.9rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #00000052;
+  }
+
+  .best-badge {
+    font-size: 0.65rem;
+    padding: 2px 6px;
+    border-radius: 999px;
+    background: var(--ion-color-primary);
+    color: white;
+  }
+
+  .desc {
+    font-size: 0.75rem;
+    color: #7484843f;
+  }
+
+  .points {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 999px;
+    background: #7fffea54;
+    color: #00000060;
+  }
+}
+
+.toggle-btn {
+  margin-top: 10px;
+  background: none;
+  border: none;
+  font-size: 0.8rem;
+  color: var(--ion-color-primary);
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+}
+
+.header{
+  p{
+    font-size: .8rem;
+    color: #0000008a;
+  }
+
+  h3{
+    margin: 0;
+  }
+}
+
+.reward-row.applied {
+  border-color: black;
+  background: #eafff8;
+
+  .points {
+    background: black;
+    color: white;
+  }
+}
+
+.reward-row.unlocked {
+  cursor: pointer;
+}
+
+.reward-row:not(.unlocked) {
+  cursor: default;
+}
+
+.applied-badge {
+  font-size: 0.75rem;
+  font-weight: 200;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: black;
+  color: white;
+}
+
+/* Hover affordance for selectable rewards */
+.reward-row.unlocked:not(.applied) {
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.reward-row.unlocked:not(.applied):hover {
+  background: #ecfffb;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.06);
+
+  .points {
+    background: #7fffea;
+    color: #000;
+  }
+
+  .title {
+    color: #000;
+  }
+}

@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { map, catchError, of, tap } from 'rxjs';
+import { map, catchError, of, tap, switchMap } from 'rxjs';
 import { SettingsService } from '../../services/settings.service';
 import { ProductsService } from '../../services/products.service';
 
@@ -22,41 +22,47 @@ export class AdBannerComponent implements OnInit, OnDestroy {
 
   constructor(private router: Router, private settings: SettingsService, private productsService: ProductsService) {}
 
-  ngOnInit(): void {
-    this.settings.getCarouselImages()
-      .pipe(
-        map((res: any) => {
-          // old format: plain array
-          if (Array.isArray(res)) {
-            return { images: res, links: [] };
-          }
+ngOnInit(): void {
+  this.settings.selectedLocationId$
+    .pipe(
+      tap(() => {
+        // reset state on location change
+        this.stop();
+        this.currentAdIndex = 0;
+        this.ads = [];
+        this.bannerLinks = [];
+      }),
+      switchMap(() =>
+        this.settings.getCarouselImages().pipe(
+          map((res: any) => {
+            if (Array.isArray(res)) {
+              return { images: res, links: [] };
+            }
 
-          // new format: images + links
-          return {
-            images: res?.images ?? [],
-            links: res?.links ?? []
-          };
-        }),
-        tap(result => {
-          console.log(result); // you'll now see { images: [...], links: [...] }
-          this.ads = result.images;
-          this.bannerLinks = result.links;
+            return {
+              images: res?.images ?? [],
+              links: res?.links ?? []
+            };
+          }),
+          catchError(err => {
+            console.error('Failed to load banners', err);
+            return of({ images: [], links: [] });
+          })
+        )
+      )
+    )
+    .subscribe((result: any) => {
+      this.ads = result.images;
+      this.bannerLinks = result.links;
 
-          // optional: store links if you want clickable banners later
-          this.bannerLinks = result.links;
+      if (this.ads.length > 1) {
+        this.start();
+      }
+    });
 
-          if (this.ads.length > 1) this.start();
-        }),
-        catchError(err => {
-          console.error('Failed to load banners', err);
-          this.ads = [];
-          return of({ images: [], links: [] });
-        })
-      ).subscribe();
+  document.addEventListener('visibilitychange', this.handleVisibility);
+}
 
-    // Pause when tab not visible
-    document.addEventListener('visibilitychange', this.handleVisibility);
-  }
 
   ngOnDestroy(): void {
     this.stop();

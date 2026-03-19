@@ -1,32 +1,117 @@
+/* You can add global styles to this file, and also import other style files */
+@use "sass:color";
 
+// html, body { height: 100%; }
+// body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+// 🌿 Global Color Variables
+
+// Primary Colors
+$primary-color: #69fced;  // Dark green
+$secondary-color: #000000;  // Light green
+
+// Accent Colors
+$accent-color: #000000; // Dark red for contrast
+$highlight-color: #0d0d0d; // Creamy background
+
+// Neutral Colors
+$black: #1A1A1A;
+$white: #FFFFFF;
+$gray-light: #EAEAEA;
+$gray-dark: #757575;
+
+.no-scroll {
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+}
+
+
+// Global Styles
 body {
-    h1, h2, h3, h4, li, label{
-      font-family: "Roboto", serif;
-      font-weight: 400;
-      font-style: normal;
-    }
-  
-    p, span, button{
-      font-weight: bold;
-      font-family: "Roboto", serif;
-    }
-    margin: 0;
-  }
 
-  button {
-    background-color: #000000; /* Green */
-    color: rgb(255, 255, 255); /* White Text */
-    border: none;
-    padding: 10px 15px;
-    font-size: 14px;
-    font-weight: bold;
-    border-radius: 8px; /* Rounded */
-    cursor: pointer;
-    transition: background 0.2s ease-in-out;
-  }
+  font-family: "Roboto", serif;
+  background-color: $highlight-color;
+  margin: 0;
+}
+
+
+// Utility Classes
+.text-primary {
+  color: $primary-color !important;
+}
+
+.text-secondary {
+  color: $secondary-color !important;
+}
+
+.text-accent {
+  color: $accent-color !important;
+}
+
+.bg-primary {
+  background-color: $primary-color !important;
+}
+
+.bg-secondary {
+  background-color: $secondary-color !important;
+}
+
+.bg-accent {
+  background-color: $accent-color !important;
+}
+
+.btn-primary {
+  background-color: $primary-color;
+  color: $secondary-color;
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: none;
+  font-size: 22px;
+}
+
+.btn-secondary {
+  background-color: $highlight-color;
+  color: $primary-color;
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: none;
+  transition: all 0.3s ease-in-out;
+  font-size: 22px;
   
-  button:disabled {
-    background-color: #b6b6b6; /* Muted Green for Disabled */
-    cursor: not-allowed;
+  &:hover {
+    color: black;
   }
-  
+}
+
+button {
+  background-color: $primary-color; /* Green */
+  color: white; /* White Text */
+  border: none;
+  padding: 5px 10px;
+  font-size: 18px;
+  font-weight: bold;
+  border-radius: 8px; /* Rounded */
+  cursor: pointer;
+  transition: background 0.2s ease-in-out;
+}
+
+button:hover {
+  background-color: #ffffff; /* Darker Green on Hover */
+}
+
+button:disabled {
+  background-color: #A8B5A3; /* Muted Green for Disabled */
+  cursor: not-allowed;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  clip: rect(0, 0, 0, 0);
+  overflow: hidden;
+}

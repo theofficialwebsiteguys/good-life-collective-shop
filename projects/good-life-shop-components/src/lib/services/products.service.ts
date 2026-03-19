@@ -15,6 +15,8 @@ import {
 
 import { environment } from '../../environments/environment.prod';
 import { NavigationService } from './navigation.service';
+import { OfferBanner } from '../offer-banner.model';
+
 
 @Injectable({
   providedIn: 'root',
@@ -37,68 +39,178 @@ export class ProductsService {
   private lastFetchedLocationId: string | null = null;
 
   constructor(private navigationService: NavigationService,  private http: HttpClient, private route: Router) {
-    this.loadProductsFromSessionStorage();
+    // this.loadProductsFromSessionStorage();
+     this.syncFromUrl();
   }
 
-  private loadProductsFromSessionStorage(): void {
-    const storedProducts = sessionStorage.getItem('products');
-    if (storedProducts) {
-      const parsedProducts: Product[] = JSON.parse(storedProducts);
-      const sortedProducts = this.sortProducts(parsedProducts);
-      this.products.next(sortedProducts);
+  private slugify(value: string): string {
+    return value
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
+  }
+
+  private syncFromUrl() {
+    const tree = this.route.parseUrl(this.route.url);
+    const q = tree.queryParams;
+
+    // CATEGORY
+    if (q['category']) {
+      this.currentCategory.next(q['category'].toUpperCase() as ProductCategory);
     }
-    // } else{
-    //   this.fetchProducts().subscribe();
-    // }
+
+    // OFFER SLUG
+    if (q['offer']) {
+      // just store slug — filtering already happens downstream
+      this.currentProductFilters.next({
+        ...this.currentProductFilters.value,
+        offerSlug: q['offer'],
+      } as any);
+    }
   }
 
-  private saveProductsToSessionStorage(products: Product[]): void {
-    sessionStorage.setItem('products', JSON.stringify(products));
+  private storageKey(locationId: string) {
+    return `products_${locationId}`;
   }
+
+  private saveProductsToSessionStorage(locationId: string, products: Product[]) {
+    sessionStorage.setItem(this.storageKey(locationId), JSON.stringify(products));
+  }
+
+  private loadProductsFromSessionStorage(locationId: string): Product[] | null {
+    const stored = sessionStorage.getItem(this.storageKey(locationId));
+    return stored ? JSON.parse(stored) : null;
+  }
+
+  // private loadProductsFromSessionStorage(): void {
+  //   const storedProducts = sessionStorage.getItem('products');
+  //   if (storedProducts) {
+  //     const parsedProducts: Product[] = JSON.parse(storedProducts);
+  //     const sortedProducts = this.sortProducts(parsedProducts);
+  //     sortedProducts.forEach((p: any) => {
+  //       if (Array.isArray(p.bundleProducts)) {
+  //         p.bundleProducts = p.bundleProducts
+  //           .map((bp: any) => sortedProducts.find(sp => sp.id === bp.id))
+  //           .filter(Boolean);
+  //       }
+  //     });
+  //     this.products.next(sortedProducts);
+  //   }
+  //   // } else{
+  //   //   this.fetchProducts().subscribe();
+  //   // }
+  // }
+
+  // private saveProductsToSessionStorage(products: Product[]): void {
+  //   sessionStorage.setItem('products', JSON.stringify(products));
+  // }
+
+  // fetchProducts(location_id: string): Observable<Product[]> {
+  //   if (this.lastFetchedLocationId && this.lastFetchedLocationId !== location_id) {
+  //     this.products.next([]);
+  //     this.saveProductsToSessionStorage([]); // optional, if you’re syncing to session storage
+  //   }
+
+  //   // Return cached products if already loaded for the same location
+  //   if (this.products.value.length > 0 && this.lastFetchedLocationId === location_id) {
+  //     return of(this.products.value);
+  //   }
+
+  //   this.lastFetchedLocationId = location_id;
+
+  //   const options = {
+  //     url: `${environment.apiUrl}/flowhub/inventoryByLocation`,
+  //     params: { location_id, toggleVape: String(false) },
+  //     headers: {
+  //       'Content-Type': 'application/json',
+  //       'x-auth-api-key': environment.db_api_key,
+  //     },
+  //   };
+
+  //   return new Observable<Product[]>((observer) => {
+  //     CapacitorHttp.get(options)
+  //       .then((response) => {
+  //         if (response.status === 200) {
+  //           const raw = response.data.products.map((p: any) => ({
+  //             ...p,
+  //             rawPrice: Number(p.price),     // ✅ permanent source of truth
+  //           }));
+  //           const sortedProducts = this.sortProducts(raw);
+  //           // const sortedProducts = this.sortProducts(response.data.products);
+  //           this.lastFetchedLocationId = location_id; // ✅ Set current location
+  //           this.products.next(sortedProducts);
+  //           this.saveProductsToSessionStorage(sortedProducts);
+  //           observer.next(sortedProducts);
+  //           observer.complete();
+  //         } else {
+  //           console.error('API request failed:', response);
+  //           observer.error(response);
+  //         }
+  //       })
+  //       .catch((error) => {
+  //         console.error('Error fetching products:', error);
+  //         observer.error(error);
+  //       });
+  //   });
+  // }
 
   fetchProducts(location_id: string): Observable<Product[]> {
-    if (this.lastFetchedLocationId && this.lastFetchedLocationId !== location_id) {
-      this.products.next([]);
-      this.saveProductsToSessionStorage([]); // optional, if you’re syncing to session storage
-    }
+  const storageKey = `products_${location_id}`;
 
-    // Return cached products if already loaded for the same location
-    if (this.products.value.length > 0 && this.lastFetchedLocationId === location_id) {
-      return of(this.products.value);
-    }
-
+  // 1️⃣ Try sessionStorage FIRST (per location)
+  const cached = sessionStorage.getItem(storageKey);
+  if (cached) {
+    const parsed: Product[] = JSON.parse(cached);
+    this.products.next(parsed);
     this.lastFetchedLocationId = location_id;
-
-    const options = {
-      url: `${environment.apiUrl}/flowhub/inventoryByLocation`,
-      params: { location_id, toggleVape: String(false) },
-      headers: {
-        'Content-Type': 'application/json',
-        'x-auth-api-key': environment.db_api_key,
-      },
-    };
-
-    return new Observable<Product[]>((observer) => {
-      CapacitorHttp.get(options)
-        .then((response) => {
-          if (response.status === 200) {
-            const sortedProducts = this.sortProducts(response.data.products);
-            this.lastFetchedLocationId = location_id; // ✅ Set current location
-            this.products.next(sortedProducts);
-            this.saveProductsToSessionStorage(sortedProducts);
-            observer.next(sortedProducts);
-            observer.complete();
-          } else {
-            console.error('API request failed:', response);
-            observer.error(response);
-          }
-        })
-        .catch((error) => {
-          console.error('Error fetching products:', error);
-          observer.error(error);
-        });
-    });
+    return of(parsed);
   }
+
+  // 2️⃣ Clear in-memory products if switching locations
+  if (this.lastFetchedLocationId && this.lastFetchedLocationId !== location_id) {
+    this.products.next([]);
+  }
+
+  this.lastFetchedLocationId = location_id;
+
+  const options = {
+    url: `${environment.apiUrl}/flowhub/inventoryByLocation`,
+    params: { location_id, toggleVape: String(false) },
+    headers: {
+      'Content-Type': 'application/json',
+      'x-auth-api-key': environment.db_api_key,
+    },
+  };
+
+  return new Observable<Product[]>((observer) => {
+    CapacitorHttp.get(options)
+      .then((response) => {
+        if (response.status !== 200) {
+          observer.error(response);
+          return;
+        }
+
+        // 3️⃣ Normalize RAW server price ONCE
+        const rawProducts = response.data.products.map((p: any) => ({
+          ...p,
+          rawPrice: Number(p.price), // 🔒 immutable source of truth
+        }));
+
+        const sorted = this.sortProducts(rawProducts);
+
+        // 4️⃣ Cache per location
+        sessionStorage.setItem(storageKey, JSON.stringify(sorted));
+
+        // 5️⃣ Emit
+        this.products.next(sorted);
+        observer.next(sorted);
+        observer.complete();
+      })
+      .catch((err) => observer.error(err));
+  });
+}
+
   
   getProducts(): Observable<Product[]> {
     return this.products$.pipe(
@@ -202,13 +314,23 @@ export class ProductsService {
   // }
   
 
+  setProducts(products: Product[]) {
+    this.products.next(products);
+    // this.saveProductsToSessionStorage(products);
+  }
+
+
   getFilteredProducts(
     searchQuery: string = '',
     category: string | null = null,
     selectedBrands: string[] = [],
     selectedWeights: string[] = [],
     selectedTypes: string[] = [],
-    sortOption: string = 'RECENT'
+    sortOption: string = 'RECENT',
+    onSaleOnly: boolean = false,
+    thcMin: number = 0,
+    thcMax: number = 100,
+    selectedVapeTypes: string[] = []
   ): Observable<Product[]> {
     return this.products$.pipe(
       filter(productArray => productArray.length > 0),
@@ -216,39 +338,24 @@ export class ProductsService {
         let filteredProducts = productArray;
     
 
-       if (category) {
+      if (category) {
         const normalizedCategory = category.toLowerCase();
 
         if (normalizedCategory === 'offers') {
-          filteredProducts = filteredProducts.filter((p: any) => {
-            // 🟢 Percent or flat discounts (with discountedPrice applied)
-            const hasStandardDiscount =
-              typeof p.discountedPrice === 'number' &&
-              p.discountedPrice < Number(p.price);
-
-            // 🟡 Active description + numeric discount value
-            const hasManualDiscount =
-              !!p.discountDescription &&
-              (p.discountType === 'percent' || p.discountType === 'flat');
-
-            // 🔵 BOGO or bundle rule present
-            const hasBogoOrBundle =
-              (Array.isArray(p.bogoRules) && p.bogoRules.length > 0) ||
-              (Array.isArray(p.bundleProducts) && p.bundleProducts.length > 0);
-
-            // ✅ Return true if any of these apply
-            return hasStandardDiscount || hasManualDiscount || hasBogoOrBundle;
-          });
-        } else {
-          filteredProducts = filteredProducts.filter(
-            p => p.category?.toLowerCase() === normalizedCategory
-          );
+            console.log(
+              'OFFERS COUNT:',
+              productArray.filter(p => this.isOfferProduct(p)).length
+            );
+          filteredProducts = productArray.filter(p => this.isOfferProduct(p));
+        }
+        else {
+          filteredProducts =
+            productArray.filter(
+              p => p.category?.toLowerCase() === normalizedCategory
+            );
         }
       }
 
-
-
-  
         // ✅ Filter by search query
         if (searchQuery.trim() !== '') {
           filteredProducts = filteredProducts.filter(p =>
@@ -278,12 +385,42 @@ export class ProductsService {
           });
         }
 
-
+        console.log(selectedTypes)
         if (selectedTypes && selectedTypes.length > 0) {
-          filteredProducts = filteredProducts.filter(p => selectedTypes.includes(p.strainType));
+          console.log(selectedTypes)
+          filteredProducts = filteredProducts.filter(p => {
+            if (!p.strainType) return false;
+            const st = p.strainType.toUpperCase();
+            return selectedTypes.some(t => st === t.toUpperCase());
+          });
         }
-        
-        
+
+        if (selectedVapeTypes && selectedVapeTypes.length > 0) {
+          filteredProducts = filteredProducts.filter(p => {
+            const t = (p.title || '').toLowerCase();
+            const isAio = t.includes('aio') || t.includes('all in one') || t.includes('all-in-one') || t.includes('disposable');
+            const is510 = t.includes('510') || t.includes('cart') || t.includes('cartridge');
+            const isVape = t.includes('vape');
+            const bucket = isAio || (isVape && !is510) ? 'aio' : is510 ? '510' : null;
+            return bucket !== null && selectedVapeTypes.includes(bucket);
+          });
+        }
+
+        if (onSaleOnly) {
+          filteredProducts = filteredProducts.filter(p => this.isOfferProduct(p));
+        }
+
+        if (thcMin > 0 || thcMax < 100) {
+          const min = Math.min(thcMin, thcMax);
+          const max = Math.max(thcMin, thcMax);
+          filteredProducts = filteredProducts.filter(p => {
+            const potency = (p as any)['potency'];
+            const rawThc = potency?.totalThc ?? potency?.thc ?? p.thc;
+            const val = this.extractThcValue(rawThc);
+            return val >= min && val <= max;
+          });
+        }
+
         // ✅ Sorting logic
         switch (sortOption) {
           case 'PRICE_ASC':
@@ -384,19 +521,7 @@ getProductFilterOptions(): Observable<ProductFilterOptions> {
 
       if (normalizedCat === 'OFFERS') {
         // 🔥 Special logic: include only discounted / promo items
-        relevantProducts = productArray.filter((p: any) => {
-          const hasStandardDiscount =
-            typeof p.discountedPrice === 'number' && p.discountedPrice < Number(p.price);
-
-          const hasManualDiscount =
-            !!p.discountDescription && (p.discountType === 'percent' || p.discountType === 'flat');
-
-          const hasBogoOrBundle =
-            (Array.isArray(p.bogoRules) && p.bogoRules.length > 0) ||
-            (Array.isArray(p.bundleProducts) && p.bundleProducts.length > 0);
-
-          return hasStandardDiscount || hasManualDiscount || hasBogoOrBundle;
-        });
+       relevantProducts = productArray.filter(p => this.isOfferProduct(p));
       } else {
         // 🧭 Normal category filtering
         relevantProducts = productArray.filter(
@@ -443,11 +568,16 @@ getProductFilterOptions(): Observable<ProductFilterOptions> {
 }
 
 
-
   updateCategory(category: ProductCategory) {
-    this.currentCategory.next(category); 
-    // this.route.navigateByUrl('/products');
+    this.currentCategory.next(category);
+
+    this.route.navigate([], {
+      queryParams: { category: category.toLowerCase() },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
   }
+
 
   getCurrentCategory(): ProductCategory {
     return this.currentCategory.value;
@@ -510,5 +640,76 @@ getProductFilterOptions(): Observable<ProductFilterOptions> {
       )
     );
   }
+
+private isOfferProduct(p: any): boolean {
+  if (!Array.isArray(p.discounts) || p.discounts.length === 0) {
+    return false;
+  }
+
+  const price = Number(p.price);
+
+  return p.discounts.some((d:any) => {
+    switch (d.kind) {
+      case 'percent':
+      case 'flat':
+        return (
+          typeof d.discountedPrice === 'number' &&
+          d.discountedPrice > 0 &&
+          d.discountedPrice < price
+        );
+
+      case 'bogo':
+        return d.buyQty > 0 && d.getQty > 0;
+
+      case 'bundle':
+        return d.bundleSize > 1;
+
+      default:
+        return false;
+    }
+  });
+}
+
+  getOfferBanners(products: any[]): OfferBanner[] {
+    const map = new Map<string, OfferBanner>();
+
+    products.forEach(p => {
+      (p.discounts ?? []).forEach((d: any) => {
+        const key = this.slugify(
+          d.name || `${d.kind}-${d.value}-${d.description || ''}`
+        );
+
+        map.set(key, {
+          id: key,
+          kind: d.kind,
+          label: d.name,
+          banner_image_url: d.banner_image_url || '',
+          description: d.description,
+          predicate: (product: any) =>
+            (product.discounts ?? []).some((pd: any) => {
+              if (pd.kind !== d.kind) return false;
+              if (pd.kind === 'percent' || pd.kind === 'flat') {
+                return (
+                  pd.value === d.value &&
+                  pd.description === d.description
+                );
+              }
+              return true;
+            }),
+        });
+      });
+    });
+
+    return Array.from(map.values());
+  }
+
+
+  applyOfferFromSlug(slug: string | null, products: Product[]): OfferBanner | null {
+    if (!slug) return null;
+
+    const offers = this.getOfferBanners(products);
+    return offers.find(o => o.id === slug) ?? null;
+  }
+
   
 }

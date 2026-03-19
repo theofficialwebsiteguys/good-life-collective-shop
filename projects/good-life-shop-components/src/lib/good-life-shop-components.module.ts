@@ -23,6 +23,7 @@ import { ResetPasswordComponent } from './components/reset-password/reset-passwo
 import { LocationSelectionComponent } from './components/location-selection/location-selection.component';
 import { LocationDropdownComponent } from './components/location-dropdown/location-dropdown.component';
 import { MerchShopComponent } from './components/merch-shop/merch-shop.component';
+import { AiqTiersComponent } from './components/aiq-tiers/aiq-tiers.component';
 
 @NgModule({
   providers: [ConfigService],
@@ -48,7 +49,8 @@ import { MerchShopComponent } from './components/merch-shop/merch-shop.component
     ResetPasswordComponent,
     LocationSelectionComponent,
     LocationDropdownComponent,
-    MerchShopComponent
+    MerchShopComponent,
+    AiqTiersComponent
   ],
   exports: [
     AuthNavComponent,
@@ -69,7 +71,8 @@ import { MerchShopComponent } from './components/merch-shop/merch-shop.component
     ResetPasswordComponent,
     LocationSelectionComponent,
     LocationDropdownComponent,
-    MerchShopComponent
+    MerchShopComponent,
+    AiqTiersComponent
   ]
 })
 export class ShopComponentsModule {}

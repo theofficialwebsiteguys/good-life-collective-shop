@@ -1,20 +1,23 @@
 <section class="location-selection" role="region" aria-label="Select store">
-  <h2 class="location-heading">Select Location</h2>
+  <h2 class="location-heading">Choose Your Location</h2>
+  <p class="location-subheading">Select a store to start shopping</p>
 
-  <!-- Loading -->
-  <div *ngIf="isLoading">Loading locations...</div>
+  <!-- Loading skeleton -->
+  <div *ngIf="isLoading" class="skeleton-list">
+    <div class="skeleton-card" *ngFor="let n of [1,2,3]"></div>
+  </div>
 
   <!-- Empty -->
   <div class="empty" *ngIf="!isLoading && locations.length === 0">
     <p>No stores available right now.</p>
-    <button (click)="loadLocations()">Retry</button>
+    <button class="retry-btn" (click)="loadLocations()">Try Again</button>
   </div>
 
-  <!-- Radio List -->
-  <form *ngIf="locations.length > 0" (ngSubmit)="continue()">
+  <!-- Location Cards -->
+  <form *ngIf="!isLoading && locations.length > 0" (ngSubmit)="continue()">
     <ul class="location-list">
       <li *ngFor="let loc of locations">
-        <label>
+        <label class="location-card" [class.selected]="selectedLocation === loc">
           <input
             type="radio"
             name="location"
@@ -22,79 +25,61 @@
             [(ngModel)]="selectedLocation"
             required
           />
-          <div class="location-label">
-            <strong>{{ loc.name }}</strong>
-            <p>{{ loc.address }}</p>
-            <div class="badges">
-                <span class="badge" [class.open]="isOpenPickup(loc)">{{ isOpenPickup(loc) ? 'Open' : 'Closed' }}</span>
-                <span class="badge" *ngIf="loc.services?.includes('pickup')">Pickup</span>
-                <span
-                class="badge delivery"
-                *ngIf="loc.services?.includes('delivery') || loc.deliveryHours"
-                [class.active]="isDeliveryNow(loc)"
-                [attr.aria-label]="deliveryAriaLabel(loc)"
-              >
-                Delivery
-              </span>
-                <span class="badge happy" *ngIf="hasHappyHourToday(loc)" [class.active]="isHappyHourNow(loc)">Happy Hour</span>
+
+          <!-- Status dot + name row -->
+          <div class="card-header">
+            <div class="name-row">
+              <span class="status-dot" [class.open]="isOpenPickup(loc)"></span>
+              <span class="loc-name">{{ loc.name }}<span class="loc-state" *ngIf="loc.name === 'Astoria'"> · OR</span></span>
             </div>
-          <div class="hours">
-            <p><strong>Pickup/Walk-in:</strong> {{ todayPickupHours(loc) }}</p>
-            <p *ngIf="loc.deliveryHours"><strong>Delivery:</strong> {{ todayDeliveryHours(loc) }}</p>
-            <p *ngIf="hasHappyHourToday(loc)"><strong>Happy Hour:</strong> {{ happyHourLabelToday(loc) }}</p>
+            <span class="open-label" [class.open]="isOpenPickup(loc)">
+              {{ isOpenPickup(loc) ? 'Open' : 'Closed' }}
+            </span>
           </div>
+
+          <!-- Address -->
+          <p class="loc-address">{{ loc.address }}</p>
+
+          <!-- Hours block -->
+          <div class="hours-block">
+            <div class="hours-row">
+              <span class="hours-icon"><i class="fa-regular fa-clock"></i></span>
+              <span>{{ todayPickupHours(loc) }}</span>
+            </div>
+            <div class="hours-row delivery-row" *ngIf="loc.deliveryHours">
+              <span class="hours-icon"><i class="fa-solid fa-car-side"></i></span>
+              <span>{{ todayDeliveryHours(loc) }}</span>
+              <span class="inline-badge delivery" [class.active]="isDeliveryNow(loc)">
+                {{ isDeliveryNow(loc) ? 'Delivering Now' : 'Delivery' }}
+              </span>
+            </div>
+            <div class="hours-row" *ngIf="hasHappyHourToday(loc)">
+              <span class="hours-icon"><i class="fa-solid fa-leaf"></i></span>
+              <span>{{ happyHourLabelToday(loc) }}</span>
+              <span class="inline-badge happy" [class.active]="isHappyHourNow(loc)">
+                Happy Hour
+              </span>
+            </div>
+          </div>
+
+          <!-- Service badges -->
+          <div class="badges">
+            <span class="badge" *ngIf="loc.services?.includes('pickup')">Pickup</span>
+            <span class="badge" *ngIf="loc.services?.includes('delivery') || loc.deliveryHours">Delivery</span>
+          </div>
+
+          <!-- Selected checkmark -->
+          <div class="check-ring" [class.visible]="selectedLocation === loc">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M2 7l3.5 3.5L12 3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
           </div>
         </label>
       </li>
     </ul>
 
     <button type="submit" class="continue-btn" [disabled]="!selectedLocation">
-      Continue to shop
+      Continue to Shop
     </button>
   </form>
 </section>
-
-
-    <!-- <header class="card-top">
-        <img class="brand-logo" [src]="loc.logo || logoSrc" [alt]="loc.name + ' logo'">
-        <div class="name-block">
-            <h3 class="location-name">{{ loc.name }}</h3>
-            <div class="badges">
-                <span class="badge" [class.open]="isOpenPickup(loc)">{{ isOpenPickup(loc) ? 'Open' : 'Closed' }}</span>
-                <span class="badge" *ngIf="loc.services?.includes('pickup')">Pickup</span>
-                <span
-                class="badge delivery"
-                *ngIf="loc.services?.includes('delivery') || loc.deliveryHours"
-                [class.active]="isDeliveryNow(loc)"
-                [attr.aria-label]="deliveryAriaLabel(loc)"
-              >
-                Delivery
-              </span>
-                <span class="badge happy" *ngIf="hasHappyHourToday(loc)" [class.active]="isHappyHourNow(loc)">Happy Hour</span>
-            </div>
-        </div>
-    </header>
-
-      <div class="meta">
-        <div class="row">
-          <span class="icon">📍</span>
-          <p class="address">
-            {{ loc.address }}
-          </p>
-        </div>
-
-
-        <div class="row">
-        <span class="icon">🕒</span>
-        <div class="hours">
-            <p><strong>Pickup/Walk-in:</strong> {{ todayPickupHours(loc) }}</p>
-            <p *ngIf="loc.deliveryHours"><strong>Delivery:</strong> {{ todayDeliveryHours(loc) }}</p>
-            <p *ngIf="hasHappyHourToday(loc)"><strong>Happy Hour:</strong> {{ happyHourLabelToday(loc) }}</p>
-        </div>
-        </div>
-
-        <div class="row" *ngIf="loc.etaMinutes">
-          <span class="icon">⚡</span>
-          <p>Avg. pickup ready in ~{{ loc.etaMinutes }} min</p>
-        </div>
-      </div> -->

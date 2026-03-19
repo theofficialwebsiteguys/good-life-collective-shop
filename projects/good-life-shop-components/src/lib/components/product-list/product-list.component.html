@@ -1,3 +1,58 @@
+<!-- OFFERS BANNERS -->
+<section
+  *ngIf="category?.toLowerCase() === 'offers'"
+  class="offers-section"
+>
+  <div class="offers-grid">
+    <div
+      class="offer-card"
+      *ngFor="let offer of offers$ | async"
+      [class.active]="activeOffer?.id === offer.id"
+      (click)="selectOffer(offer)"
+    >
+      <!-- background image -->
+      <img
+        class="offer-bg"
+        [src]="offer.banner_image_url"
+        alt="offer banner"
+        aria-hidden="true"
+      />
+
+      <!-- gradient overlay -->
+      <div class="offer-overlay"></div>
+
+      <!-- content -->
+      <div class="offer-content">
+        <i class="fa-solid fa-tag"></i>
+
+        <div class="offer-text">
+          <h3 class="offer-title">
+            {{ offer.label }}
+          </h3>
+          <p class="offer-desc">
+            {{ offer.description || 'Limited time offer. While supplies last.' }}
+          </p>
+        </div>
+
+        <button class="offer-btn">
+          Shop
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Clear filter -->
+  <div class="offers-clear" *ngIf="activeOffer">
+    <button (click)="clearOffer()">
+      Show All Offers
+    </button>
+  </div>
+
+  <h1 class="sale-header">Items On Sale</h1>
+</section>
+
+
+
 <section class="product-section" aria-labelledby="productListHeading">
   <div class="product-grid" role="list">
     <lib-product-card

@@ -1,30 +1,71 @@
+/* ── Heading link ───────────────────────────────────────────── */
+.carousel-link {
+  text-decoration: none;
+  color: inherit;
+  display: inline-block;
+}
+
 .carousel-title {
-  margin: 0 0 8px 150px;
+  margin: 0 0 12px 150px;
   font-size: 2.2rem;
   font-weight: 600;
   color: white;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
+.arrow-icon {
+  width: 18px;
+  height: 18px;
+  transition: transform 0.2s ease;
+}
+
+.carousel-link:hover .arrow-icon {
+  transform: translateX(4px);
+}
+
+/* ── Container ──────────────────────────────────────────────── */
 .carousel-container {
   display: flex;
   align-items: center;
   position: relative;
-  overflow: hidden;
-  max-width: 80%;
-  padding: 10px 0;
+  max-width: 90%;
   margin: auto;
+  padding: 10px 0;
 }
 
+/* ── Scrollable track ───────────────────────────────────────── */
 .product-carousel {
   display: flex;
   overflow-x: auto;
   scroll-behavior: smooth;
   gap: 16px;
-  padding: 12px 48px;
+  padding: 12px 0;
   scroll-snap-type: x mandatory;
+  mask-image: none;
+  -webkit-mask-image: none;
+  transition: mask-image 0.2s;
 }
+
 .product-carousel::-webkit-scrollbar { display: none; }
+
+/* Conditional fade edges based on scroll position */
+.fade-left .product-carousel {
+  mask-image: linear-gradient(to right, transparent 0, #000 52px, #000 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 52px, #000 100%);
+}
+
+.fade-right .product-carousel {
+  mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 52px), transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 52px), transparent 100%);
+}
+
+.fade-left.fade-right .product-carousel {
+  mask-image: linear-gradient(to right, transparent 0, #000 52px, #000 calc(100% - 52px), transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 52px, #000 calc(100% - 52px), transparent 100%);
+}
 
 .product-carousel > lib-product-card {
   display: block;
@@ -33,75 +74,118 @@
   contain: layout paint;
   padding-top: 10px;
 }
+
+/* ── Nav buttons ────────────────────────────────────────────── */
 .carousel-btn {
   position: absolute;
-  top: 30%; /* center vertically */
-  transform: translateY(-50%); /* perfect vertical alignment */
-  background: rgb(0, 0, 0);
-  color: #fff;
-  border: none;
-  width: 44px;
-  height: 44px; /* equal width & height for symmetry */
-  font-size: 1.8rem;
-  border-radius: 50%;
-  cursor: pointer;
+  top: 50%;
+  transform: translateY(-50%);
   z-index: 2;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(13, 13, 13, 0.82);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #c0c0c0;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.2s ease, transform 0.2s ease;
-  margin-left: 10px;
+  transition: background 0.18s, border-color 0.18s, color 0.18s, transform 0.18s;
 }
 
-/* .carousel-btn:hover {
-  background: rgba(255, 255, 255, 0.15);
-  transform: translateY(-50%) scale(1.05);
-} */
-
-.carousel-btn.left { 
-  left: 8px; 
+.carousel-btn svg {
+  width: 18px;
+  height: 18px;
+  pointer-events: none;
 }
 
-.carousel-btn.right { 
-  right: 8px; 
+.carousel-btn:hover {
+  background: rgba(105, 252, 237, 0.1);
+  border-color: rgba(105, 252, 237, 0.35);
+  color: #8fffef;
+  transform: translateY(-50%) scale(1.08);
 }
 
-/* Optional: smaller buttons on mobile */
-@media (max-width: 768px) {
-  .carousel-btn {
-    width: 36px;
-    height: 36px;
-    font-size: 1.5rem;
-  }
+.carousel-btn:active {
+  transform: translateY(-50%) scale(0.95);
 }
 
+.carousel-btn.left  { left: 0; }
+.carousel-btn.right { right: 0; }
 
-.carousel-link {
-  text-decoration: none;
-  color: inherit;
-
-  .carousel-title {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px; 
-    font-weight: 600;
-    cursor: pointer;
-
-    .arrow-icon {
-      width: 18px;
-      height: 18px;
-      transition: transform 0.2s ease;
-    }
-  }
-
-  &:hover .arrow-icon {
-    transform: translateX(3px);
-  }
+/* ── Skeleton cards ─────────────────────────────────────────── */
+.skeleton-card {
+  flex: 0 0 clamp(220px, 24vw, 280px);
+  scroll-snap-align: start;
+  height: 340px;
+  border-radius: 16px;
+  background: #1a1a1a;
+  overflow: hidden;
+  position: relative;
 }
 
+.skeleton-img {
+  height: 160px;
+  background: #222;
+}
 
+.skeleton-body {
+  padding: 14px 14px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.skeleton-line {
+  height: 12px;
+  border-radius: 6px;
+  background: #252525;
+}
+
+.skeleton-line.price  { width: 35%; }
+.skeleton-line.brand  { width: 50%; }
+.skeleton-line.title  { width: 85%; }
+.skeleton-line.short  { width: 55%; }
+
+/* Shimmer sweep */
+.skeleton-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 25%,
+    rgba(255, 255, 255, 0.045) 50%,
+    transparent 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+
+/* ── Responsive ─────────────────────────────────────────────── */
 @media (max-width: 1024px) {
   .carousel-title {
-    margin: 0 0 8px 48px;
+    margin: 0 0 12px 48px;
+  }
+}
+
+@media (max-width: 768px) {
+  .carousel-btn {
+    width: 34px;
+    height: 34px;
+  }
+
+  .carousel-btn svg {
+    width: 15px;
+    height: 15px;
   }
 }

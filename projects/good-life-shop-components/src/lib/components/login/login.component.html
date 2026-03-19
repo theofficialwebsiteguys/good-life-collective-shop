@@ -37,6 +37,16 @@
   <p class="info-text">
     Welcome back! We found your account, but you’ll need to create a new password to continue.
   </p>
+  
+
+  <label for="dob">Date of Birth <span class="required">*</span></label>
+  <input
+    id="dob"
+    type="date"
+    [(ngModel)]="dob"
+    aria-required="true"
+    autocomplete="bday" />
+
 
   <label for="newPassword">New Password <span class="required">*</span></label>
   <input

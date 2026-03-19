@@ -37,6 +37,17 @@
             <input type="tel" [(ngModel)]="userInfo.phone" name="phone" required />
           </div>
         </div>
+
+        <div class="form-row">
+          <div class="form-field" >
+            <label>Date of Birth</label>
+            <input class="dob-input" type="date" [(ngModel)]="userInfo.dob" name="dob" required />
+          </div>
+        </div>
+        <div *ngIf="userInfo.dob && !is21OrOlder(userInfo.dob)" class="dob-error">
+          You must be at least 21 years old to place an order.
+        </div>
+
       </div>
 
       <!-- ORDER TYPE -->
@@ -45,22 +56,65 @@
         <p class="section-subtitle">Choose how you’d like to receive your order.</p>
 
         <div class="radio-options">
-          <label>
-            <input type="radio" name="orderType" value="pickup"
-                   [(ngModel)]="selectedOrderType"
-                   (change)="onOrderTypeChange($event)" />
-            Pickup
-          </label>
-          <label>
-            <input type="radio" name="orderType" value="delivery"
-                   [(ngModel)]="selectedOrderType"
-                   [disabled]="!enableDelivery || finalTotal < deliveryMin"
-                   (change)="onOrderTypeChange($event)" />
-            Delivery
-            <span *ngIf="enableDelivery && finalTotal < deliveryMin" class="warning">(Min ${{ deliveryMin }} required)</span>
-            <span *ngIf="!enableDelivery" class="warning">(Delivery off)</span>
-          </label>
-        </div>
+        <label class="order-type-option">
+          <div class="left">
+            <input
+              type="radio"
+              name="orderType"
+              value="pickup"
+              [(ngModel)]="selectedOrderType"
+              (change)="onOrderTypeChange($event)"
+            />
+
+            <div class="option-text">
+              <span class="option-title">Pickup</span>
+              <small class="option-note">
+                Orders must be picked up the same day. We do not hold products overnight.
+              </small>
+            </div>
+          </div>
+        </label>
+
+        <label class="order-type-option">
+          <div class="left">
+            <input
+              type="radio"
+              name="orderType"
+              value="delivery"
+              [(ngModel)]="selectedOrderType"
+              [disabled]="!enableDelivery || finalSubtotal < lowestDeliveryMin!"
+              (change)="onOrderTypeChange($event)"
+            />
+
+            <div class="option-text">
+              <span class="option-title">Delivery</span>
+
+              <!-- Dynamic Status -->
+              <small
+                *ngIf="enableDelivery && !deliveryAddressValid && finalSubtotal < lowestDeliveryMin!"
+                class="option-note warning"
+              >
+                Delivery minimum ${{ lowestDeliveryMin }} required.
+              </small>
+
+              <small
+                *ngIf="enableDelivery && deliveryAddressValid && finalSubtotal < deliveryMin"
+                class="option-note warning"
+              >
+                Minimum ${{ deliveryMin }} required for your area.
+              </small>
+
+              <small
+                *ngIf="!enableDelivery"
+                class="option-note warning"
+              >
+                Delivery currently unavailable.
+              </small>
+            </div>
+          </div>
+        </label>
+      </div>
+
       </div>
 
       <!-- DELIVERY ADDRESS -->
@@ -97,7 +151,9 @@
                    [min]="minDate" (change)="onDateSelected($event)" required />
           </div>
           <div class="form-field">
-            <label>Delivery Time</label>
+            <label>Delivery Time<small *ngIf="isCanandaigua">
+              - Delivery times start 1 hour from now.
+            </small></label>
             <select [(ngModel)]="selectedDeliveryTime" name="deliveryTime" required>
               <option value="" disabled selected>Select Time</option>
               <option *ngFor="let time of timeOptions" [value]="time.value">{{ time.display }}</option>
@@ -112,29 +168,45 @@
         <p class="section-subtitle">Select your preferred payment option.</p>
 
         <div class="radio-options">
-          <label>
-            <input #cashRef type="radio" name="payment" value="cash"
-                   [(ngModel)]="selectedPaymentMethod"
-                   [disabled]="selectedOrderType === 'delivery'"
-                   (ngModelChange)="onPaymentMethodChange($event)" />
-            Cash
+          <!-- CASH -->
+          <label class="payment-option">
+            <div class="left">
+              <input #cashRef type="radio" name="payment" value="cash"
+                    [(ngModel)]="selectedPaymentMethod"
+                    [disabled]="selectedOrderType === 'delivery'"
+                    (ngModelChange)="onPaymentMethodChange($event)" />
+              <span>Cash</span>
+            </div>
           </label>
 
-          <label>
-            <input type="radio" name="payment" value="debit"
-                   [(ngModel)]="selectedPaymentMethod"
-                   [disabled]="selectedOrderType === 'delivery'"
-                   (ngModelChange)="onPaymentMethodChange($event)" />
-            Debit
+          <!-- DEBIT -->
+          <label class="payment-option">
+            <div class="left">
+              <input type="radio" name="payment" value="debit"
+                    [(ngModel)]="selectedPaymentMethod"
+                    [disabled]="selectedOrderType === 'delivery'"
+                    (ngModelChange)="onPaymentMethodChange($event)" />
+              <span>Debit</span>
+            </div>
           </label>
 
-          <label class="aeropay-option" *ngIf="!(selectedOrderType === 'pickup' && currentLocationKey === 'canandaigua')">
-            <input #aeropayRef type="radio" name="payment" value="aeropay"
-                   [(ngModel)]="selectedPaymentMethod"
-                   (change)="onPaymentMethodChange('aeropay', aeropayRef, cashRef)" />
-            <img src="assets/aeropay.png" alt="AeroPay" />
-            <span>Pay By Bank</span>
+          <label class="payment-option"
+                *ngIf="!(selectedOrderType === 'pickup' && (currentLocationKey === 'canandaigua' || currentLocationKey === 'buffalo'))">
+
+            <!-- LEFT SIDE (radio + text) -->
+            <div class="left">
+              <input #aeropayRef type="radio" name="payment" value="aeropay"
+                    [(ngModel)]="selectedPaymentMethod"
+                    (change)="onPaymentMethodChange('aeropay', aeropayRef, cashRef)" />
+              <span>Pay By Bank</span>
+            </div>
+
+            <!-- RIGHT SIDE (icon + optional warning) -->
+            <div class="right">
+              <img src="assets/aeropay.png" class="method-icon" alt="AeroPay" />
+            </div>
           </label>
+
         </div>
 
         <!-- AeroPay Expanded -->
@@ -202,14 +274,52 @@
       <div class="summary-box" role="region" aria-labelledby="order-summary-heading">
         <h2 id="order-summary-heading">Order Summary</h2>
 
-        <div class="summary-row"><span>Subtotal:</span><span>{{ finalSubtotal | currency }}</span></div>
+        <div class="summary-row original">
+          <span>Subtotal:</span>
+          <span class="strikethrough">
+            {{ finalSubtotal  | currency }}
+          </span>
+        </div>
 
-        <div *ngIf="userInfo.points">
+        <!-- DISCOUNTED SUBTOTAL -->
+        <!-- <div class="summary-row discounted">
+          <span>Discounted Subtotal:</span>
+          <span class="highlight">  
+            {{ discountedSubtotal | currency }}
+          </span>
+        </div> -->
+
+        <!-- SAVINGS -->
+        <div class="summary-row savings" *ngIf="dealSavings > 0">
+          <span>You saved:</span>
+          <span>-{{ dealSavings | currency }}</span>
+        </div>
+
+        <div
+          class="summary-row"
+          *ngIf="appliedAiqReward"
+        >
+          <span>Reward: {{ appliedAiqReward.name }}</span>
+          <span>
+            -
+            {{
+              appliedAiqReward.dollarValue
+                ? (appliedAiqReward.dollarValue | currency)
+                : (appliedAiqReward.percentageValue + '%')
+            }}
+          </span>
+        </div>
+
+
+        <!-- <div *ngIf="userInfo.points">
           <div class="summary-row"><span>Available Points:</span><span>{{ userInfo.points }}</span></div>
           <div class="summary-row"><span>Potential Savings:</span><span>{{ (userInfo.points * pointValue) | currency }}</span></div>
 
           <div class="points-section">
             <div class="points-label">Redeem Points:</div>
+            <div *ngIf="userInfo.points < 100" class="points-warning">
+              Minimum 100 points required to redeem rewards.
+            </div>
             <div class="points-grid">
               <button *ngFor="let option of redemptionOptions"
                       class="points-btn"
@@ -220,16 +330,75 @@
             </div>
           </div>
 
-          <div class="summary-row"><span>Discount Applied:</span><span>-{{ (pointsToRedeem * pointValue) | currency }}</span></div>
-        </div>
+          <div class="summary-row"><span>Loyalty Discount:</span><span>-{{ (pointsToRedeem * pointValue) | currency }}</span></div>
+      
+        </div> -->
 
-        <div class="summary-row"><span>Tax:</span><span>{{ finalTax | currency }}</span></div>
+        <div class="summary-row" *ngIf="!isTaxIncludedLocation"><span>Tax:</span><span>{{ finalTax | currency }}</span></div>
+        <div class="summary-row" *ngIf="isTaxIncludedLocation"><span>Tax Included</span></div>
 
         <div *ngIf="selectedOrderType === 'delivery'" class="summary-row">
           <span>Delivery Fee:</span><span>{{ deliveryFee | currency }}</span>
         </div>
 
+        <!-- TIP SECTION -->
+
+<div
+  class="tip-section"
+  *ngIf="selectedPaymentMethod === 'aeropay'"
+>
+  <div class="tip-header">
+    <span>Tip</span>
+    <span class="tip-amount">{{ tipAmount | currency }}</span>
+  </div>
+
+  <div class="tip-options">
+    <button
+      *ngFor="let tip of tipPercentOptions"
+      class="tip-btn"
+      [class.active]="selectedTipPercent === tip.value && !isCustomTip"
+      (click)="selectTipPercent(tip.value)"
+    >
+      {{ tip.label }}
+    </button>
+
+    <button
+      class="tip-btn"
+      [class.active]="isCustomTip"
+      (click)="enableCustomTipPercent()"
+    >
+      Custom
+    </button>
+  </div>
+
+  <div class="currency-input" *ngIf="isCustomTip">
+    <input
+      type="text"
+      inputmode="decimal"
+      placeholder="Enter tip amount"
+      [(ngModel)]="customTipAmountInput"
+      (ngModelChange)="onCustomTipAmountChange($event)"
+    />
+    <span class="suffix">$</span>
+  </div>
+</div>
+
+
         <div class="summary-row total"><span>Total:</span><span>{{ finalTotal | currency }}</span></div>
+
+        <ng-container *ngIf="!isGuest && discounts.length">
+          <app-aiq-tiers
+            [userPoints]="userInfo.points"
+            [discounts]="discounts"
+          ></app-aiq-tiers>
+        </ng-container>
+
+        <div *ngIf="selectedOrderType === 'delivery'
+            && deliveryAddressValid
+            && finalSubtotal < deliveryMin"
+            class="error-banner">
+          Add {{ (deliveryMin - finalSubtotal) | currency }} more to meet the delivery minimum.
+        </div>
 
         <button class="checkout-submit" (click)="placeOrder()"
                 [disabled]="isLoading || !isFormValid() || (selectedPaymentMethod === 'aeropay' && !selectedBankId)"  [title]="selectedPaymentMethod === 'aeropay' && !selectedBankId ? 'Aeropay Incomplete' : ''">
@@ -241,23 +410,36 @@
       <!-- CART PREVIEW -->
       <div class="cart-preview">
         <h2>Your Items</h2>
+          <div *ngIf="isCartLoading" class="cart-loading">
+            <span class="spinner"></span>
+            <p>Loading your cart...</p>
+          </div>
+          <ng-container *ngIf="!isCartLoading">
         <div *ngFor="let item of cartItems" class="cart-item">
-          <img [src]="item.image || 'assets/' + (item.category ? item.category.toLowerCase() + '-general.png' : 'default.png')"
+          <img [src]="item.image || placeholderFor(item.category, item.title)"
                [alt]="item.title" class="product-image" />
           <div class="item-details">
             <span class="item-quantity">{{ item.quantity }}x</span>
             <span class="item-title">{{ item.title }}</span>
-            <span class="item-price">{{ item.price | currency }}</span>
-            <div *ngIf="isDiscounted(item) || isBogo(item)" class="deal-banner">
-              <ng-container *ngIf="isBogo(item); else saleBanner">
-                <span>{{ getBogoText(item) }}</span>
-              </ng-container>
-              <ng-template #saleBanner>
-                <span>{{ item.discountDescription || 'On Sale!' }}</span>
-              </ng-template>
+            <span
+              class="item-weight"
+              *ngIf="getItemWeightLabel(item)"
+            >
+              {{ getItemWeightLabel(item) }}
+            </span>
+            <span class="item-price">
+              {{ item.lineTotal | currency }}
+            </span>
+            <span class="item-unit" *ngIf="item.quantity > 1">
+              {{ item.price | currency }} ea
+            </span>
+            <!-- <span class="item-price">{{ item.price | currency }}</span> -->
+            <div *ngIf="isDealApplied(item)" class="deal-banner">
+              <span>{{ getDealText(item) }}</span>
             </div>
           </div>
         </div>
+        </ng-container>
       </div>
     </div>
   </div>

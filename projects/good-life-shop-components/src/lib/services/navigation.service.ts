@@ -13,7 +13,67 @@ export class NavigationService {
   private selectedCategory = new BehaviorSubject<string | null>(this.getStoredCategory());
   selectedCategory$ = this.selectedCategory.asObservable();
 
-  constructor(private router: Router) {}
+  private selectedOffer = new BehaviorSubject<string | null>(this.getStoredOffer());
+  selectedOffer$ = this.selectedOffer.asObservable();
+
+
+  constructor(private router: Router) {
+     this.hydrateFromUrl();
+  }
+
+  private hydrateFromUrl() {
+    const tree = this.router.parseUrl(this.router.url);
+    const q = tree.queryParams;
+
+    if (q['category']) {
+      this.setSelectedCategory(q['category']);
+    }
+
+    if (q['offer']) {
+      this.setSelectedOffer(q['offer']);
+    }
+  }
+
+  setSelectedOffer(offerSlug: string | null) {
+    this.selectedOffer.next(offerSlug);
+
+    if (offerSlug) {
+      sessionStorage.setItem('selectedOffer', offerSlug);
+    } else {
+      sessionStorage.removeItem('selectedOffer');
+    }
+  }
+
+  getSelectedOffer(): string | null {
+    return this.selectedOffer.value;
+  }
+
+  private getStoredOffer(): string | null {
+    return sessionStorage.getItem('selectedOffer');
+  }
+
+
+  navigateToOffer(offerSlug: string) {
+    this.setSelectedOffer(offerSlug);
+
+    this.router.navigate(['/shop'], {
+      queryParams: {
+        category: 'OFFERS',
+        offer: offerSlug,
+      },
+      queryParamsHandling: 'merge',
+    });
+  }
+
+  clearOffer() {
+    this.setSelectedOffer(null);
+
+    this.router.navigate(['/shop'], {
+      queryParams: { offer: null },
+      queryParamsHandling: 'merge',
+    });
+  }
+
 
   // Set the selected product and store in sessionStorage
   setSelectedProduct(product: Product | null) {
@@ -57,8 +117,14 @@ export class NavigationService {
 
   navigateToCategory(category: string): void {
     this.setSelectedCategory(category);
-    this.router.navigate(['/shop'], { queryParams: { category: category.toUpperCase() } });
+    this.setSelectedOffer(null); // 👈 reset offer if switching category
+
+    this.router.navigate(['/shop'], {
+      queryParams: { category: category.toUpperCase() },
+      queryParamsHandling: 'merge',
+    });
   }
+
 
   // Retrieve stored product from sessionStorage
   private getStoredProduct(): Product | null {
