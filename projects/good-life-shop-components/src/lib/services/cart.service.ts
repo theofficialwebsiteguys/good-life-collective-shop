@@ -485,7 +485,7 @@ export class CartService {
         // Convert once to UTC ISO (toISOString already does the offset)
         const startIso = localDateTime.toISOString();
 
-        const endIso = new Date(localDateTime.getTime() + 30 * 60 * 1000).toISOString();
+        const endIso = new Date(localDateTime.getTime() + 60 * 60 * 1000).toISOString();
 
         orderItems.requestedFulfillmentTimeStart = startIso;
         orderItems.requestedFulfillmentTimeEnd = endIso;
@@ -673,8 +673,8 @@ export class CartService {
       return addedItems;
     }
 
-  async placeOrder(user_id: number = 19139, pos_order_id: number, points_add: number, points_redeem: number, amount: number, cart: any, email?: string, customer_name?: string, customer_email?: string, customer_phone?: string, customer_dob?: string, order_type?: string) {
-    const payload = { user_id, pos_order_id, points_add, points_redeem, amount, cart, customer_name, customer_email, customer_phone, customer_dob, order_type };
+  async placeOrder(user_id: number = 19139, pos_order_id: number, points_add: number, points_redeem: number, amount: number, cart: any, email?: string, customer_name?: string, customer_email?: string, customer_phone?: string, customer_dob?: string, order_type?: string, order_source?: string) {
+    const payload = { user_id, pos_order_id, points_add, points_redeem, amount, cart, customer_name, customer_email, customer_phone, customer_dob, order_type, order_source };
 
     const location_id = this.settingsService.getSelectedLocationId() ?? '';
 
@@ -783,176 +783,161 @@ export class CartService {
   }
 
   private applyBogoPricing(cart: CartItem[]): CartItem[] {
-    // Always reset BOGO-calculated fields first (prevents stale values)
-    for (const item of cart) {
-      // ✅ Only reset BOGO-specific fields
-      const hasBogo = item.discounts?.some(d => d.kind === 'bogo');
+    // Pre-discount subtotal for requires_min_subtotal checks
+    const preDiscountSubtotal = cart.reduce((sum, i) => sum + (i.price * i.quantity), 0);
 
-      if (hasBogo) {
+    // Reset BOGO-specific fields
+    for (const item of cart) {
+      if (item.discounts?.some(d => d.kind === 'bogo')) {
         item.discountedQty = 0;
         item.discountedUnitPrice = item.unitPrice;
         item.discountNote = null;
       }
     }
 
-    // Collect bogo discounts safely + narrow the type
+    // Deduplicate bogo discounts by name (each bogo applies once across all matching items)
+    const seen = new Set<string>();
     const bogos = cart
       .flatMap((i: CartItem) => i.discounts ?? [])
-      .filter(
-        (d): d is Extract<AppliedDiscount, { kind: 'bogo' }> => d.kind === 'bogo'
-      );
+      .filter((d): d is Extract<AppliedDiscount, { kind: 'bogo' }> => d.kind === 'bogo')
+      .filter(d => {
+        const key = d.name ?? `${d.buyQty}x${d.getQty}:${d.getProductId}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
 
     for (const bogo of bogos) {
-      // Which product receives the reward?
-      // If getProductId exists, use it; otherwise, fallback to "same product" model.
-      const targetId: string | null =
-        (bogo.getProductId ?? null) ? String(bogo.getProductId) : null;
+      // Minimum subtotal check
+      if (bogo.requires_min_subtotal && bogo.min_subtotal_amount != null) {
+        if (preDiscountSubtotal < bogo.min_subtotal_amount) continue;
+      }
 
-      // Qualifying qty:
-      // - If your BOGO is encoded per-product using role 'buy', count only those.
-      // - If role isn't present, treat any item carrying this bogo as qualifying.
-      const qualifyingQty = cart
-        .filter((item: CartItem) => {
-          const ds = item.discounts ?? [];
-          return ds.some(d =>
-            d.kind === 'bogo' &&
-            // if roles exist, exclude 'get' lines from qualifying
-            (d.role ? d.role !== 'get' : true) &&
-            // if bogo targets a specific getProductId, still qualify based on bogo presence
-            true
-          );
-        })
-        .reduce((sum: number, item: CartItem) => sum + item.quantity, 0);
+      // Qualifying items: those with role='buy' for this bogo
+      const qualifyingItems = cart.filter(item =>
+        (item.discounts ?? []).some(d =>
+          d.kind === 'bogo' && d.name === bogo.name && d.role === 'buy'
+        )
+      );
+      const qualifyingQty = qualifyingItems.reduce((sum, i) => sum + i.quantity, 0);
 
-      const rewardQty =
-        Math.floor(qualifyingQty / bogo.buyQty) * bogo.getQty;
+      // Dedicated get-side items: role='get' for this bogo
+      const getItems = cart.filter(item =>
+        (item.discounts ?? []).some(d =>
+          d.kind === 'bogo' && d.name === bogo.name && d.role === 'get'
+        )
+      );
 
+      // "Same pool" detection: no dedicated get-role items AND no specific product target.
+      // Covers both sameAsBuys=true and overlapping-filter cases (e.g. "buy 2 Edibles get 1 Edible").
+      // Formula: need (buyQty + getQty) items per reward set since buy and get share the same pool.
+      const isSamePool = getItems.length === 0 && !bogo.getProductId;
+
+      const rewardQty = isSamePool
+        ? Math.floor(qualifyingQty / (bogo.buyQty + bogo.getQty)) * bogo.getQty
+        : Math.floor(qualifyingQty / bogo.buyQty) * bogo.getQty;
+
+      if (rewardQty <= 0) continue;
+
+      // Which items receive the reward
+      const targetItems: CartItem[] = isSamePool
+        ? qualifyingItems
+        : bogo.getProductId
+          ? cart.filter(i => String(i.id) === String(bogo.getProductId))
+          : getItems;
+
+      // Apply reward to target items (up to rewardQty units)
       let remaining = rewardQty;
-
-      for (const item of cart) {
+      for (const item of targetItems) {
         if (remaining <= 0) break;
-
-        // If getProductId is provided, only apply reward to that product id.
-        // If not provided, apply to items that contain this bogo discount (same-product fallback).
-        const appliesToThisItem =
-          targetId
-            ? String(item.id) === targetId
-            : (item.discounts ?? []).some(d => d.kind === 'bogo');
-
-        if (!appliesToThisItem) continue;
-
         const applied = Math.min(item.quantity, remaining);
         remaining -= applied;
 
         item.discountedQty = applied;
-
-        // reward price for those discounted units
-        if (bogo.discountType === 'percent') {
-          item.discountedUnitPrice =
-            item.unitPrice * (1 - bogo.discountValue / 100);
-        } else {
-          // flat
-          item.discountedUnitPrice =
-            Math.max(item.unitPrice - bogo.discountValue, 0);
-        }
-
-        item.discountNote =
-          `${bogo.name ?? 'BOGO'}: ${applied} @ ${bogo.discountType}`;
+        item.discountedUnitPrice = bogo.discountType === 'percent'
+          ? item.unitPrice * (1 - bogo.discountValue / 100)
+          : Math.max(item.unitPrice - bogo.discountValue, 0);
+        item.discountNote = `${bogo.name ?? 'BOGO'}: ${applied} @ ${bogo.discountType}`;
       }
     }
 
-    // Final totals for every row
+    // Recalculate line totals
     for (const item of cart) {
       const paidQty = Math.max(item.quantity - item.discountedQty, 0);
-      item.lineTotal =
-        (item.discountedQty * item.discountedUnitPrice) +
-        (paidQty * item.unitPrice);
+      item.lineTotal = (item.discountedQty * item.discountedUnitPrice) + (paidQty * item.unitPrice);
     }
 
     return cart;
   }
 
 
+ private itemMatchesDiscount(item: CartItem, filter: any): boolean {
+    const { includedProductIds, excludedProductIds, categories, brands, weight } = filter ?? {};
+    if (excludedProductIds?.includes(String(item.id))) return false;
+    if (includedProductIds?.length) return includedProductIds.includes(String(item.id));
+    if (categories?.length && !categories.includes(item.category)) return false;
+    if (brands?.length && !brands.includes(item.brand)) return false;
+    if (weight && String((item as any).weight ?? '').toLowerCase() !== weight.toLowerCase()) return false;
+    return true;
+  }
+
  private applyStandardDiscounts(cart: CartItem[]): CartItem[] {
   // Reset prices
   cart.forEach(i => {
-    i.unitPrice = i.price;          // base price
-    i.discountedQty = 0;            // reset
+    i.unitPrice = i.price;
+    i.discountedQty = 0;
     i.discountedUnitPrice = i.price;
   });
+
+  // Pre-discount subtotal for requires_min_subtotal checks
+  const preDiscountSubtotal = cart.reduce((sum, i) => sum + (i.price * i.quantity), 0);
+
+  // Cart-wide exclusivity: if any exclusive discount exists, remove all non-exclusives from all items
+  const allDiscounts = cart.flatMap(i => i.discounts ?? []);
+  const hasExclusive = allDiscounts.some(d => (d as any).is_exclusive);
+  if (hasExclusive) {
+    cart.forEach(item => {
+      item.discounts = (item.discounts ?? []).filter(d => (d as any).is_exclusive);
+    });
+  }
 
   const discounts = cart
     .flatMap(i => i.discounts ?? [])
     .filter(
-      (d): d is Extract<AppliedDiscount, { kind: 'percent' | 'flat' }> =>
-        d.kind === 'percent' || d.kind === 'flat'
+      (d): d is Extract<AppliedDiscount, { kind: 'percent' | 'flat' | 'new_price' | 'penny' }> =>
+        d.kind === 'percent' || d.kind === 'flat' || d.kind === 'new_price' || d.kind === 'penny'
     );
 
   for (const d of discounts) {
     if (!d.rule) continue;
 
-    // 🔍 Qualifying items
-    const qualifyingItems = cart.filter(i => {
-      if (d.rule?.productIds?.length) {
-        return d.rule.productIds.includes(String(i.id));
-      }
-      if (d.rule?.brands?.length) {
-        return d.rule.brands.includes(i.brand);
-      }
-      if (d.rule?.categories?.length) {
-        return d.rule.categories.includes(i.category);
-      }
-      return false;
-    });
+    // Skip discount if cart hasn't reached minimum subtotal
+    if ((d as any).requires_min_subtotal && (d as any).min_subtotal_amount != null) {
+      if (preDiscountSubtotal < (d as any).min_subtotal_amount) continue;
+    }
 
-    const totalQty = qualifyingItems.reduce((s, i) => s + i.quantity, 0);
-    const minQty = d.minQty ?? d.rule.minQty ?? 1;
+    const filter = d.rule.filter ?? {};
+    const qty = d.rule.qty ?? 1;
+    const applyMode = d.rule.applyMode ?? 'per_item';
 
-    if (totalQty < minQty) continue;
+    // 🔍 Qualifying items using ProductFilter
+    const qualifyingItems = cart.filter(i => this.itemMatchesDiscount(i, filter));
+    const totalQty = qualifyingItems.reduce((s: number, i: CartItem) => s + i.quantity, 0);
 
-    /* ===========================
-       ✅ PERCENT → per-item OK
-    =========================== */
+    if (totalQty < qty) continue;
+
     if (d.kind === 'percent') {
-      qualifyingItems.forEach(item => {
-        item.unitPrice = item.price * (1 - d.value / 100);
-      });
-      continue;
+      qualifyingItems.forEach(item => { item.unitPrice = item.price * (1 - d.value / 100); });
+    } else if (d.kind === 'flat') {
+      if (applyMode === 'per_item') {
+        qualifyingItems.forEach(item => { item.unitPrice = Math.max(0, item.price - d.value); });
+      }
+      // threshold flat is handled in getCartSubtotal
+    } else if (d.kind === 'new_price') {
+      qualifyingItems.forEach(item => { item.unitPrice = d.value; });
+    } else if (d.kind === 'penny') {
+      qualifyingItems.forEach(item => { item.unitPrice = 0.01; });
     }
-
-    // ✅ FLAT is cart-level. Do NOT modify item pricing here.
-    if (d.kind === 'flat') {
-      continue;
-    }
-
-    // /* ===========================
-    //   ✅ FLAT → PER-GROUP, NOT BLENDED
-    // =========================== */
-
-    // const groups = Math.floor(totalQty / minQty);
-    // if (groups <= 0) continue;
-
-    // const discountedQtyTotal = groups * minQty;
-    // const perUnitDiscount = d.value / minQty;
-
-    // let remainingDiscounted = discountedQtyTotal;
-
-    // for (const item of qualifyingItems) {
-    //   if (remainingDiscounted <= 0) break;
-
-    //   const applyQty = Math.min(item.quantity, remainingDiscounted);
-    //   remainingDiscounted -= applyQty;
-
-    //   // ✅ DO NOT change unitPrice
-    //   item.discountedQty += applyQty;
-
-    //   item.discountedUnitPrice = Math.max(
-    //     item.price - perUnitDiscount,
-    //     0
-    //   );
-    // }
-
-
   }
 
   return cart;
@@ -1047,38 +1032,60 @@ private buildCart(
 getCartSubtotal(cart?: CartItem[]): number {
   const items = cart ?? this.cartSubject.value;
 
-  // base: item-level discounts already baked into lineTotal
-  let subtotal = items.reduce((sum, i) => sum + (Number(i.lineTotal) || 0), 0);
+  // Item-level discounts already baked into lineTotal
+  let subtotal = items.reduce((sum: number, i: CartItem) => sum + (Number(i.lineTotal) || 0), 0);
 
-  // find a CART-LEVEL flat discount (minQty > 1)
-  const flat: any = items
-    .flatMap(i => i.discounts ?? [])
-    .find(d => d.kind === 'flat' && !!d.rule && ((d.minQty ?? d.rule.minQty) > 1));
+  // Pre-discount subtotal (base price × qty) used for requires_min_subtotal checks
+  const preDiscountSubtotal = items.reduce((sum: number, i: CartItem) => sum + (i.price * i.quantity), 0);
 
-  if (!flat?.rule) return Math.max(subtotal, 0);
+  // ── cart_subtotal discounts ─────────────────────────────────────────────
+  const seen = new Set<string>();
+  const cartSubtotalDiscounts = items
+    .flatMap((i: CartItem) => i.discounts ?? [])
+    .filter((d): d is Extract<AppliedDiscount, { kind: 'cart_subtotal' }> => d.kind === 'cart_subtotal')
+    .filter(d => {
+      if (seen.has(d.discount_id)) return false;
+      seen.add(d.discount_id);
+      return true;
+    });
 
-  const minQty = flat.minQty ?? flat.rule.minQty ?? 1;
+  // Exclusivity: if any exclusive cart discount, keep only the most exclusive ones
+  const exclusiveCart = cartSubtotalDiscounts.filter(d => d.is_exclusive);
+  const eligibleCart = exclusiveCart.length > 0 ? exclusiveCart : cartSubtotalDiscounts;
 
-  // qualifying qty (SAFE string comparisons)
-  const qualifyingQty = items
-    .filter(i => {
-      if (flat.rule?.productIds?.length) {
-        return flat.rule.productIds.includes(String(i.id));
-      }
-      if (flat.rule?.brands?.length) {
-        return flat.rule.brands.includes(String(i.brand));
-      }
-      if (flat.rule?.categories?.length) {
-        return flat.rule.categories.includes(String(i.category)); // category is normalized now
-      }
-      return false;
-    })
-    .reduce((s, i) => s + (Number(i.quantity) || 0), 0);
+  for (const d of eligibleCart) {
+    if (d.requires_min_subtotal && d.min_subtotal_amount != null) {
+      if (preDiscountSubtotal < d.min_subtotal_amount) continue;
+    }
+    const e = d.effect;
+    if (!e) continue;
+    switch (e.type) {
+      case 'percent_off': subtotal = subtotal * (1 - e.value / 100); break;
+      case 'dollar_off':  subtotal = Math.max(0, subtotal - e.value); break;
+      case 'new_price':   subtotal = e.value; break;
+      case 'penny':       subtotal = 0.01; break;
+      case 'free':        subtotal = 0; break;
+    }
+  }
 
-  const groups = Math.floor(qualifyingQty / minQty);
-  const totalOff = groups * (Number(flat.value) || 0);
+  // ── threshold flat discounts (product type, dollar_off, applyMode=threshold) ─
+  const flatThreshold = items
+    .flatMap((i: CartItem) => i.discounts ?? [])
+    .find((d): d is Extract<AppliedDiscount, { kind: 'flat' }> =>
+      d.kind === 'flat' && d.rule?.applyMode === 'threshold'
+    );
 
-  return Math.max(subtotal - totalOff, 0);
+  if (flatThreshold?.rule) {
+    const filter = flatThreshold.rule.filter ?? {};
+    const qty = flatThreshold.rule.qty ?? 1;
+    const qualifyingQty = items
+      .filter((i: CartItem) => this.itemMatchesDiscount(i, filter))
+      .reduce((s: number, i: CartItem) => s + i.quantity, 0);
+    const groups = Math.floor(qualifyingQty / qty);
+    subtotal = Math.max(subtotal - groups * (Number(flatThreshold.value) || 0), 0);
+  }
+
+  return Math.max(subtotal, 0);
 }
 
 

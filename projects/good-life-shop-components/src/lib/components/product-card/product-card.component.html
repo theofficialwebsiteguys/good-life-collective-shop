@@ -16,51 +16,11 @@
       (error)="onImgError($event)"
     />
     <div class="halo" aria-hidden="true"></div>
+    <div *ngIf="dealBadgeText" class="deal-badge">{{ dealBadgeText }}</div>
   </div>
 
     <!-- BODY -->
     <div class="body">
-      <div *ngIf="hasDiscount" class="sale-banner">
-
-        <div *ngIf="bogo" class="sale-chip bogo">
-           <span class="sub" *ngIf="bogo.name">
-            {{ bogo.name }}
-          </span> 
-          <br>
-          <strong *ngIf="bogo.role === 'buy'">
-            <ng-container *ngIf="bogo.getProductId === product.posProductId; else crossProduct">
-              Buy {{ bogo.buyQty }} Get {{ bogo.getQty }} at a discount.
-            </ng-container>
-
-            <ng-template #crossProduct>
-              <!-- Buy {{ bogo.buyQty }} → Get a Free Item -->
-               {{ bogo.description }}
-            </ng-template>
-          </strong>
-
-
-          <strong *ngIf="bogo.role === 'get'">
-            Discounted with qualifying purchase
-          </strong>
-
-          <!-- <span class="sub" *ngIf="bogo.description">
-            {{ bogo.description }}
-          </span> -->
-        </div>
-
-
-        <!-- Percent / Flat -->
-        <div *ngIf="!bogo && dealBannerText" class="sale-chip discount">
-          <strong>{{ dealBannerText }}</strong>
-        </div>
-
-        <div *ngIf="bundle" class="sale-chip bundle">
-          Part of a {{ bundle.bundleSize }}-item bundle
-        </div>
-
-
-      </div>
-
     <!-- DETAILS -->
     
    <div class="price" [class.discounted]="isPriceDiscounted">

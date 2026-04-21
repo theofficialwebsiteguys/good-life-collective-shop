@@ -6,7 +6,7 @@ import { AccessibilityService } from '../../services/accessibility.service';
 import { NavigationService } from '../../services/navigation.service';
 import { Router } from '@angular/router';
 
-type PriceDiscount = Extract<AppliedDiscount, { kind: 'percent' | 'flat' }>;
+type PriceDiscount = Extract<AppliedDiscount, { kind: 'percent' | 'flat' | 'new_price' | 'penny' }>;
 @Component({
   selector: 'lib-product-card',
   standalone: true,
@@ -76,7 +76,8 @@ export class ProductCardComponent {
 
   get priceDiscount(): PriceDiscount | null {
     const d = this.discounts.find(
-      (x): x is PriceDiscount => x.kind === 'percent' || x.kind === 'flat',
+      (x): x is PriceDiscount =>
+        x.kind === 'percent' || x.kind === 'flat' || x.kind === 'new_price' || x.kind === 'penny',
     );
     return d ?? null;
   }
@@ -200,25 +201,37 @@ export class ProductCardComponent {
     const d = this.priceDiscount;
     if (!d) return null;
 
-    // ------------------------
-    // PERCENT DISCOUNT
-    // ------------------------
     if (d.kind === 'percent') {
       return `${d.value}% off`;
     }
 
-    // ------------------------
-    // FLAT DISCOUNT
-    // ------------------------
-    const minQty = d.minQty ?? 1;
+    if (d.kind === 'new_price') {
+      return `$${d.value} each`;
+    }
 
-    // Buy X get $Y off (total)
+    if (d.kind === 'penny') {
+      return 'Penny Deal';
+    }
+
+    // flat / dollar_off
+    const minQty = d.minQty ?? 1;
     if (minQty > 1 && d.totalOff) {
       return `Buy ${minQty}, get $${d.totalOff} off`;
     }
-
-    // Simple flat
     return `$${d.value} off`;
+  }
+
+  /** Short label shown as an overlay badge on the product image. */
+  get dealBadgeText(): string | null {
+    if (!this.hasDiscount) return null;
+    const priceText = this.dealBannerText;
+    if (priceText) return priceText;
+    const b = this.bogo as any;
+    if (b) return b.name || '1 Deal Available';
+    const bu = this.bundle as any;
+    if (bu) return bu.name || 'Bundle Deal';
+    const n = this.discounts.length;
+    return `${n} Deal${n !== 1 ? 's' : ''} Available`;
   }
 
   get showCheckoutDisclaimer(): boolean {

@@ -32,7 +32,6 @@ export class CartComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe(cart => {
         this.cartItems = cart;
-        console.log(this.cartItems)
         // this.subtotal = this.calculateSubtotal(cart);
         this.subtotal = this.cartService.getCartSubtotal(cart);
       });
@@ -424,7 +423,7 @@ export class CartComponent implements OnInit, OnDestroy {
           (d): d is Extract<AppliedDiscount, { kind: 'flat' | 'percent' }> =>
             (d.kind === 'flat' || d.kind === 'percent') &&
             !!d.rule &&
-            (d.minQty ?? d.rule.minQty) > 1
+            (d.minQty ?? d.rule.qty) > 1
         ) ?? null
     );
   }
@@ -439,18 +438,14 @@ export class CartComponent implements OnInit, OnDestroy {
 
     if (!discount.rule) return 0;
 
+    const filter = discount.rule.filter ?? {};
     return this.cartItems
       .filter(i => {
-        if (discount.rule?.productIds?.length) {
-          return discount.rule.productIds.includes(String(i.id));
-        }
-        if (discount.rule?.brands?.length) {
-          return discount.rule.brands.includes(i.brand);
-        }
-        if (discount.rule?.categories?.length) {
-          return discount.rule.categories.includes(i.category);
-        }
-        return false;
+        if (filter.excludedProductIds?.includes(String(i.id))) return false;
+        if (filter.includedProductIds?.length) return filter.includedProductIds.includes(String(i.id));
+        if (filter.categories?.length && !filter.categories.includes(i.category)) return false;
+        if (filter.brands?.length && !filter.brands.includes(i.brand)) return false;
+        return true;
       })
       .reduce((sum, i) => sum + i.quantity, 0);
   }
@@ -466,7 +461,7 @@ export class CartComponent implements OnInit, OnDestroy {
       return null;
     }
 
-    const minQty = discount.minQty ?? discount.rule.minQty ?? 1;
+    const minQty = discount.minQty ?? discount.rule.qty ?? 1;
     const qualifyingQty = this.getQualifyingQty(discount);
 
     // How many full sets have been earned

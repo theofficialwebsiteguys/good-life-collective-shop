@@ -8,35 +8,36 @@
       class="offer-card"
       *ngFor="let offer of offers$ | async"
       [class.active]="activeOffer?.id === offer.id"
+      [class.no-image]="!offer.banner_image_url"
+      [attr.data-kind]="offer.kind"
       (click)="selectOffer(offer)"
     >
-      <!-- background image -->
+      <!-- background image (only when available) -->
       <img
+        *ngIf="offer.banner_image_url"
         class="offer-bg"
         [src]="offer.banner_image_url"
         alt="offer banner"
         aria-hidden="true"
       />
 
-      <!-- gradient overlay -->
-      <div class="offer-overlay"></div>
+      <!-- gradient overlay (always present — lighter when no image) -->
+      <div class="offer-overlay" [class.overlay-subtle]="!offer.banner_image_url"></div>
 
       <!-- content -->
       <div class="offer-content">
-        <i class="fa-solid fa-tag"></i>
+        <div class="offer-icon-wrap" [attr.data-kind]="offer.kind">
+          <i [class]="getOfferIcon(offer.kind)"></i>
+        </div>
 
         <div class="offer-text">
-          <h3 class="offer-title">
-            {{ offer.label }}
-          </h3>
+          <h3 class="offer-title">{{ offer.label }}</h3>
           <p class="offer-desc">
             {{ offer.description || 'Limited time offer. While supplies last.' }}
           </p>
         </div>
 
-        <button class="offer-btn">
-          Shop
-        </button>
+        <button class="offer-btn">Shop</button>
       </div>
     </div>
   </div>

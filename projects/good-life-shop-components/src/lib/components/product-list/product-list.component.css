@@ -136,6 +136,84 @@
   cursor: pointer;
 }
 
+/* ── No-image fallback gradients (keyed by data-kind) ──────────────────── */
+
+.offer-card.no-image {
+  background: #1a1a1a; /* safe base */
+}
+
+/* percent / flat → teal */
+.offer-card.no-image[data-kind="percent"],
+.offer-card.no-image[data-kind="flat"] {
+  background: linear-gradient(135deg, #0d3d38 0%, #0a2e2b 55%, #071f1d 100%);
+}
+
+/* new_price → deep blue */
+.offer-card.no-image[data-kind="new_price"] {
+  background: linear-gradient(135deg, #0b2a4a 0%, #091f38 55%, #061527 100%);
+}
+
+/* bogo → indigo/purple */
+.offer-card.no-image[data-kind="bogo"] {
+  background: linear-gradient(135deg, #2a1a4a 0%, #1f1238 55%, #140c27 100%);
+}
+
+/* bundle → warm amber */
+.offer-card.no-image[data-kind="bundle"] {
+  background: linear-gradient(135deg, #3d2600 0%, #2e1b00 55%, #1f1200 100%);
+}
+
+/* cart_subtotal → cobalt */
+.offer-card.no-image[data-kind="cart_subtotal"] {
+  background: linear-gradient(135deg, #0a1f4a 0%, #081638 55%, #050e27 100%);
+}
+
+/* penny → gold-green */
+.offer-card.no-image[data-kind="penny"] {
+  background: linear-gradient(135deg, #2a3300 0%, #1f2600 55%, #141900 100%);
+}
+
+.overlay-subtle {
+  background: linear-gradient(
+    90deg,
+    rgba(0,0,0,0.45) 0%,
+    rgba(0,0,0,0.25) 60%,
+    rgba(0,0,0,0.10) 100%
+  ) !important;
+}
+
+/* Icon circle badge */
+.offer-icon-wrap {
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: #fff;
+}
+
+/* Accent ring when no image — colour per kind (all icon colors ≥ 4.5:1 on their dark bg) */
+.offer-card.no-image[data-kind="percent"] .offer-icon-wrap,
+.offer-card.no-image[data-kind="flat"]    .offer-icon-wrap { background: rgba(0,220,175,0.20); color: #4dffd8; }
+.offer-card.no-image[data-kind="new_price"]     .offer-icon-wrap { background: rgba(80,160,255,0.20); color: #80c4ff; }
+.offer-card.no-image[data-kind="bogo"]          .offer-icon-wrap { background: rgba(185,130,255,0.20); color: #c99aff; }
+.offer-card.no-image[data-kind="bundle"]        .offer-icon-wrap { background: rgba(255,185,50,0.20);  color: #ffd580; }
+.offer-card.no-image[data-kind="cart_subtotal"] .offer-icon-wrap { background: rgba(100,155,255,0.20); color: #90b8ff; }
+.offer-card.no-image[data-kind="penny"]         .offer-icon-wrap { background: rgba(220,230,60,0.20);  color: #e8f060; }
+
+/* Pill accent label under title for no-image cards */
+.offer-card.no-image .offer-title {
+  font-size: 16px;
+}
+
+.offer-card.no-image .offer-desc {
+  opacity: 0.75;
+}
+
 /* MOBILE */
 @media (max-width: 640px) {
   .offers-grid {

@@ -11,6 +11,7 @@ import { CapacitorHttp } from '@capacitor/core';
 import { SettingsService } from '../../services/settings.service';
 import { AiqTiersComponent, Discount } from '../aiq-tiers/aiq-tiers.component';
 import { AiqService, AppliedDiscount } from '../../services/aiq.service';
+import { filter, take } from 'rxjs/operators';
 
 @Component({
   selector: 'lib-checkout',
@@ -45,6 +46,7 @@ export class CheckoutComponent {
   pointValue: number = 0.025;
 
   enableDelivery: boolean = false;
+  eligibilityChecked: boolean = false;
 
   deliveryHoursByDay: { [key: number]: { start: number; end: number } } = {
     0: { start: 11, end: 21 }, // Sunday
@@ -63,6 +65,7 @@ export class CheckoutComponent {
   validDeliveryDates: string[] = [];
 
   deliveryAddressValid: boolean = false;
+  addressOutOfZone: boolean = false;
 
   isGuest: boolean = true;
 
@@ -144,6 +147,18 @@ export class CheckoutComponent {
       this.selectedTipPercent = state.selectedTipPercent;
       this.customTipAmount = state.customTipAmount;
       this.isCustomTip = state.isCustomTip;
+
+      if (state.deliverySchedule?.length) {
+        this.deliverySchedule = state.deliverySchedule;
+        this.deliveryAddressValid = state.deliveryAddressValid ?? false;
+        this.deliveryMin = state.deliveryMin ?? 0;
+        this.deliveryFee = state.deliveryFee ?? 0;
+
+        if (this.selectedDeliveryDate) {
+          const dayOfWeek = new Date(this.selectedDeliveryDate + 'T00:00:00').getDay();
+          this.generateTimeOptionsFromSchedule(dayOfWeek);
+        }
+      }
     }
 
     this.isCartLoading = true;
@@ -162,6 +177,23 @@ export class CheckoutComponent {
     this.userInfo = this.authService.getCurrentUser();
     this.currentLocationKey =
       this.settingsService.getSelectedLocationKey()?.toLowerCase() || null;
+
+    // If locations haven't loaded yet (async), re-run location-dependent checks once they do
+    if (!this.currentLocationKey) {
+      this.settingsService.locations$
+        .pipe(filter(locs => locs.length > 0), take(1))
+        .subscribe(() => {
+          this.currentLocationKey =
+            this.settingsService.getSelectedLocationKey()?.toLowerCase() || null;
+          if (this.aeropayDisabledForPickup && this.selectedPaymentMethod === 'aeropay') {
+            this.selectedPaymentMethod = 'cash';
+            this.showBankSelection = false;
+            this.selectedBankId = null;
+          }
+          this.cdr.detectChanges();
+        });
+    }
+
     this.locationState = this.settingsService.getSelectedLocationState();
     this.taxRate = this.settingsService.getSelectedTaxRate();
     this.discounts = await this.settingsService.getDiscounts();
@@ -183,6 +215,17 @@ export class CheckoutComponent {
     } else {
       this.isGuest = false;
     }
+
+    // If state was restored with delivery + aeropay but process never ran, restart it
+    if (this.selectedOrderType === 'delivery' && !this.isGuest && !this.showBankSelection) {
+      this.startAeroPayProcess();
+    }
+
+    // Clear stale aeropay state if this location doesn't support aeropay for pickup
+    if (this.aeropayDisabledForPickup && this.selectedPaymentMethod === 'aeropay') {
+      this.selectedPaymentMethod = 'cash';
+    }
+
     this.authService.validateSession();
 
     await this.loadLoyaltyAndInitTotals();
@@ -644,13 +687,13 @@ export class CheckoutComponent {
   checkDeliveryEligibility() {
     this.cartService.checkDeliveryEligibility().subscribe({
       next: (response) => {
-        //remove false indicator
         this.enableDelivery = response.deliveryAvailable;
-        // console.log('Delivery availability:', this.enableDelivery);
+        this.eligibilityChecked = true;
       },
       error: (error) => {
         console.error('Error fetching delivery eligibility:', error);
-        this.enableDelivery = false; // Fallback if the request fails
+        this.enableDelivery = false;
+        this.eligibilityChecked = true;
       },
     });
   }
@@ -878,7 +921,9 @@ export class CheckoutComponent {
 
       // }
 
-      if (this.selectedPaymentMethod === 'aeropay' && this.selectedBankId) {
+      const aeropayAllowed = !this.aeropayDisabledForPickup;
+
+      if (this.selectedPaymentMethod === 'aeropay' && this.selectedBankId && aeropayAllowed) {
         try {
           await this.aeropayService
             .fetchUsedForMerchantToken(this.aeropayUserId)
@@ -956,6 +1001,7 @@ export class CheckoutComponent {
         customer_phone,
         customer_dob,
         this.selectedOrderType,
+        'shop',
       );
 
       if (points_redeem > 0) {
@@ -1046,8 +1092,20 @@ export class CheckoutComponent {
     const { street, city, zip } = this.deliveryAddress;
 
     this.deliveryAddressValid = false;
+    this.addressOutOfZone = false;
 
     if (!street?.trim() || !city?.trim() || zip?.trim().length < 3) {
+      return;
+    }
+
+    // Require a proper street: must start with a number and have a street name after it
+    const streetWords = street.trim().split(/\s+/);
+    if (!/^\d+/.test(streetWords[0]) || streetWords.length < 2) {
+      return;
+    }
+
+    // Require a full 5-digit zip
+    if (!/^\d{5}$/.test(zip.trim())) {
       return;
     }
 
@@ -1058,7 +1116,7 @@ export class CheckoutComponent {
         await this.cartService.checkAddressInZone(fullAddress);
 
       if (!result?.inZone) {
-        this.showError('This address is outside the delivery zone.');
+        this.addressOutOfZone = true;
         this.deliveryAddressValid = false;
         this.enableDelivery = false;
         return;
@@ -1080,6 +1138,10 @@ export class CheckoutComponent {
       // ✅ normalize schedule defensively
       this.deliverySchedule = Array.isArray(zone.schedule) ? zone.schedule : [];
 
+      // Capture existing selection before reset so we can restore it if still valid
+      const prevDate = this.selectedDeliveryDate;
+      const prevTime = this.selectedDeliveryTime;
+
       // 🔥 RESET dependent state
       this.validDeliveryDates = [];
       this.selectedDeliveryDate = null;
@@ -1096,11 +1158,17 @@ export class CheckoutComponent {
         return;
       }
 
-      // auto-select first valid date
-      this.selectedDeliveryDate = this.validDeliveryDates[0];
+      // Restore previous date if still in the valid list, otherwise use first available
+      this.selectedDeliveryDate =
+        prevDate && this.validDeliveryDates.includes(prevDate)
+          ? prevDate
+          : this.validDeliveryDates[0];
 
-      // generate times
-      const dayOfWeek = new Date(this.selectedDeliveryDate).getDay();
+      // Pre-set previous time so generateTimeOptionsFromSchedule can preserve it if still valid
+      this.selectedDeliveryTime = prevTime;
+
+      // generate times — append T00:00:00 to parse as local midnight, not UTC
+      const dayOfWeek = new Date(this.selectedDeliveryDate + 'T00:00:00').getDay();
       this.generateTimeOptionsFromSchedule(dayOfWeek);
 
       // force UI refresh
@@ -1381,6 +1449,18 @@ export class CheckoutComponent {
       if (!this.isGuest) {
         this.startAeroPayProcess();
       }
+      // Pre-load placeholder times so dropdown isn't empty before address validation
+      if (!this.deliveryAddressValid) {
+        const today = new Date();
+        this.generateTimeOptionsForDay(today.getDay());
+      }
+    } else {
+      // Switching away from delivery — clear aeropay at locations that don't support it for pickup
+      if (this.isCanandaigua || this.isBuffalo) {
+        this.selectedPaymentMethod = 'cash';
+        this.showBankSelection = false;
+        this.selectedBankId = null;
+      }
     }
     this.updateTotals();
     this.saveCheckoutState();
@@ -1508,7 +1588,7 @@ export class CheckoutComponent {
   }
 
   onDateSelected(event: any) {
-    const date = new Date(event.target.value);
+    const date = new Date(event.target.value + 'T00:00:00');
     const dayOfWeek = date.getDay();
     this.generateTimeOptionsFromSchedule(dayOfWeek);
     this.selectedDeliveryTime = ''; // reset previous time
@@ -1580,35 +1660,33 @@ export class CheckoutComponent {
         const formattedHour = nowHour % 12 === 0 ? 12 : nowHour % 12;
         const amPm = nowHour < 12 ? 'AM' : 'PM';
         const formattedMinute = nowMinute.toString().padStart(2, '0');
+        const endNowHour = nowHour + 1;
+        const endDisplayHour = endNowHour % 12 === 0 ? 12 : endNowHour % 12;
+        const endAmPm = endNowHour < 12 ? 'AM' : 'PM';
 
         options.push({
           value: `${nowHour.toString().padStart(2, '0')}:${formattedMinute}`,
-          display: `Now (${formattedHour}:${formattedMinute} ${amPm})`,
+          display: `Now (${formattedHour}:${formattedMinute} ${amPm} - ${endDisplayHour}:${formattedMinute} ${endAmPm})`,
         });
       }
     }
 
-    // 🕒 Add all upcoming 30-min intervals
-    for (let hour = startHour; hour <= endHour; hour++) {
-      for (let min of [0, 30]) {
-        // const totalMinutes = hour * 60 + min;
-        if (hour > endHour || (hour === endHour && min > endMinute)) break;
+    // 🕒 Add all upcoming 1-hour range slots
+    for (let hour = startHour; hour < endHour; hour++) {
+      const totalMinutes = hour * 60;
+      if (isToday && totalMinutes < cutoffMinutes) continue;
 
-        const totalMinutes = hour * 60 + min;
-        if (isToday && totalMinutes < cutoffMinutes) continue;
+      const endSlotHour = hour + 1;
+      const startDisplayHour = hour % 12 === 0 ? 12 : hour % 12;
+      const endDisplayHour = endSlotHour % 12 === 0 ? 12 : endSlotHour % 12;
+      const startAmPm = hour < 12 ? 'AM' : 'PM';
+      const endAmPm = endSlotHour < 12 ? 'AM' : 'PM';
+      const formattedHour = hour.toString().padStart(2, '0');
 
-        // if (isToday && totalMinutes < currentMinutes) continue;
-
-        const displayHour = hour % 12 === 0 ? 12 : hour % 12;
-        const amPm = hour < 12 ? 'AM' : 'PM';
-        const formattedHour = hour.toString().padStart(2, '0');
-        const formattedMinute = min === 0 ? '00' : '30';
-
-        options.push({
-          value: `${formattedHour}:${formattedMinute}`,
-          display: `${displayHour}:${formattedMinute} ${amPm}`,
-        });
-      }
+      options.push({
+        value: `${formattedHour}:00`,
+        display: `${startDisplayHour}:00 ${startAmPm} - ${endDisplayHour}:00 ${endAmPm}`,
+      });
     }
 
     // 🟠 If no slots left today, go to tomorrow
@@ -1622,9 +1700,14 @@ export class CheckoutComponent {
 
     this.timeOptions = options;
 
-    // ✅ Auto-select “Now” if present, otherwise first available
+    // ✅ Auto-select “Now” if present, otherwise first available — but preserve an existing valid selection
     setTimeout(() => {
       if (this.timeOptions.length > 0) {
+        const alreadyValid = this.timeOptions.find((t) => t.value === this.selectedDeliveryTime);
+        if (alreadyValid) {
+          this.cdr.detectChanges();
+          return;
+        }
         const nowOption = this.timeOptions.find((t) =>
           t.display.startsWith('Now'),
         );
@@ -1670,21 +1753,18 @@ export class CheckoutComponent {
     const startHour = hours.start;
     const endHour = hours.end;
 
-    for (let hour = startHour; hour <= endHour; hour++) {
-      for (let minute of [0, 30]) {
-        // Don't exceed endHour if it's the last half-hour
-        if (hour === endHour && minute === 30) break;
+    for (let hour = startHour; hour < endHour; hour++) {
+      const endSlotHour = hour + 1;
+      const startDisplayHour = hour % 12 === 0 ? 12 : hour % 12;
+      const endDisplayHour = endSlotHour % 12 === 0 ? 12 : endSlotHour % 12;
+      const startAmPm = hour < 12 ? 'AM' : 'PM';
+      const endAmPm = endSlotHour < 12 ? 'AM' : 'PM';
+      const formattedHour = hour < 10 ? `0${hour}` : `${hour}`;
 
-        const displayHour = hour % 12 === 0 ? 12 : hour % 12;
-        const amPm = hour < 12 ? 'AM' : 'PM';
-        const formattedHour = hour < 10 ? `0${hour}` : `${hour}`;
-        const formattedMinute = minute === 0 ? '00' : '30';
-
-        this.timeOptions.push({
-          value: `${formattedHour}:${formattedMinute}`,
-          display: `${displayHour}:${formattedMinute} ${amPm}`,
-        });
-      }
+      this.timeOptions.push({
+        value: `${formattedHour}:00`,
+        display: `${startDisplayHour}:00 ${startAmPm} - ${endDisplayHour}:00 ${endAmPm}`,
+      });
     }
   }
 
@@ -1932,9 +2012,15 @@ export class CheckoutComponent {
   }
 
   get isCanandaigua(): boolean {
-    return (this.currentLocationKey || '')
-      .toLowerCase()
-      .includes('canandaigua');
+    return (this.currentLocationKey || '').toLowerCase().includes('canandaigua');
+  }
+
+  get isBuffalo(): boolean {
+    return (this.currentLocationKey || '').toLowerCase().includes('buffalo');
+  }
+
+  get aeropayDisabledForPickup(): boolean {
+    return this.selectedOrderType === 'pickup' && (this.isCanandaigua || this.isBuffalo);
   }
 
   private getAiqRewardDiscount(subtotal: number): number {
@@ -1961,7 +2047,11 @@ export class CheckoutComponent {
       selectedDeliveryTime: this.selectedDeliveryTime,
       selectedTipPercent: this.selectedTipPercent,
       customTipAmount: this.customTipAmount,
-      isCustomTip: this.isCustomTip
+      isCustomTip: this.isCustomTip,
+      deliverySchedule: this.deliverySchedule,
+      deliveryAddressValid: this.deliveryAddressValid,
+      deliveryMin: this.deliveryMin,
+      deliveryFee: this.deliveryFee,
     };
 
     localStorage.setItem('checkoutState', JSON.stringify(state));

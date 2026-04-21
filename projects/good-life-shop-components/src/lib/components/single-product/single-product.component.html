@@ -68,12 +68,48 @@
       <div *ngIf="hasDiscount && !bundleDeal"
            class="deal-section">
 
+        <!-- DEAL BANNER CARDS (offer-card style) -->
+        <div class="sp-deals-label">
+          Deals Available
+          <span class="sp-deals-count">{{ discounts.length }}</span>
+        </div>
+
+        <div class="sp-deal-banners">
+          <div *ngFor="let d of discounts"
+               class="sp-deal-card"
+               [class.no-image]="!d['banner_image_url']"
+               [attr.data-kind]="d.kind">
+
+            <img *ngIf="d['banner_image_url']"
+                 class="sp-deal-bg"
+                 [src]="d['banner_image_url']"
+                 alt="deal banner"
+                 aria-hidden="true" />
+
+            <div class="sp-deal-overlay"
+                 [class.sp-overlay-subtle]="!d['banner_image_url']"></div>
+
+            <div class="sp-deal-content">
+              <div class="sp-deal-icon-wrap" [attr.data-kind]="d.kind">
+                <i [class]="getOfferIcon(d.kind)"></i>
+              </div>
+              <div class="sp-deal-text">
+                <h4 class="sp-deal-title">{{ d['name'] || 'Deal' }}</h4>
+                <p class="sp-deal-desc">
+                  {{ d['description'] || getDealSummary(d) }}
+                </p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
         <!-- BOGO -->
         <div *ngIf="activeBogo" class="bogo-ui">
 
           <!-- BUY PRODUCT VIEW -->
           <ng-container *ngIf="isBuyProduct">
-            <strong>{{ activeBogo.name }}</strong>
+            <!-- <strong>{{ activeBogo.name }}</strong> -->
             <p class="muted">{{ activeBogo.description }}</p>
 
             <div class="bogo-products">

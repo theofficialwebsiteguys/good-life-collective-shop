@@ -139,6 +139,17 @@ export class ProductListComponent implements OnInit {
     this.applyOfferFilter();
   }
 
+  getOfferIcon(kind: string): string {
+    switch (kind) {
+      case 'bogo':         return 'fa-solid fa-arrow-right-arrow-left';
+      case 'bundle':       return 'fa-solid fa-boxes-stacked';
+      case 'cart_subtotal':return 'fa-solid fa-cart-shopping';
+      case 'penny':        return 'fa-solid fa-cent-sign';
+      case 'new_price':    return 'fa-solid fa-dollar-sign';
+      default:             return 'fa-solid fa-tag';  // percent / flat
+    }
+  }
+
 
 
 }

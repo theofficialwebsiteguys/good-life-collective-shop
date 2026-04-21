@@ -541,7 +541,7 @@ export class SingleProductComponent {
 
   getDealExplanation(d: AppliedDiscount) {
     if (d.kind === 'flat') {
-      const minQty = d.minQty ?? d.rule?.minQty ?? 1;
+      const minQty = d.minQty ?? d.rule?.qty ?? 1;
 
       return {
         title: d.name || `Buy ${minQty}, Save $${d.value}`,
@@ -552,7 +552,7 @@ export class SingleProductComponent {
     }
 
     if (d.kind === 'percent') {
-      const minQty = d.minQty ?? d.rule?.minQty ?? 1;
+      const minQty = d.minQty ?? d.rule?.qty ?? 1;
 
       return {
         title: d.name || `${d.value}% Off`,
@@ -588,6 +588,30 @@ export class SingleProductComponent {
     }
 
     return null;
+  }
+
+  getOfferIcon(kind: string): string {
+    switch (kind) {
+      case 'bogo':          return 'fa-solid fa-arrow-right-arrow-left';
+      case 'bundle':        return 'fa-solid fa-boxes-stacked';
+      case 'cart_subtotal': return 'fa-solid fa-cart-shopping';
+      case 'penny':         return 'fa-solid fa-cent-sign';
+      case 'new_price':     return 'fa-solid fa-dollar-sign';
+      default:              return 'fa-solid fa-tag';
+    }
+  }
+
+  getDealSummary(d: AppliedDiscount): string {
+    switch (d.kind) {
+      case 'percent':      return `${d.value}% off`;
+      case 'flat':         return `$${d.value} off`;
+      case 'new_price':    return `$${d.value} each`;
+      case 'penny':        return 'Penny deal — $0.01';
+      case 'bogo':         return `Buy ${d.buyQty}, get ${d.getQty}`;
+      case 'bundle':       return `${d.bundleSize}-item bundle`;
+      case 'cart_subtotal':return 'Cart-wide discount';
+      default:             return 'Limited time offer';
+    }
   }
 
   get activeBogo(): BogoDiscount | null {

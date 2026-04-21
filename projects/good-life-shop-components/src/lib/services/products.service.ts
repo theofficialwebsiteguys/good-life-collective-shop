@@ -342,10 +342,6 @@ export class ProductsService {
         const normalizedCategory = category.toLowerCase();
 
         if (normalizedCategory === 'offers') {
-            console.log(
-              'OFFERS COUNT:',
-              productArray.filter(p => this.isOfferProduct(p)).length
-            );
           filteredProducts = productArray.filter(p => this.isOfferProduct(p));
         }
         else {
@@ -385,9 +381,7 @@ export class ProductsService {
           });
         }
 
-        console.log(selectedTypes)
         if (selectedTypes && selectedTypes.length > 0) {
-          console.log(selectedTypes)
           filteredProducts = filteredProducts.filter(p => {
             if (!p.strainType) return false;
             const st = p.strainType.toUpperCase();
@@ -648,7 +642,7 @@ private isOfferProduct(p: any): boolean {
 
   const price = Number(p.price);
 
-  return p.discounts.some((d:any) => {
+  return p.discounts.some((d: any) => {
     switch (d.kind) {
       case 'percent':
       case 'flat':
@@ -657,13 +651,16 @@ private isOfferProduct(p: any): boolean {
           d.discountedPrice > 0 &&
           d.discountedPrice < price
         );
-
+      case 'new_price':
+        return typeof d.discountedPrice === 'number' && d.discountedPrice < price;
+      case 'penny':
+        return price > 0.01;
       case 'bogo':
         return d.buyQty > 0 && d.getQty > 0;
-
       case 'bundle':
         return d.bundleSize > 1;
-
+      case 'cart_subtotal':
+        return true;
       default:
         return false;
     }
@@ -685,17 +682,10 @@ private isOfferProduct(p: any): boolean {
           label: d.name,
           banner_image_url: d.banner_image_url || '',
           description: d.description,
+          // Match by discount name — ensures clicking "Munchie Monday" only shows
+          // Edibles with that specific deal, not all bogo products.
           predicate: (product: any) =>
-            (product.discounts ?? []).some((pd: any) => {
-              if (pd.kind !== d.kind) return false;
-              if (pd.kind === 'percent' || pd.kind === 'flat') {
-                return (
-                  pd.value === d.value &&
-                  pd.description === d.description
-                );
-              }
-              return true;
-            }),
+            (product.discounts ?? []).some((pd: any) => pd.name === d.name),
         });
       });
     });
