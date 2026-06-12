@@ -40,7 +40,7 @@ export class CartComponent implements OnInit, OnDestroy {
     this.productsService.products$
       .pipe(takeUntil(this.destroy$))
       .subscribe(products => {
-        this.products = products;
+        this.products = products ?? [];
       });
   }
 

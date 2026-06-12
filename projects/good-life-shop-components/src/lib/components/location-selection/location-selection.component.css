@@ -1,11 +1,21 @@
 /* ── Container ─────────────────────────────────────────────── */
 .location-selection {
-  max-width: 440px;
-  padding: 1.5rem 1rem 2rem;
+  /* Fill whatever width the dialog gives us — no max-width here */
+  display: block;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 1.5rem 1.25rem 2rem;
   color: #ffffff;
   background: black;
   overflow-y: auto;
-  max-height: 85dvh;
+  max-height: 90dvh;
+}
+
+/* Ensure the form inside also fills full width */
+.location-selection form {
+  width: 100%;
+  min-width: 0;
 }
 
 .location-heading {
@@ -115,7 +125,7 @@
 }
 
 .open-label.open {
-  background: rgba(64, 217, 139, 0.12);
+  background: #162a1f;
   color: #5ee8a0;
 }
 
@@ -166,9 +176,9 @@
 }
 
 .inline-badge.delivery.active {
-  background: rgba(105, 252, 237, 0.1);
+  background: #0d2022;
   color: #69fced;
-  border: 1px solid rgba(105, 252, 237, 0.3);
+  border: 1px solid #2a5a58;
 }
 
 .inline-badge.happy {
@@ -178,9 +188,9 @@
 }
 
 .inline-badge.happy.active {
-  background: rgba(255, 200, 50, 0.15);
+  background: #2a2010;
   color: #f5c518;
-  border: 1px solid rgba(255, 200, 50, 0.4);
+  border: 1px solid #5a4818;
 }
 
 /* ── Service badges ─────────────────────────────────────────── */
@@ -253,7 +263,7 @@
 
 .continue-btn:disabled {
   background: #1e2e2b;
-  color: #5a8a84;
+  color: #7ab8b2;
   cursor: not-allowed;
   opacity: 1;
 }
@@ -307,4 +317,40 @@
   padding: 10px 20px;
   font-weight: 700;
   cursor: pointer;
+}
+
+/* ── Mobile responsive ──────────────────────────────────────── */
+@media (max-width: 520px) {
+  .location-selection {
+    padding: 1.1rem 1rem 1.5rem;
+    /* fill full modal height so it doesn't leave gaps */
+    min-height: 100%;
+    max-height: 90dvh;
+  }
+
+  .location-heading {
+    font-size: 1.3rem;
+  }
+
+  .location-card {
+    padding: 12px 12px 38px;
+  }
+
+  .loc-name {
+    font-size: 0.95rem;
+  }
+
+  .hours-row {
+    font-size: 0.78rem;
+    gap: 5px;
+  }
+
+  .continue-btn {
+    padding: 15px;
+    font-size: 1rem;
+    /* always in view — sticky at bottom */
+    position: sticky;
+    bottom: 0;
+    z-index: 1;
+  }
 }

@@ -239,31 +239,64 @@
 .verification-container {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: #f0f8f4;
+  border: 1px solid #b2dfc1;
+  border-radius: 12px;
+  margin-top: 4px;
+}
+
+.verification-message {
+  font-size: 0.88rem;
+  color: #1a5e37;
+  line-height: 1.5;
+  font-weight: 500;
+  margin: 0;
 }
 
 .verification-input {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 10px;
 }
 
 .verification-input input {
-  width: 60px;
+  flex: 1;
   text-align: center;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  padding: 6px;
+  letter-spacing: 0.25em;
+  border: 1px solid #b2dfc1;
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  background: #fff;
+  color: #111;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  box-sizing: border-box;
+}
+
+.verification-input input:focus {
+  border-color: #5eb881;
+  box-shadow: 0 0 0 3px rgba(94, 184, 129, 0.2);
+  outline: none;
 }
 
 .verification-input button {
-  background: #000;
+  background: #111;
   color: #fff;
   border: none;
-  border-radius: 6px;
-  padding: 6px 8px;
+  border-radius: 10px;
+  padding: 12px 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
   cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s ease;
+}
+
+.verification-input button:hover {
+  background: #333;
 }
 /******************************
   BANK CARD FIXES
@@ -727,29 +760,6 @@
 
 
 .order-type-option .left {
-  align-items: flex-start; /* align radio with top */
-}
-
-.option-text {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.option-title {
-  font-weight: 600;
-  font-size: 0.95rem;
-  color: #111;
-}
-
-.option-note {
-  font-size: 0.78rem;
-  color: #666;
-  line-height: 1.4;
-  font-weight: 400;
-}
-
-.order-type-option .left {
   align-items: flex-start;
 }
 
@@ -776,3 +786,4 @@
   color: #c62828;
   font-weight: 500;
 }
+

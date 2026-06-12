@@ -31,9 +31,8 @@ export class ProductListComponent implements OnInit {
   activeOffer: OfferBanner | null = null;
   offers$: Observable<OfferBanner[]> = of([]);
 
-  // products$: Observable<Product[]> = new Observable();
-  baseProducts$!: Observable<Product[]>;
-  products$!: Observable<Product[]>;
+  baseProducts$!: Observable<Product[] | null>;
+  products$!: Observable<Product[] | null>;
 
 
   trackById = (_: number, item: any) => item.id ?? item.productId ?? item.sku ?? item.title;
@@ -87,7 +86,7 @@ export class ProductListComponent implements OnInit {
 
     if (this.category?.toLowerCase() === 'offers') {
       this.offers$ = this.baseProducts$.pipe(
-        map(products => this.productService.getOfferBanners(products))
+        map(products => products ? this.productService.getOfferBanners(products) : [])
       );
     } else {
       this.activeOffer = null;
@@ -112,11 +111,8 @@ export class ProductListComponent implements OnInit {
   private applyOfferFilter() {
     this.products$ = this.baseProducts$.pipe(
       map(products => {
-        if (!this.activeOffer) return products;
-
-        return products.filter(product =>
-          this.activeOffer!.predicate(product)
-        );
+        if (products === null || !this.activeOffer) return products;
+        return products.filter(product => this.activeOffer!.predicate(product));
       })
     );
   }

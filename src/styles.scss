@@ -115,3 +115,31 @@ button:disabled {
   clip: rect(0, 0, 0, 0);
   overflow: hidden;
 }
+
+/* ── Location modal: force every MDC layer to fill the pane width
+      so no light background leaks through on the right ────────── */
+.location-modal {
+  /* The pane itself — remove any padding/margin */
+  width: 100% !important;
+  max-width: 500px !important;
+
+  /* Every nested MDC container must stretch to fill */
+  .mat-mdc-dialog-container,
+  .mdc-dialog,
+  .mdc-dialog__container,
+  .mdc-dialog__surface,
+  .mat-mdc-dialog-surface {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Black background on the surface so nothing leaks */
+  .mdc-dialog__surface,
+  .mat-mdc-dialog-surface {
+    background: #000 !important;
+    border-radius: 16px !important;
+  }
+}

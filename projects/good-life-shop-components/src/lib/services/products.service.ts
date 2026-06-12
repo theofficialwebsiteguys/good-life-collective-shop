@@ -22,7 +22,7 @@ import { OfferBanner } from '../offer-banner.model';
   providedIn: 'root',
 })
 export class ProductsService {
-  private products = new BehaviorSubject<Product[]>([]);
+  private products = new BehaviorSubject<Product[] | null>(null);
   products$ = this.products.asObservable();
 
   private currentCategory = new BehaviorSubject<ProductCategory>('FLOWER');
@@ -167,11 +167,8 @@ export class ProductsService {
     return of(parsed);
   }
 
-  // 2️⃣ Clear in-memory products if switching locations
-  if (this.lastFetchedLocationId && this.lastFetchedLocationId !== location_id) {
-    this.products.next([]);
-  }
-
+  // 2️⃣ Signal loading (null clears old products and shows skeleton atomically)
+  this.products.next(null);
   this.lastFetchedLocationId = location_id;
 
   const options = {
@@ -187,34 +184,33 @@ export class ProductsService {
     CapacitorHttp.get(options)
       .then((response) => {
         if (response.status !== 200) {
+          this.products.next([]);
           observer.error(response);
           return;
         }
 
-        // 3️⃣ Normalize RAW server price ONCE
-        const rawProducts = response.data.products.map((p: any) => ({
+        const rawProducts = (response.data.products ?? []).map((p: any) => ({
           ...p,
-          rawPrice: Number(p.price), // 🔒 immutable source of truth
+          rawPrice: Number(p.price),
         }));
 
         const sorted = this.sortProducts(rawProducts);
-
-        // 4️⃣ Cache per location
         sessionStorage.setItem(storageKey, JSON.stringify(sorted));
-
-        // 5️⃣ Emit
         this.products.next(sorted);
         observer.next(sorted);
         observer.complete();
       })
-      .catch((err) => observer.error(err));
+      .catch((err) => {
+        this.products.next([]);
+        observer.error(err);
+      });
   });
 }
 
   
   getProducts(): Observable<Product[]> {
     return this.products$.pipe(
-      filter(products => products.length > 0) // Only emit if products exist
+      filter((products): products is Product[] => products !== null)
     );
   }
 
@@ -331,10 +327,10 @@ export class ProductsService {
     thcMin: number = 0,
     thcMax: number = 100,
     selectedVapeTypes: string[] = []
-  ): Observable<Product[]> {
+  ): Observable<Product[] | null> {
     return this.products$.pipe(
-      filter(productArray => productArray.length > 0),
       map(productArray => {
+        if (productArray === null) return null;
         let filteredProducts = productArray;
     
 
@@ -506,7 +502,7 @@ getProductFilterOptions(): Observable<ProductFilterOptions> {
       const brands = new Set<string>();
       const weightMap = new Map<string, { label: string; value: string; sort: number }>();
 
-      if (!selectedCat) return { brands: [], weights: [] };
+      if (!selectedCat || productArray === null) return { brands: [], weights: [] };
 
       const normalizedCat = selectedCat.toUpperCase();
 
@@ -595,9 +591,9 @@ getProductFilterOptions(): Observable<ProductFilterOptions> {
   getSimilarItems(): Observable<Product[]> {
     return combineLatest([this.currentProduct$, this.products$]).pipe(
       map(([currentProduct, productArray]) => {
-  
-        if (!currentProduct || !currentProduct.category || !currentProduct.brand) {
-          return []; 
+
+        if (!currentProduct || !currentProduct.category || !currentProduct.brand || productArray === null) {
+          return [];
         }
   
         const { category, brand } = currentProduct;
@@ -630,7 +626,7 @@ getProductFilterOptions(): Observable<ProductFilterOptions> {
   getProductsByIds(ids: string[]): Observable<Product[]> {
     return this.products$.pipe(
       map((productArray) =>
-        productArray.filter((product) => ids.includes(product.id))
+        (productArray ?? []).filter((product) => ids.includes(product.id))
       )
     );
   }

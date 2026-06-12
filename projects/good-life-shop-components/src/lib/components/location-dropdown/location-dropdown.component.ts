@@ -37,13 +37,20 @@ export class LocationDropdownComponent {
     this.sub?.unsubscribe();
   }
 
-  async refreshLocation(id: string) {
-    const locations = await this.settings.getFlowhubLocations();
-    const loc = locations.find(l => l.location_id === id);
-
-    if (loc?.address) {
-      this.formattedLocation = this.extractCityState(loc.address);
+  refreshLocation(id: string): void {
+    // Use cached location first so the text updates synchronously
+    const cached = this.settings.getSelectedLocation();
+    if (cached?.address) {
+      this.formattedLocation = this.extractCityState(cached.address);
+      return;
     }
+    // Fall back to API fetch when cache is empty (first load)
+    this.settings.getFlowhubLocations().then(locations => {
+      const loc = locations.find((l: any) => l.location_id === id);
+      if (loc?.address) {
+        this.formattedLocation = this.extractCityState(loc.address);
+      }
+    });
   }
 
   async loadSelectedLocation() {
@@ -78,7 +85,9 @@ export class LocationDropdownComponent {
     this.a11y.announce('Opening location selector…', 'polite');
 
     const dialogRef = this.dialog.open(LocationSelectionComponent, {
-      width: '500px',
+      width: '100%',
+      maxWidth: '500px',
+      maxHeight: '90dvh',
       panelClass: 'location-modal',
     });
 

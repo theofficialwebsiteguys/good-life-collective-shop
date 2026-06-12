@@ -35,6 +35,7 @@ export * from './lib/services/navigation.service'
 export * from './lib/services/products.service'
 export * from './lib/services/config.service'
 export * from './lib/services/discounts.service'
+export * from './lib/services/settings.service'
 
 export * from './lib/models/product-category.model'
 export * from './lib/models/product-filters.model'

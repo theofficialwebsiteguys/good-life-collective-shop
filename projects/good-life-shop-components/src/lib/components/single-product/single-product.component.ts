@@ -106,9 +106,9 @@ export class SingleProductComponent {
     ])
       .pipe(
         takeUntil(this.destroy$),
-        filter(([id, products]) => !!id && products.length > 0),
+        filter(([id, products]) => !!id && !!products && products.length > 0),
         map(([id, products]) =>
-          products.find(p => String(p.id) === String(id)) ?? null
+          (products as Product[]).find(p => String(p.id) === String(id)) ?? null
         )
       )
       .subscribe(found => {
@@ -649,6 +649,7 @@ export class SingleProductComponent {
       this.productService.products$
         .pipe(take(1))
         .subscribe(allProducts => {
+          if (!allProducts) return;
           this.bogoRelatedProducts = allProducts.filter(p =>
             p.discounts?.some(d =>
               d.kind === 'bogo' &&
@@ -731,6 +732,7 @@ export class SingleProductComponent {
     this.productService.products$
       .pipe(take(1))
       .subscribe(all => {
+        if (!all) return;
         const currentId = String(this.product!.id);
 
         this.dealRelatedProducts = all.filter(p =>

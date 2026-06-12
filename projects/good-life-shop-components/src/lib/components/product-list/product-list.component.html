@@ -1,68 +1,64 @@
-<!-- OFFERS BANNERS -->
-<section
-  *ngIf="category?.toLowerCase() === 'offers'"
-  class="offers-section"
->
-  <div class="offers-grid">
-    <div
-      class="offer-card"
-      *ngFor="let offer of offers$ | async"
-      [class.active]="activeOffer?.id === offer.id"
-      [class.no-image]="!offer.banner_image_url"
-      [attr.data-kind]="offer.kind"
-      (click)="selectOffer(offer)"
-    >
-      <!-- background image (only when available) -->
-      <img
-        *ngIf="offer.banner_image_url"
-        class="offer-bg"
-        [src]="offer.banner_image_url"
-        alt="offer banner"
-        aria-hidden="true"
-      />
+<ng-container *ngIf="products$ | async as products; else loadingTpl">
 
-      <!-- gradient overlay (always present — lighter when no image) -->
-      <div class="offer-overlay" [class.overlay-subtle]="!offer.banner_image_url"></div>
-
-      <!-- content -->
-      <div class="offer-content">
-        <div class="offer-icon-wrap" [attr.data-kind]="offer.kind">
-          <i [class]="getOfferIcon(offer.kind)"></i>
+  <!-- OFFERS BANNERS -->
+  <section *ngIf="category?.toLowerCase() === 'offers'" class="offers-section">
+    <div class="offers-grid">
+      <div
+        class="offer-card"
+        *ngFor="let offer of offers$ | async"
+        [class.active]="activeOffer?.id === offer.id"
+        [class.no-image]="!offer.banner_image_url"
+        [attr.data-kind]="offer.kind"
+        (click)="selectOffer(offer)"
+      >
+        <img *ngIf="offer.banner_image_url" class="offer-bg" [src]="offer.banner_image_url" alt="offer banner" aria-hidden="true" />
+        <div class="offer-overlay" [class.overlay-subtle]="!offer.banner_image_url"></div>
+        <div class="offer-content">
+          <div class="offer-icon-wrap" [attr.data-kind]="offer.kind">
+            <i [class]="getOfferIcon(offer.kind)"></i>
+          </div>
+          <div class="offer-text">
+            <h3 class="offer-title">{{ offer.label }}</h3>
+            <p class="offer-desc">{{ offer.description || 'Limited time offer. While supplies last.' }}</p>
+          </div>
+          <button class="offer-btn">Shop</button>
         </div>
-
-        <div class="offer-text">
-          <h3 class="offer-title">{{ offer.label }}</h3>
-          <p class="offer-desc">
-            {{ offer.description || 'Limited time offer. While supplies last.' }}
-          </p>
-        </div>
-
-        <button class="offer-btn">Shop</button>
       </div>
     </div>
+    <div class="offers-clear" *ngIf="activeOffer">
+      <button (click)="clearOffer()">Show All Offers</button>
+    </div>
+    <h1 class="sale-header">Items On Sale</h1>
+  </section>
+
+  <!-- Empty state -->
+  <div class="no-products-state" *ngIf="products.length === 0">
+    <i class="fa-solid fa-store no-products-icon"></i>
+    <p class="no-products-msg">No products for this location.</p>
+    <p class="no-products-sub">Check back soon!</p>
   </div>
 
-  <!-- Clear filter -->
-  <div class="offers-clear" *ngIf="activeOffer">
-    <button (click)="clearOffer()">
-      Show All Offers
-    </button>
-  </div>
+  <!-- Product grid -->
+  <section class="product-section" *ngIf="products.length > 0" aria-labelledby="productListHeading">
+    <div class="product-grid" role="list">
+      <lib-product-card
+        *ngFor="let product of products; trackBy: trackById"
+        [product]="product"
+        (click)="navigateToProduct(product)"
+        (keydown)="handleCardKey($event, product)"
+        tabindex="0"
+        role="button">
+      </lib-product-card>
+    </div>
+  </section>
 
-  <h1 class="sale-header">Items On Sale</h1>
-</section>
+</ng-container>
 
-
-
-<section class="product-section" aria-labelledby="productListHeading">
-  <div class="product-grid" role="list">
-    <lib-product-card
-      *ngFor="let product of products$ | async; trackBy: trackById"
-      [product]="product"
-      (click)="navigateToProduct(product)"
-      (keydown)="handleCardKey($event, product)"
-      tabindex="0"
-      role="button">
-    </lib-product-card>
-  </div>
-</section>
+<!-- Loading skeleton (shown while products$ emits null) -->
+<ng-template #loadingTpl>
+  <section class="product-section">
+    <div class="product-grid">
+      <div class="product-skeleton" *ngFor="let n of [1,2,3,4,5,6,7,8]"></div>
+    </div>
+  </section>
+</ng-template>

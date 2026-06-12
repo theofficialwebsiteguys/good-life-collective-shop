@@ -149,6 +149,21 @@ export class LocationSelectionComponent {
           loc.timezone = 'America/New_York';
         }
 
+        // --- Hardcoded Hours for Batavia ---
+        if (name.includes('batavia')) {
+          loc.hours = {
+            0: { open: '09:00', close: '22:00' }, // Sunday
+            1: { open: '09:00', close: '22:00' }, // Monday
+            2: { open: '09:00', close: '22:00' }, // Tuesday
+            3: { open: '09:00', close: '22:00' }, // Wednesday
+            4: { open: '09:00', close: '22:00' }, // Thursday
+            5: { open: '09:00', close: '00:00' }, // Friday
+            6: { open: '09:00', close: '00:00' }, // Saturday
+          };
+
+          loc.timezone = 'America/New_York';
+        }
+
         // --- Hardcoded Hours for Astoria ---
         if (name.includes('astoria')) {
           loc.hours = {

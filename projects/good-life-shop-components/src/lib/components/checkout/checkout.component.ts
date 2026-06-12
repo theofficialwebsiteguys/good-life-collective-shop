@@ -1186,6 +1186,7 @@ export class CheckoutComponent {
 
   verificationRequired: boolean = false;
   verificationCode: string = '';
+  verificationMessage: string = '';
   existingUserId: string = '';
 
   aerosyncURL: string | null = null;
@@ -1206,6 +1207,19 @@ export class CheckoutComponent {
 
   //Aeropay
   async startAeroPayProcess() {
+    if (this.isFetchingAeroPay || this.verificationRequired || this.showBankSelection || this.aeropayUserId) {
+      return;
+    }
+
+    const saved = this.loadAeropayState();
+    if (saved) {
+      this.aeropayUserId = saved.userId;
+      this.userBankAccounts = saved.bankAccounts || [];
+      this.selectedBankId = saved.selectedBankId;
+      this.showBankSelection = true;
+      return;
+    }
+
     if (
       !this.userInfo.fname ||
       !this.userInfo.lname ||
@@ -1264,8 +1278,8 @@ export class CheckoutComponent {
 
         if (response.data.displayMessage) {
           this.verificationRequired = true;
-          this.existingUserId = response.data.existingUser.userId; // Store userId for verification
-          this.presentToast(response.data.displayMessage, 'warning');
+          this.existingUserId = response.data.existingUser.userId;
+          this.verificationMessage = response.data.displayMessage;
         } else {
           if (response.data.success && response.data.user) {
             this.aeropayUserId = response.data.user.userId;
@@ -1304,9 +1318,11 @@ export class CheckoutComponent {
       .verifyUser(this.existingUserId, this.verificationCode)
       .subscribe({
         next: (response: any) => {
-          this.verificationRequired = false; // Hide verification input
+          this.verificationRequired = false;
+          this.verificationCode = '';
+          this.aeropayUserId = this.existingUserId;
           this.presentToast('Verification successful!', 'success');
-          this.createAeroPayUser();
+          this.retrieveAerosyncCredentials();
         },
         error: (error: any) => {
           console.error('Verification Failed:', error);
@@ -1415,14 +1431,14 @@ export class CheckoutComponent {
           this.presentToast('Bank account linked successfully!', 'success');
 
           const linkedBank = response.data.userBankInfo;
-          if (this.isGuest && linkedBank) {
+          if (linkedBank) {
             this.aeropayUserId = response.data.userId || this.aeropayUserId;
             this.userBankAccounts = [linkedBank];
             this.selectedBankId = linkedBank.bankAccountId;
             this.showBankSelection = true;
+            this.saveAeropayState();
           } else {
-            // For logged-in users, re-fetch and display all
-            this.createAeroPayUser();
+            this.showError('Failed to get bank info. Please try again.');
           }
         } else {
           this.showError('Failed to link your bank. Please try again.');
@@ -1456,7 +1472,7 @@ export class CheckoutComponent {
       }
     } else {
       // Switching away from delivery — clear aeropay at locations that don't support it for pickup
-      if (this.isCanandaigua || this.isBuffalo) {
+      if (this.isCanandaigua || this.isBuffalo || this.isBatavia) {
         this.selectedPaymentMethod = 'cash';
         this.showBankSelection = false;
         this.selectedBankId = null;
@@ -2019,8 +2035,13 @@ export class CheckoutComponent {
     return (this.currentLocationKey || '').toLowerCase().includes('buffalo');
   }
 
+  get isBatavia(): boolean {
+    return (this.currentLocationKey || '').toLowerCase().includes('batavia');
+  }
+
+
   get aeropayDisabledForPickup(): boolean {
-    return this.selectedOrderType === 'pickup' && (this.isCanandaigua || this.isBuffalo);
+    return this.selectedOrderType === 'pickup' && (this.isCanandaigua || this.isBuffalo || this.isBatavia);
   }
 
   private getAiqRewardDiscount(subtotal: number): number {
@@ -2055,5 +2076,25 @@ export class CheckoutComponent {
     };
 
     localStorage.setItem('checkoutState', JSON.stringify(state));
+  }
+
+  private aeropayStateKey(): string {
+    return `aeropay_state_${this.userInfo?.email || ''}`;
+  }
+
+  private saveAeropayState() {
+    if (this.isGuest || !this.aeropayUserId) return;
+    localStorage.setItem(this.aeropayStateKey(), JSON.stringify({
+      userId: this.aeropayUserId,
+      bankAccounts: this.userBankAccounts,
+      selectedBankId: this.selectedBankId,
+    }));
+  }
+
+  private loadAeropayState(): { userId: string; bankAccounts: any[]; selectedBankId: string } | null {
+    if (this.isGuest) return null;
+    const stored = localStorage.getItem(this.aeropayStateKey());
+    if (!stored) return null;
+    try { return JSON.parse(stored); } catch { return null; }
   }
 }

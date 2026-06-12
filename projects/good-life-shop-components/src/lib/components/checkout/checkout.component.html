@@ -222,10 +222,10 @@
           </div>
 
           <div *ngIf="verificationRequired" class="verification-container">
-            <p>Enter Verification Code:</p>
+            <p class="verification-message">{{ verificationMessage || 'A verification code has been sent to your phone.' }}</p>
             <div class="verification-input">
-              <input type="text" [(ngModel)]="verificationCode" placeholder="Code" />
-              <button (click)="verifyAeroPayUser()">✔</button>
+              <input type="text" [(ngModel)]="verificationCode" placeholder="Enter code" />
+              <button (click)="verifyAeroPayUser()">Verify</button>
             </div>
           </div>
 

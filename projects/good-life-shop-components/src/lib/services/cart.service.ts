@@ -167,7 +167,7 @@ export class CartService {
         this.rawCart$,
         this.productsService.products$
       ])
-        .pipe(map(([raw, products]) => this.buildCart(raw, products)))
+        .pipe(map(([raw, products]) => this.buildCart(raw, products ?? [])))
         .subscribe(cart => this.cartSubject.next(cart))
     );
   }
